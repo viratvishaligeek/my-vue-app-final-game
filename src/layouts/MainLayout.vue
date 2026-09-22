@@ -8,16 +8,15 @@
             <i class="bi bi-person"></i>
           </div>
           <div>
-            <h6 class="mb-1">Alex Johnson</h6>
-            <p class="mb-0 small">Premium Member</p>
+            <h6 class="mb-1">Raman Ahuja</h6>
           </div>
         </div>
         <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <small>Travel Points</small>
-            <div class="d-flex align-items-center">
-              <i class="bi bi-star-fill me-1 points-icon"></i>
-              <span>2,450</span>
+          <div class="bg-white px-1 rounded-2">
+            <!-- <small>Wallet Amount</small> -->
+            <div class="d-flex align-items-center text-danger fw-bold">
+              <span class="icon-3d pe-2">💸</span>
+              <span>₹ 2,450</span>
             </div>
           </div>
           <router-link
@@ -31,17 +30,76 @@
       </div>
 
       <div class="sidebar-menu">
+        <!-- Home -->
         <router-link to="/dashboard" class="sidebar-menu-item" @click="closeSidebar">
-          <i class="bi bi-house-door"></i>
+          <span class="icon-3d">🏠</span>
           <span>Home</span>
         </router-link>
-        <router-link to="/bus-listing" class="sidebar-menu-item" @click="closeSidebar">
-          <i class="bi bi-list"></i>
-          <span>Bus Listing</span>
+
+        <!-- Wallet Transactions -->
+        <router-link to="/wallet-transactions" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">💳</span>
+          <span>Wallet Transactions</span>
         </router-link>
-        <router-link to="/not-available" class="sidebar-menu-item" @click="closeSidebar">
-          <i class="bi bi-emoji-frown"></i>
-          <span>Not Available</span>
+
+        <!-- Played History -->
+        <router-link to="/played-history" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">🎮</span>
+          <span>Played History</span>
+        </router-link>
+
+        <!-- Monthly Charts -->
+        <router-link to="/monthly-charts" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">📊</span>
+          <span>Monthly Charts</span>
+        </router-link>
+
+        <!-- Money Withdraw -->
+        <router-link to="/money-withdraw" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">💸</span>
+          <span>Money Withdraw</span>
+        </router-link>
+
+        <!-- Withdraw History -->
+        <router-link to="/withdraw-history" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">📜</span>
+          <span>Withdraw History</span>
+        </router-link>
+
+        <!-- Terms & Conditions -->
+        <router-link to="/terms-conditions" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">📄</span>
+          <span>Terms & Conditions</span>
+        </router-link>
+
+        <!-- How to Play -->
+        <router-link to="/how-to-play" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">🎯</span>
+          <span>How to Play</span>
+        </router-link>
+
+        <!-- Game Rates -->
+        <router-link to="/game-rates" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">📈</span>
+          <span>Game Rates</span>
+        </router-link>
+
+        <!-- Notification -->
+        <router-link to="/notifications" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">🔔</span>
+          <span>Notification</span>
+        </router-link>
+
+        <!-- Bank Details -->
+        <router-link to="/bank-details" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">🏦</span>
+          <span>Bank Details</span>
+        </router-link>
+
+        <!-- Share Apps -->
+        <router-link to="/share-app" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">🚀</span>
+          <span>Share Apps</span>
         </router-link>
       </div>
 
@@ -51,7 +109,6 @@
         </button>
       </div>
     </div>
-
     <!-- Overlay -->
     <div
       class="overlay"
@@ -67,18 +124,21 @@
           <i class="bi bi-list menu-icon"></i>
         </button>
         <div class="d-flex align-items-center ms-2">
-          <i class="bi bi-bus-front me-2 app-header-icon"></i>
-          <span class="app-header-title fw-bold fs-5">BusGo</span>
+          <span class="app-header-title fw-bold fs-5 pe-2"> 👑 </span>
+          <span class="app-header-title fw-bold fs-5">Gali Disawar</span>
         </div>
       </div>
-      <div>
-        <router-link to="/notifications" class="btn header-btn me-2">
-          <i class="bi bi-bell icon-md"></i>
-        </router-link>
-        <router-link to="/profile" class="btn header-btn">
-          <i class="bi bi-person-circle icon-md"></i>
-        </router-link>
+      <div
+        class="shimmer-card"
+        style="padding: 9px 20px 2px 20px; border: 1px solid gray; border-radius: 51px"
+      >
+        <h4 class="fw-bold"><i class="bi bi-wallet"></i> ₹55</h4>
       </div>
+      <!-- <div>
+        <router-link to="/notifications" class="btn header-btn me-2">
+          <i class="">🔔</i>
+        </router-link>
+      </div> -->
     </div>
 
     <!-- Main Content Area (Dynamic Child Component Area) -->
@@ -135,3 +195,40 @@ const handleSignOut = () => {
   router.push('/')
 }
 </script>
+<style scoped>
+.sidebar-menu-item .icon-3d {
+  font-size: 1.2rem;
+  margin-right: 10px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  transition: transform 0.2s ease;
+}
+
+.sidebar-menu-item:hover .icon-3d {
+  transform: scale(1.15);
+}
+
+/* ---------------------------- */
+.shimmer-card {
+  background: linear-gradient(
+    110deg,
+    rgb(98, 2, 235) 20%,
+    rgba(255, 255, 255, 0.9) 45%,
+    rgba(255, 255, 255, 0.9) 55%,
+    rgb(98, 2, 235) 80%
+  );
+  background-size: 200% 100%;
+  animation: pauseFlash 2s infinite ease-in-out;
+}
+
+@keyframes pauseFlash {
+  0% {
+    background-position: 150%;
+  }
+  50% {
+    background-position: 75%;
+  }
+  100% {
+    background-position: 0%;
+  }
+}
+</style>

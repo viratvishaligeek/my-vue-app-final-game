@@ -11,11 +11,11 @@ export default [
         name: 'dashboard',
         component: () => import('../views/DashboardView.vue'),
       },
-      // {
-      //   path: '/bus-listing',
-      //   name: 'bus-listing',
-      //   component: () => import('../views/DashboardView.vue'),
-      // },
+      {
+        path: '/play-game',
+        name: 'play-game',
+        component: () => import('../views/PlayView.vue'),
+      },
     ],
   },
 ]
