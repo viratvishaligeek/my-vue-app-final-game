@@ -1,9 +1,6 @@
 <template>
   <div class="overlay" id="overlay"></div>
-
-  <!-- Auth Container -->
   <div class="auth-container">
-    <!-- Logo and Header -->
     <div class="text-center mb-4">
       <div class="app-logo mb-3">
         <i class="bi bi-bus-front display-4 text-primary"></i>
@@ -11,38 +8,25 @@
       <h4 class="fw-bold text-primary-color">BusGo</h4>
       <p class="text-muted">Sign in to your account</p>
     </div>
-
-    <!-- General API Error Alert -->
     <div v-if="errors.api" class="alert alert-danger alert-dismissible fade show" role="alert">
       {{ errors.api }}
       <button type="button" class="btn-close" @click="errors.api = ''" aria-label="Close"></button>
     </div>
-
-    <!-- Sign In Form -->
     <form @submit.prevent="handleLogin" class="auth-form" novalidate>
-      <!-- Email Input -->
       <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
+        <label for="phone" class="form-label">Phone Number</label>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0">
-            <i class="bi bi-envelope text-muted"></i>
+            <i class="bi bi-telephone text-muted"></i>
           </span>
-          <input
-            type="email"
-            class="form-control border-start-0"
-            :class="{ 'is-invalid': errors.email }"
-            id="email"
-            v-model.trim="form.email"
-            placeholder="Enter your email"
-            @input="validateEmail"
-          />
+          <input type="tel" class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }" id="phone"
+            v-model.trim="form.phone" placeholder="Enter phone number" @input="clearFieldError('phone')" />
         </div>
-        <div v-if="errors.email" class="text-danger small mt-1">
-          {{ errors.email }}
+        <div v-if="errors.phone" class="invalid-feedback d-block small mt-1">
+          {{ errors.phone }}
         </div>
       </div>
 
-      <!-- Password Input -->
       <div class="mb-3">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <label for="password" class="form-label mb-0">Password</label>
@@ -54,44 +38,31 @@
           <span class="input-group-text bg-transparent border-end-0">
             <i class="bi bi-lock text-muted"></i>
           </span>
-          <input
-            :type="showPassword ? 'text' : 'password'"
-            class="form-control border-start-0 border-end-0"
-            :class="{ 'is-invalid': errors.password }"
-            id="password"
-            v-model="form.password"
-            placeholder="Enter your password"
-            @input="validatePassword"
-          />
-          <button
-            type="button"
-            class="input-group-text bg-transparent border-start-0"
-            id="togglePassword"
-            @click="showPassword = !showPassword"
-          >
+          <input :type="showPassword ? 'text' : 'password'" class="form-control border-start-0 border-end-0"
+            :class="{ 'is-invalid': errors.password }" id="password" v-model="form.password"
+            placeholder="Enter your password" @input="clearFieldError('password')" />
+          <button type="button" class="input-group-text bg-transparent border-start-0" id="togglePassword"
+            @click="showPassword = !showPassword" aria-label="Toggle password visibility">
             <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye', 'text-muted']"></i>
           </button>
         </div>
-        <div v-if="errors.password" class="text-danger small mt-1">
+        <div v-if="errors.password" class="invalid-feedback d-block small mt-1">
           {{ errors.password }}
         </div>
       </div>
 
-      <!-- Remember Me Checkbox -->
       <div class="mb-3 form-check">
         <input type="checkbox" class="form-check-input" id="rememberMe" v-model="form.rememberMe" />
         <label class="form-check-label" for="rememberMe">Remember me</label>
       </div>
 
-      <!-- Submit Button -->
       <div class="d-grid gap-2 mb-4">
         <button type="submit" class="btn btn-app btn-primary" :disabled="isLoading">
-          <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
           <span>{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
         </button>
       </div>
 
-      <!-- Sign Up Link -->
       <div class="text-center">
         <p class="mb-0">
           Don't have an account?
@@ -106,13 +77,16 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { useRouter, useRoute } from 'vue-router'
+import api from '@/plugins/axios'
+import { useAuthStore } from '@/utils/auth'
 
 const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
 
 const form = reactive({
-  email: '',
+  phone: '',
   password: '',
   rememberMe: false,
 })
@@ -121,78 +95,93 @@ const showPassword = ref(false)
 const isLoading = ref(false)
 
 const errors = reactive({
-  email: '',
+  phone: '',
   password: '',
   api: '',
 })
 
-const validateEmail = () => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!form.email) {
-    errors.email = 'Email address is required.'
-    return false
-  } else if (!emailRegex.test(form.email)) {
-    errors.email = 'Please enter a valid email address.'
-    return false
-  } else {
-    errors.email = ''
-    return true
-  }
+const clearFieldError = (field) => {
+  errors[field] = ''
+  errors.api = ''
 }
 
-const validatePassword = () => {
+const validateForm = () => {
+  let isValid = true
+  const phoneRegex = /^[0-9+\-\s]{7,15}$/
+
+  if (!form.phone) {
+    errors.phone = 'Phone number is required.'
+    isValid = false
+  } else if (!phoneRegex.test(form.phone)) {
+    errors.phone = 'Please enter a valid phone number.'
+    isValid = false
+  } else {
+    errors.phone = ''
+  }
+
   if (!form.password) {
     errors.password = 'Password is required.'
-    return false
+    isValid = false
   } else if (form.password.length < 6) {
     errors.password = 'Password must be at least 6 characters long.'
-    return false
+    isValid = false
   } else {
     errors.password = ''
-    return true
   }
+
+  return isValid
 }
 
 const handleLogin = async () => {
   errors.api = ''
 
-  const isEmailValid = validateEmail()
-  const isPasswordValid = validatePassword()
-
-  if (!isEmailValid || !isPasswordValid) {
+  if (!validateForm()) {
     return
   }
 
   isLoading.value = true
 
-  // for testing only
-  sessionStorage.setItem('auth_token', 'sdfsdfsdf456sd4f65s4d5f64sdf465')
-  localStorage.setItem('auth_token', 'sdfsdfsdf456sd4f65s4d5f64sdf465')
-  router.push('/dashboard')
   try {
-    const response = await axios.post('https://api.example.com/v1/auth/login', {
-      email: form.email,
+    const response = await api.post('/login', {
+      phone: form.phone,
       password: form.password,
-      remember_me: form.rememberMe,
+      remember: form.rememberMe,
     })
 
-    if (response.data && response.data.token) {
-      if (form.rememberMe) {
-        localStorage.setItem('auth_token', response.data.token)
-      } else {
-        sessionStorage.setItem('auth_token', response.data.token)
-      }
+    const responseData = response.data
 
-      router.push('/dashboard')
+    if (
+      responseData?.success &&
+      responseData?.data?.token
+    ) {
+      const userData = responseData.data.user || {}
+
+      authStore.setAuth(
+        responseData.data.token,
+        userData,
+        form.rememberMe
+      )
+
+      const redirectPath =
+        typeof route.query.redirect === 'string'
+          ? route.query.redirect
+          : '/dashboard'
+
+      await router.push(redirectPath)
+
+      return
     }
+
+    errors.api =
+      responseData?.message ||
+      'Login failed. Please try again.'
   } catch (error) {
-    if (error.response && error.response.data && error.response.data.message) {
-      errors.api = error.response.data.message
-    } else {
-      errors.api = 'Invalid credentials or server error. Please try again.'
-    }
+    errors.api =
+      error.response?.data?.message ||
+      'Unable to login. Please try again.'
   } finally {
     isLoading.value = false
   }
 }
+
 </script>
