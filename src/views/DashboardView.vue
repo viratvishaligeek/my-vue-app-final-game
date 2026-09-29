@@ -29,19 +29,19 @@
 
     <div class="row g-2 mb-4 ms-2 me-2">
       <div class="col-4">
-        <router-link to="/wallet/add" class="btn btn-app btn-add-money w-100 text-truncate">
+        <router-link to="/wallet/add" class="btn bg-success w-100 text-light">
           <span class="icon-3d">💰</span>
           <span>Add Money</span>
         </router-link>
       </div>
       <div class="col-4">
-        <router-link to="/wallet/withdraw" class="btn btn-app btn-withdraw w-100 text-truncate">
+        <router-link to="/wallet/withdraw" class="btn bg-danger w-100 text-light">
           <span class="icon-3d">💸</span>
           Withdraw
         </router-link>
       </div>
       <div class="col-4">
-        <router-link to="/live-support" class="btn btn-app btn-support w-100 text-truncate">
+        <router-link to="/live-support" class="btn bg-primary w-100 text-light">
           <span class="icon-3d">🎧</span>
           Support
         </router-link>
@@ -97,7 +97,7 @@
 
     <div v-else class="row g-3 ms-2 me-2">
       <div v-for="(game, index) in games" :key="game.id" class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card" :class="getCardClass(index)">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card">
           <div class="bg-white p-3 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt-fill fs-2 icon-color"></i>
@@ -125,7 +125,7 @@
             </div>
             <div class="d-flex align-items-center gap-2">
               <router-link :to="`/monthly-chart?game=${game.id}`"
-                class="btn btn-light border btn-sm px-2 py-1 rounded-3 fw-semibold text-secondary d-none d-sm-inline-block">
+                class="btn btn-light border btn-sm px-2 py-1 rounded-3 fw-semibold text-secondary">
                 <i class="bi bi-bar-chart-line me-1"></i>
                 Chart
               </router-link>
@@ -299,10 +299,6 @@ const formatTime = (time) => {
   })
 }
 
-const getCardClass = (index) => {
-  return index % 2 === 0 ? 'card-purple' : 'card-blue'
-}
-
 const fetchGames = async () => {
   isLoading.value = true
   errorMessage.value = ''
@@ -461,18 +457,6 @@ onUnmounted(() => {
   100% {
     left: 150%;
   }
-}
-
-.btn-add-money {
-  background: linear-gradient(135deg, #00b09b, #96c93d);
-}
-
-.btn-withdraw {
-  background: linear-gradient(135deg, #ff416c, #ff4b2b);
-}
-
-.btn-support {
-  background: linear-gradient(135deg, #2193b0, #6dd5ed);
 }
 
 @keyframes infinityFloat {

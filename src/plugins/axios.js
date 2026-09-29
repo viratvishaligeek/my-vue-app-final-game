@@ -4,7 +4,7 @@ import router from '../router'
 import { getAuthToken, clearAuthStorage } from '../utils/auth'
 
 const api = axios.create({
-  // baseURL: 'https://palevioletred-lemur-564721.hostingersite.com/public/api/v1',
+  // baseURL: 'https://galidisawar.com/api/v1',
   baseURL: 'http://127.0.0.1:8000/api/v1',
   headers: {
     Accept: 'application/json',
