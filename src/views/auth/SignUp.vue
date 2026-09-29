@@ -4,9 +4,9 @@
   <div class="auth-container">
     <div class="text-center mb-4">
       <div class="app-logo mb-3">
-        <i class="bi bi-bus-front display-4 text-primary"></i>
+        <img src="../../assets/img/logo.png" style="height: 90px; width: auto;" alt="">
       </div>
-      <h4 class="fw-bold text-primary-color">Create Account</h4>
+      <h4 class="fw-bold text-primary-color">Gali Disawar Bazar</h4>
       <p class="text-muted">Sign up to get started with BusGo</p>
     </div>
 

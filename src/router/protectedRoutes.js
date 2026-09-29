@@ -51,6 +51,11 @@ export default [
         name: 'live-support',
         component: () => import('../views/LiveSupport.vue'),
       },
+      {
+        path: '/notifications',
+        name: 'notifications',
+        component: () => import('../views/Notification.vue'),
+      },
     ],
   },
 ]

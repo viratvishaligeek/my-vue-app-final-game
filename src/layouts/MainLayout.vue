@@ -13,7 +13,6 @@
         </div>
         <div class="d-flex justify-content-between align-items-center">
           <div class="bg-white px-1 rounded-2">
-            <!-- <small>Wallet Amount</small> -->
             <div class="d-flex align-items-center text-danger fw-bold">
               <span class="icon-3d pe-2">💸</span>
               <span>₹ {{ authStore.amount }}</span>
@@ -27,71 +26,61 @@
       </div>
 
       <div class="sidebar-menu">
-        <!-- Home -->
         <router-link to="/dashboard" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">🏠</span>
           <span>Home</span>
         </router-link>
 
-        <!-- Wallet Transactions -->
         <router-link to="/wallet" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">💳</span>
           <span>Wallet Transactions</span>
         </router-link>
 
-        <!-- Played History -->
         <router-link to="/play-history" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">🎮</span>
           <span>Played History</span>
         </router-link>
 
-        <!-- Monthly Charts -->
         <router-link to="/monthly-chart" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">📊</span>
           <span>Monthly Charts</span>
         </router-link>
 
-        <!-- Money Withdraw -->
         <router-link to="/wallet/withdraw" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">💸</span>
           <span>Money Withdraw</span>
         </router-link>
 
-        <!-- Withdraw History -->
         <router-link to="/withdraw/withdraw/history" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">📜</span>
           <span>Withdraw History</span>
         </router-link>
 
-        <!-- Terms & Conditions -->
         <router-link to="/terms-conditions" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">📄</span>
           <span>Terms & Conditions</span>
         </router-link>
 
-        <!-- How to Play -->
         <router-link to="/how-to-play" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">🎯</span>
           <span>How to Play</span>
         </router-link>
 
-        <!-- Game Rates -->
         <router-link to="/game-rates" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">📈</span>
           <span>Game Rates</span>
         </router-link>
 
-        <!-- Notification -->
         <router-link to="/notifications" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">🔔</span>
           <span>Notification</span>
         </router-link>
 
-        <!-- Share Apps -->
-        <router-link to="/share-app" class="sidebar-menu-item" @click="closeSidebar">
+        <a href="#" class="sidebar-menu-item" @click.prevent="shareApp">
           <span class="icon-3d">🚀</span>
-          <span>Share Apps</span>
-        </router-link>
+          <span>Share Now</span>
+        </a>
+
       </div>
 
       <div class="p-3 text-center">
@@ -115,7 +104,7 @@
           </button>
           <router-link to="/dashboard" class="d-flex align-items-center ms-2 min-width-0">
             <div class="brand-crown me-2">
-              <span>👑</span>
+              <img src="../assets/img/logo.png" style="height: 50px; width: auto;" alt="">
             </div>
             <div class="lh-sm min-width-0">
               <div class="fw-bold text-dark text-truncate brand-title">
@@ -129,7 +118,7 @@
           </router-link>
         </div>
         <div class="d-flex align-items-center gap-2">
-          <router-link to="wallet" class="wallet-pill d-flex align-items-center gap-2 px-2 px-sm-3 py-1">
+          <router-link to="/wallet" class="wallet-pill d-flex align-items-center gap-2 px-2 px-sm-3 py-1">
             <div class="wallet-icon">
               <i class="bi bi-wallet2"></i>
             </div>
@@ -209,6 +198,18 @@ const handleLogout = async () => {
     isLoggingOut.value = false
   }
 }
+// -------------
+const shareApp = () => {
+  const appUrl = 'https://google.com/panga'
+  const message = `🚀 Hey! Check out this amazing app!
+I’ve been using it and thought you might like it too. 😊
+Join me here:
+${appUrl}
+See you there! ❤️`
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
+  window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+  closeSidebar()
+}
 </script>
 
 <style scoped>
@@ -252,7 +253,6 @@ const handleLogout = async () => {
 .app-header {
   position: sticky;
   top: 0;
-  /* z-index: 1030; */
   min-height: 58px;
   padding: 7px 10px !important;
   background: rgba(255, 255, 255, 0.96) !important;
@@ -295,21 +295,19 @@ const handleLogout = async () => {
    BRAND
 ========================================= */
 .brand-crown {
-  width: 36px;
-  height: 36px;
+  width: 50px;
+  height: 50px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 11px;
-  background:
-    linear-gradient(135deg,
-      #fff3cd,
-      #ffe69c);
+  background-color: #250f42;
   box-shadow:
     0 3px 8px rgba(255, 193, 7, 0.16);
   font-size: 18px;
   animation: crownFloat 3s ease-in-out infinite;
+  border-radius: 50%;
 }
 
 @keyframes crownFloat {

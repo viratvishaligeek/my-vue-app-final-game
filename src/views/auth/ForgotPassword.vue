@@ -4,7 +4,7 @@
   <div class="auth-container">
     <div class="text-center mb-4">
       <div class="app-logo mb-3">
-        <i class="bi bi-shield-lock display-4 text-primary"></i>
+        <img src="../../assets/img/logo.png" style="height: 90px; width: auto;" alt="">
       </div>
       <h4 class="fw-bold text-primary-color">Reset Password</h4>
       <p class="text-muted small">
@@ -17,21 +17,12 @@
     </div>
 
     <!-- Alert Messages -->
-    <div
-      v-if="apiMessage.text"
-      :class="[
-        'alert alert-dismissible fade show',
-        apiMessage.type === 'error' ? 'alert-danger' : 'alert-success',
-      ]"
-      role="alert"
-    >
+    <div v-if="apiMessage.text" :class="[
+      'alert alert-dismissible fade show',
+      apiMessage.type === 'error' ? 'alert-danger' : 'alert-success',
+    ]" role="alert">
       {{ apiMessage.text }}
-      <button
-        type="button"
-        class="btn-close"
-        @click="apiMessage.text = ''"
-        aria-label="Close"
-      ></button>
+      <button type="button" class="btn-close" @click="apiMessage.text = ''" aria-label="Close"></button>
     </div>
 
     <!-- STEP 1: Send OTP -->
@@ -42,15 +33,8 @@
           <span class="input-group-text bg-transparent border-end-0">
             <i class="bi bi-telephone text-muted"></i>
           </span>
-          <input
-            type="tel"
-            class="form-control border-start-0"
-            :class="{ 'is-invalid': errors.phone }"
-            id="phone"
-            v-model.trim="form.phone"
-            placeholder="Enter registered phone number"
-            @input="clearFieldError('phone')"
-          />
+          <input type="tel" class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }" id="phone"
+            v-model.trim="form.phone" placeholder="Enter registered phone number" @input="clearFieldError('phone')" />
         </div>
         <div v-if="errors.phone" class="invalid-feedback d-block small mt-1">
           {{ errors.phone }}
@@ -74,16 +58,9 @@
           <span class="input-group-text bg-transparent border-end-0">
             <i class="bi bi-key text-muted"></i>
           </span>
-          <input
-            type="text"
-            maxLength="6"
-            class="form-control border-start-0 text-center fw-bold fs-5"
-            :class="{ 'is-invalid': errors.otp }"
-            id="otp"
-            v-model.trim="form.otp"
-            placeholder="123456"
-            @input="clearFieldError('otp')"
-          />
+          <input type="text" maxLength="6" class="form-control border-start-0 text-center fw-bold fs-5"
+            :class="{ 'is-invalid': errors.otp }" id="otp" v-model.trim="form.otp" placeholder="123456"
+            @input="clearFieldError('otp')" />
         </div>
         <div v-if="errors.otp" class="invalid-feedback d-block small mt-1">
           {{ errors.otp }}
@@ -97,20 +74,11 @@
           <span class="input-group-text bg-transparent border-end-0">
             <i class="bi bi-lock text-muted"></i>
           </span>
-          <input
-            :type="showPassword ? 'text' : 'password'"
-            class="form-control border-start-0 border-end-0"
-            :class="{ 'is-invalid': errors.password }"
-            id="password"
-            v-model="form.password"
-            placeholder="Enter new password"
-            @input="clearFieldError('password')"
-          />
-          <button
-            type="button"
-            class="input-group-text bg-transparent border-start-0"
-            @click="showPassword = !showPassword"
-          >
+          <input :type="showPassword ? 'text' : 'password'" class="form-control border-start-0 border-end-0"
+            :class="{ 'is-invalid': errors.password }" id="password" v-model="form.password"
+            placeholder="Enter new password" @input="clearFieldError('password')" />
+          <button type="button" class="input-group-text bg-transparent border-start-0"
+            @click="showPassword = !showPassword">
             <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye', 'text-muted']"></i>
           </button>
         </div>
@@ -126,15 +94,10 @@
           <span class="input-group-text bg-transparent border-end-0">
             <i class="bi bi-lock-fill text-muted"></i>
           </span>
-          <input
-            :type="showPassword ? 'text' : 'password'"
-            class="form-control border-start-0"
-            :class="{ 'is-invalid': errors.passwordConfirmation }"
-            id="password_confirmation"
-            v-model="form.passwordConfirmation"
-            placeholder="Confirm new password"
-            @input="clearFieldError('passwordConfirmation')"
-          />
+          <input :type="showPassword ? 'text' : 'password'" class="form-control border-start-0"
+            :class="{ 'is-invalid': errors.passwordConfirmation }" id="password_confirmation"
+            v-model="form.passwordConfirmation" placeholder="Confirm new password"
+            @input="clearFieldError('passwordConfirmation')" />
         </div>
         <div v-if="errors.passwordConfirmation" class="invalid-feedback d-block small mt-1">
           {{ errors.passwordConfirmation }}
