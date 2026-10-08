@@ -56,6 +56,12 @@ export default [
         name: 'notifications',
         component: () => import('../views/Notification.vue'),
       },
+      // for /terms-conditions /how-to-play /game-rates
+      {
+        path: '/page/:slug',
+        name: 'dynamic-page',
+        component: () => import('@/views/DynamicPageView.vue'),
+      },
     ],
   },
 ]

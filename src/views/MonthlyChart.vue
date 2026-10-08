@@ -1,7 +1,7 @@
 <template>
   <div class="content-area pb-5 mb-5 history-bg">
     <div class="container-fluid px-2 px-md-3 py-2">
-      <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-dark text-white position-relative overflow-hidden">
+      <div class="card border-0 shadow-sm theme-bg rounded-4 p-3 mb-3 text-white position-relative overflow-hidden">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 position-relative z-1">
           <div class="d-flex align-items-center gap-2">
             <div
@@ -37,7 +37,7 @@
       </div>
 
       <div v-if="gameHeaders.length" class="row g-2 mb-3">
-        <div v-for="game in gameHeaders" :key="game.id" class="col-6 col-sm-3">
+        <div v-for="game in gameHeaders" :key="game.id" class="col-4">
           <div class="card border-0 shadow-xs rounded-3 p-2 bg-white text-center border-top border-3"
             :style="{ borderColor: game.color }">
             <span class="fs-8 text-muted fw-bold text-uppercase d-block mb-1">
@@ -286,6 +286,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.theme-bg {
+  background: linear-gradient(135deg,
+      var(--primary-color),
+      var(--primary-light));
+}
+
 .history-bg {
   background-color: #f4f5f7;
   min-height: 100vh;

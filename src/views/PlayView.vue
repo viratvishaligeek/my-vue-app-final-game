@@ -1,22 +1,16 @@
 <template>
   <div class="content-area pb-5 mb-5 position-relative">
-    <!-- Loading -->
     <div v-if="isLoading" class="text-center py-5">
       <div class="spinner-border text-primary"></div>
-
       <div class="mt-2 text-muted">Loading game...</div>
     </div>
 
-    <!-- Error -->
     <div v-else-if="errorMessage" class="alert alert-danger m-2">
       {{ errorMessage }}
-
       <div class="mt-2">
         <router-link to="/" class="btn btn-sm btn-danger"> Back Home </router-link>
       </div>
     </div>
-
-    <!-- Game -->
     <template v-else-if="game">
       <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded-3 shadow-sm border">
         <h5 class="m-0 text-dark fw-bold d-flex align-items-center gap-2">
@@ -291,23 +285,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-
 import { useRoute, useRouter } from 'vue-router'
-
 import { useToast } from 'vue-toastification'
-
+import Swal from 'sweetalert2'
 import api from '../plugins/axios'
-
 const toast = useToast()
-
 const route = useRoute()
 const router = useRouter()
 
-/*
-|--------------------------------------------------------------------------
-| STATE
-|--------------------------------------------------------------------------
-*/
 
 const game = ref(null)
 
@@ -317,11 +302,6 @@ const errorMessage = ref('')
 
 const activeTab = ref('single')
 
-/*
-|--------------------------------------------------------------------------
-| MODE CHANGE
-|--------------------------------------------------------------------------
-*/
 
 const changeMode = (mode) => {
   if (activeTab.value === mode) {
@@ -333,11 +313,6 @@ const changeMode = (mode) => {
   clearSelections()
 }
 
-/*
-|--------------------------------------------------------------------------
-| SINGLE / JODI
-|--------------------------------------------------------------------------
-*/
 
 const chipOptions = [10, 50, 100, 500, 1000]
 
@@ -359,11 +334,6 @@ const toggleSingleBet = (num) => {
   singleBets.value[num] = Number(selectedChip.value)
 }
 
-/*
-|--------------------------------------------------------------------------
-| HARUP
-|--------------------------------------------------------------------------
-*/
 
 const harupAmount = ref(10)
 
@@ -392,11 +362,6 @@ const toggleHarupBet = (type, digit) => {
   harupBets.value[type][digit] = amount
 }
 
-/*
-|--------------------------------------------------------------------------
-| CROSSING
-|--------------------------------------------------------------------------
-*/
 
 const selectedCrossingDigits = ref([])
 
@@ -438,11 +403,6 @@ const generatedCrossingJodis = computed(() => {
   return [...new Set(result)]
 })
 
-/*
-|--------------------------------------------------------------------------
-| TOTALS
-|--------------------------------------------------------------------------
-*/
 
 const totalSingleAmount = computed(() => {
   return Object.values(singleBets.value).reduce((total, amount) => total + Number(amount || 0), 0)
@@ -505,11 +465,6 @@ const totalBetsCount = computed(() => {
   return 0
 })
 
-/*
-|--------------------------------------------------------------------------
-| FETCH GAME
-|--------------------------------------------------------------------------
-*/
 
 const fetchGame = async () => {
   isLoading.value = true
@@ -532,11 +487,6 @@ const fetchGame = async () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| SUBMIT
-|--------------------------------------------------------------------------
-*/
 
 const submitBetsAPI = async () => {
   if (isSubmitting.value) {
@@ -561,11 +511,7 @@ const submitBetsAPI = async () => {
     return
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | AMOUNT CHECK
-  |--------------------------------------------------------------------------
-  */
+
 
   const totalAmount = Number(grandTotalAmount.value)
 
@@ -589,19 +535,44 @@ const submitBetsAPI = async () => {
   |--------------------------------------------------------------------------
   */
 
-  const confirmed = window.confirm(
-    `Place bet for ₹${totalAmount.toFixed(2)}? This amount will be deducted from your wallet.`,
-  )
+  const result = await Swal.fire({
+    title: 'Place Bet?',
+    html: `
+    <div class="bet-confirm-box">
+      <div class="bet-confirm-amount">
+        ₹${totalAmount.toFixed(2)}
+      </div>
 
-  if (!confirmed) {
+      <div class="bet-confirm-text">
+        ${totalBets} ${totalBets === 1 ? 'bet' : 'bets'} selected
+      </div>
+
+      <div class="bet-confirm-warning">
+        <i class="bi bi-wallet2"></i>
+        This amount will be deducted from your wallet.
+      </div>
+    </div>
+  `,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Place Bet',
+    cancelButtonText: 'No, Cancel',
+    reverseButtons: true,
+    focusCancel: true,
+    buttonsStyling: false,
+    customClass: {
+      popup: 'mobile-bet-swal',
+      title: 'mobile-bet-swal-title',
+      htmlContainer: 'mobile-bet-swal-content',
+      confirmButton: 'btn btn-warning fw-bold rounded-pill px-4',
+      cancelButton: 'btn btn-light border fw-bold rounded-pill px-4 me-2',
+    },
+  })
+
+  if (!result.isConfirmed) {
     return
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | BUILD PAYLOAD
-  |--------------------------------------------------------------------------
-  */
 
   const payload = {
     mode: activeTab.value,
@@ -632,11 +603,6 @@ const submitBetsAPI = async () => {
     crossing_amount_per_jodi: activeTab.value === 'crossing' ? Number(crossingAmount.value) : null,
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | SUBMIT
-  |--------------------------------------------------------------------------
-  */
 
   isSubmitting.value = true
 
@@ -645,20 +611,19 @@ const submitBetsAPI = async () => {
 
     const data = response.data?.data
 
+    const placedAmount = Number(data?.total_amount ?? totalAmount)
+    const remainingBalance = data?.balance
+
     toast.success(
-      `Bet placed successfully! Order: ${data?.order_no ?? '-'} | Amount: ₹${data?.total_amount ?? totalAmount} | Balance: ₹${data?.balance ?? '-'}`,
+      `Bet placed successfully • ₹${placedAmount.toFixed(2)}`,
       {
-        timeout: 5000,
+        timeout: 3000,
+        closeOnClick: true,
+        pauseOnHover: true,
       },
     )
 
     clearSelections()
-
-    /*
-    |--------------------------------------------------------------------------
-    | REFRESH GAME
-    |--------------------------------------------------------------------------
-    */
 
     await fetchGame()
   } catch (error) {
@@ -669,12 +634,6 @@ const submitBetsAPI = async () => {
     const validationErrors = responseData?.errors
 
     let message = responseData?.message || 'Unable to place bet.'
-
-    /*
-    |--------------------------------------------------------------------------
-    | LARAVEL VALIDATION ERRORS
-    |--------------------------------------------------------------------------
-    */
 
     if (validationErrors && typeof validationErrors === 'object') {
       const messages = Object.values(validationErrors).flat().filter(Boolean)
@@ -692,11 +651,6 @@ const submitBetsAPI = async () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| CLEAR
-|--------------------------------------------------------------------------
-*/
 
 const clearSelections = () => {
   singleBets.value = {}
@@ -709,11 +663,6 @@ const clearSelections = () => {
   selectedCrossingDigits.value = []
 }
 
-/*
-|--------------------------------------------------------------------------
-| FORMAT TIME
-|--------------------------------------------------------------------------
-*/
 
 const formatTime = (time) => {
   if (!time) {
@@ -744,11 +693,6 @@ const formatTime = (time) => {
   })
 }
 
-/*
-|--------------------------------------------------------------------------
-| MOUNT
-|--------------------------------------------------------------------------
-*/
 
 onMounted(() => {
   if (!route.params.id) {
@@ -762,7 +706,419 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.bottom-custom {
+.content-area {
+  width: 100%;
+  overflow-x: hidden;
+  padding-bottom: 130px !important;
+}
+
+
+
+.game-header {
+  min-height: 56px;
+}
+
+
+
+.nav-pills {
+  gap: 4px;
+}
+
+.nav-pills .nav-link {
+  min-height: 42px;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.nav-pills .nav-link:active {
+  transform: scale(0.97);
+}
+
+
+
+.row.g-2 {
+  --bs-gutter-x: 0.45rem;
+  --bs-gutter-y: 0.45rem;
+}
+
+.col-2 {
+  width: 20%;
+  flex: 0 0 20%;
+  max-width: 20%;
+}
+
+
+
+.btn.w-100.position-relative,
+.btn.w-100.p-2.rounded-3 {
+  min-height: 54px;
+  width: 100%;
+  padding: 6px !important;
+  border-radius: 12px !important;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn.w-100.position-relative:active,
+.btn.w-100.p-2.rounded-3:active {
+  transform: scale(0.94);
+}
+
+
+
+.btn.w-100.position-relative>.fw-bold.fs-6 {
+  font-size: 0.95rem !important;
+  line-height: 1;
+}
+
+
+
+.btn.w-100.position-relative .badge {
+  width: 100%;
+  min-height: 17px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 0.58rem;
+  font-weight: 800;
+
+  margin-top: 4px !important;
+  padding: 3px 2px !important;
+
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+
+
+.single-jodi-grid {
+  width: 100%;
+}
+
+
+
+.harup-section-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: #212529;
+}
+
+.harup-section-title.ander-title {
+  color: #0d6efd;
+}
+
+.harup-section-title.bahar-title {
+  color: #dc3545;
+}
+
+.harup-title-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1rem;
+}
+
+.ander-title .harup-title-icon {
+  background: rgba(13, 110, 253, 0.1);
+  color: #0d6efd;
+}
+
+.bahar-title .harup-title-icon {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+
+
+.crossing-jodi {
+  min-height: 54px;
+  width: 100%;
+  padding: 6px !important;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px !important;
+}
+
+.crossing-jodi>.fw-bold {
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+.crossing-jodi .badge {
+  width: 100%;
+  font-size: 0.58rem;
+  padding: 3px 2px !important;
+  margin-top: 4px !important;
+}
+
+
+
+.btn-success {
+  box-shadow:
+    0 4px 12px rgba(25, 135, 84, 0.22) !important;
+}
+
+.btn-success:active {
+  transform: scale(0.94);
+}
+
+
+
+.card {
+  border-radius: 16px !important;
+}
+
+.card.shadow-xs {
+  box-shadow:
+    0 3px 12px rgba(20, 35, 70, 0.055) !important;
+}
+
+
+
+.btn.rounded-pill {
+  min-height: 36px;
+}
+
+.input-group {
+  min-height: 40px;
+}
+
+.input-group .form-control {
+  min-height: 40px;
+}
+
+
+
+.harup-card {
+  border: 1px solid rgba(0, 0, 0, 0.045) !important;
+}
+
+
+.sticky-bottom-bar {
   bottom: 80px;
+  left: 0;
+  right: 0;
+
+  padding:
+    8px 8px calc(8px + env(safe-area-inset-bottom));
+
+  background: linear-gradient(to top,
+      rgba(248, 249, 250, 0.98),
+      rgba(248, 249, 250, 0.88),
+      transparent);
+
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+
+  z-index: 1030;
+}
+
+.sticky-bottom-bar .card {
+  width: 100%;
+  border-radius: 18px !important;
+  padding: 11px !important;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+.sticky-bottom-bar .btn-warning {
+  min-height: 44px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.sticky-bottom-bar .fs-4 {
+  font-size: 1.1rem !important;
+}
+
+.sticky-bottom-bar .badge {
+  font-size: 0.58rem;
+}
+
+
+
+.mobile-bet-swal {
+  width: calc(100% - 28px) !important;
+  max-width: 390px !important;
+  border-radius: 22px !important;
+  padding: 22px 18px !important;
+}
+
+.mobile-bet-swal-title {
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+}
+
+.mobile-bet-swal-content {
+  margin-top: 5px !important;
+}
+
+.bet-confirm-box {
+  padding-top: 2px;
+}
+
+.bet-confirm-amount {
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 900;
+  color: #f0ad00;
+  margin-bottom: 8px;
+}
+
+.bet-confirm-text {
+  color: #6c757d;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.bet-confirm-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  margin-top: 13px;
+  padding: 9px 10px;
+
+  border-radius: 10px;
+
+  color: #856404;
+  background: #fff3cd;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.swal2-actions {
+  width: 100%;
+  gap: 7px;
+}
+
+.swal2-actions .btn {
+  min-height: 42px;
+  flex: 1;
+  font-size: 0.76rem;
+}
+
+
+
+.Vue-Toastification__toast {
+  border-radius: 14px !important;
+  min-height: 48px !important;
+  padding: 10px 13px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600;
+}
+
+.Vue-Toastification__toast--success {
+  background: #198754 !important;
+}
+
+.Vue-Toastification__toast--error {
+  background: #dc3545 !important;
+}
+
+.Vue-Toastification__toast--warning {
+  background: #ffc107 !important;
+  color: #212529 !important;
+}
+
+
+
+@media (max-width: 360px) {
+
+  .nav-pills .nav-link {
+    font-size: 0.64rem;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .btn.w-100.position-relative,
+  .btn.w-100.p-2.rounded-3,
+  .crossing-jodi {
+    min-height: 50px;
+    border-radius: 10px !important;
+  }
+
+  .btn.w-100.position-relative>.fw-bold.fs-6 {
+    font-size: 0.85rem !important;
+  }
+
+  .btn.w-100.position-relative .badge,
+  .crossing-jodi .badge {
+    font-size: 0.52rem;
+  }
+
+  .sticky-bottom-bar .card {
+    padding: 9px !important;
+  }
+
+  .sticky-bottom-bar .btn-warning {
+    padding-left: 13px !important;
+    padding-right: 13px !important;
+  }
+}
+
+
+
+@media (min-width: 576px) {
+
+  .col-2 {
+    width: 10%;
+    flex: 0 0 10%;
+    max-width: 10%;
+  }
+
+  .btn.w-100.position-relative,
+  .btn.w-100.p-2.rounded-3,
+  .crossing-jodi {
+    min-height: 58px;
+  }
+}
+
+.card>.d-flex>small.fw-bold.text-muted {
+  font-size: 1.05rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.03em;
+  color: #212529 !important;
+}
+
+.card>.d-flex>small.fw-bold.text-muted::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  margin-bottom: 2px;
+  border-radius: 50%;
+  background: #0d6efd;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.08);
 }
 </style>

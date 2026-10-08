@@ -26,54 +26,73 @@
                 </div>
               </div>
               <div class="wallet-summary">
+
                 <div class="wallet-summary-item">
                   <div class="summary-icon credit-icon">
                     <i class="bi bi-wallet-fill"></i>
                   </div>
+
                   <div class="summary-content">
-                    <span class="summary-label"> Cash Added </span>
+                    <span class="summary-label">
+                      Cash Added
+                    </span>
+
                     <span class="summary-value credit-value">
                       +₹{{ formatCurrency(wallet.totalCredited) }}
                     </span>
                   </div>
                 </div>
-                <div class="summary-divider"></div>
+
                 <div class="wallet-summary-item">
                   <div class="summary-icon debit-icon">
                     <i class="bi bi-bank"></i>
                   </div>
+
                   <div class="summary-content">
-                    <span class="summary-label"> Withdrawn </span>
+                    <span class="summary-label">
+                      Withdrawn
+                    </span>
+
                     <span class="summary-value debit-value">
                       -₹{{ formatCurrency(wallet.totalDebited) }}
                     </span>
                   </div>
                 </div>
-                <div class="summary-divider"></div>
+
                 <div class="wallet-summary-item">
                   <div class="summary-icon bet-icon">
                     <i class="bi bi-controller"></i>
                   </div>
+
                   <div class="summary-content">
-                    <span class="summary-label"> Played Bet </span>
+                    <span class="summary-label">
+                      Bet Played
+                    </span>
+
                     <span class="summary-value bet-value">
                       ₹{{ formatCurrency(wallet.totalPlayedBet) }}
                     </span>
                   </div>
                 </div>
-                <div class="summary-divider"></div>
+
                 <div class="wallet-summary-item">
                   <div class="summary-icon win-icon">
                     <i class="bi bi-trophy-fill"></i>
                   </div>
+
                   <div class="summary-content">
-                    <span class="summary-label"> Total Win </span>
+                    <span class="summary-label">
+                      Total Win
+                    </span>
+
                     <span class="summary-value win-value">
                       +₹{{ formatCurrency(wallet.totalWin) }}
                     </span>
                   </div>
                 </div>
+
               </div>
+
             </div>
           </div>
         </div>
@@ -145,142 +164,139 @@
                   </button>
                 </div>
               </div>
-              <div v-else-if="transactions.length > 0" class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                  <thead class="table-light text-secondary fs-7 text-uppercase">
-                    <tr>
-                      <th class="ps-4">Transaction Details</th>
-                      <th>Type</th>
-                      <th>Date & Time</th>
-                      <th>Status</th>
-                      <th class="text-end pe-4">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="item in transactions" :key="item.id" class="transition-row">
-                      <td class="ps-4">
-                        <div class="d-flex align-items-center gap-3">
-                          <div :class="[
-                            'avatar-icon',
-                            'rounded-circle',
-                            item.type === 'credit'
-                              ? 'bg-success-soft text-success'
-                              : 'bg-danger-soft text-danger',
-                          ]">
-                            <i :class="[
-                              'bi',
-                              item.type === 'credit' ? 'bi-arrow-down-left' : 'bi-arrow-up-right',
-                            ]"></i>
-                          </div>
-                          <div>
-                            <span class="fw-semibold text-dark d-block mb-0">
-                              {{ item.description || 'Transaction' }}
-                            </span>
-                            <small class="text-muted"> Txn ID: {{ item.txn_id }} </small>
-                          </div>
+              <div v-else-if="transactions.length > 0" class="transactions-list">
+                <div v-for="item in transactions" :key="item.id" class="transaction-card">
+                  <div class="transaction-main">
+
+                    <div :class="[
+                      'transaction-icon',
+                      item.type === 'credit'
+                        ? 'transaction-credit'
+                        : 'transaction-debit'
+                    ]">
+                      <i :class="item.type === 'credit'
+                        ? 'bi bi-arrow-down-left'
+                        : 'bi bi-arrow-up-right'
+                        "></i>
+                    </div>
+
+                    <div class="transaction-info">
+
+                      <div class="transaction-title-row">
+                        <div class="transaction-title">
+                          {{ item.description || 'Wallet Transaction' }}
                         </div>
-                      </td>
-                      <td>
-                        <span :class="[
-                          'badge',
-                          'px-2',
-                          'py-1',
-                          'rounded-pill',
+
+                        <div :class="[
+                          'transaction-amount',
                           item.type === 'credit'
-                            ? 'bg-success-soft text-success'
-                            : 'bg-danger-soft text-danger',
+                            ? 'amount-credit'
+                            : 'amount-debit'
                         ]">
+                          {{ item.type === 'credit' ? '+' : '-' }}₹{{
+                            formatCurrency(item.amount)
+                          }}
+                        </div>
+                      </div>
+
+                      <div class="transaction-meta">
+                        <span>
+                          {{ item.txn_id }}
+                        </span>
+
+                        <span class="meta-dot">•</span>
+
+                        <span>
+                          {{ formatDate(item.created_at) }}
+                        </span>
+                      </div>
+
+                      <div class="transaction-bottom">
+                        <span :class="[
+                          'transaction-type',
+                          item.type === 'credit'
+                            ? 'type-credit'
+                            : 'type-debit'
+                        ]">
+                          <i :class="item.type === 'credit'
+                            ? 'bi bi-arrow-down'
+                            : 'bi bi-arrow-up'
+                            "></i>
+
                           {{ item.type }}
                         </span>
-                      </td>
-                      <td class="text-muted small">
-                        {{ formatDate(item.created_at) }}
-                      </td>
-                      <td>
-                        <span :class="['badge', 'rounded-pill', getStatusBadge(item.status)]">
+
+                        <span :class="[
+                          'transaction-status',
+                          getStatusBadge(item.status)
+                        ]">
                           {{ item.status }}
                         </span>
-                      </td>
-                      <td class="text-end pe-4 fw-bold" :class="item.type === 'credit' ? 'text-success' : 'text-dark'">
-                        {{ item.type === 'credit' ? '+' : '-' }}₹{{ formatCurrency(item.amount) }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
               </div>
+
               <div v-else class="text-center py-5">
                 <i class="bi bi-receipt-cutoff display-4 text-muted opacity-50"></i>
                 <p class="text-muted mt-2 mb-0">No transactions found.</p>
               </div>
             </div>
-            <div v-if="!isLoading && totalPages > 0" class="card-footer bg-white py-3 px-4 border-0">
-              <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div v-if="!isLoading && totalPages > 0" class="pagination-wrapper">
+              <div class="d-flex flex-column align-items-center gap-2">
+
                 <small class="text-muted">
                   <template v-if="totalTransactions > 0">
-                    Showing
-                    <strong>
-                      {{ paginationFrom }}
-                    </strong>
-                    to
-                    <strong>
-                      {{ paginationTo }}
-                    </strong>
+                    {{ paginationFrom }}–{{ paginationTo }}
                     of
-                    <strong>
-                      {{ totalTransactions }}
-                    </strong>
+                    {{ totalTransactions }}
                   </template>
-                  <template v-else> No records </template>
+
+                  <template v-else>
+                    No records
+                  </template>
                 </small>
+
                 <nav v-if="totalPages > 1" aria-label="Transaction pagination">
                   <ul class="pagination pagination-sm mb-0">
-                    <li :class="['page-item', { disabled: currentPage === 1 }]">
+
+                    <li :class="[
+                      'page-item',
+                      { disabled: currentPage === 1 }
+                    ]">
                       <button type="button" class="page-link pagination-btn" :disabled="currentPage === 1"
                         @click="goToPage(currentPage - 1)">
                         <i class="bi bi-chevron-left"></i>
                       </button>
                     </li>
-                    <li v-if="visiblePages[0] > 1" class="page-item">
-                      <button type="button" class="page-link pagination-btn" @click="goToPage(1)">
-                        1
-                      </button>
-                    </li>
-                    <li v-if="visiblePages[0] > 2" class="page-item disabled">
-                      <span class="page-link pagination-dots"> ... </span>
-                    </li>
+
                     <li v-for="page in visiblePages" :key="page" :class="[
                       'page-item',
-                      {
-                        active: currentPage === page,
-                      },
+                      { active: currentPage === page }
                     ]">
                       <button type="button" class="page-link pagination-btn" @click="goToPage(page)">
                         {{ page }}
                       </button>
                     </li>
-                    <li v-if="visiblePages[visiblePages.length - 1] < totalPages - 1" class="page-item disabled">
-                      <span class="page-link pagination-dots"> ... </span>
-                    </li>
-                    <li v-if="visiblePages[visiblePages.length - 1] < totalPages" class="page-item">
-                      <button type="button" class="page-link pagination-btn" @click="goToPage(totalPages)">
-                        {{ totalPages }}
-                      </button>
-                    </li>
+
                     <li :class="[
                       'page-item',
-                      {
-                        disabled: currentPage === totalPages,
-                      },
+                      { disabled: currentPage === totalPages }
                     ]">
                       <button type="button" class="page-link pagination-btn" :disabled="currentPage === totalPages"
                         @click="goToPage(currentPage + 1)">
                         <i class="bi bi-chevron-right"></i>
                       </button>
                     </li>
+
                   </ul>
                 </nav>
+
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -344,10 +360,11 @@ const visiblePages = computed(() => {
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('en-IN', {
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(Number(value || 0))
 }
+
 
 const formatDate = (dateStr) => {
   if (!dateStr) {
@@ -443,79 +460,58 @@ onMounted(() => {
   loadWallet()
 })
 </script>
-
 <style scoped>
 .wallet-card {
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  position: relative;
+  overflow: hidden;
   padding: 18px;
-  box-shadow: 0 10px 25px rgba(30, 60, 114, 0.22);
+  border-radius: 22px !important;
+  background:
+    radial-gradient(circle at 90% 10%,
+      rgba(0, 242, 254, 0.18),
+      transparent 30%),
+    linear-gradient(135deg,
+      var(--primary-color),
+      var(--primary-light));
+  box-shadow:
+    0 12px 30px rgba(30, 60, 114, 0.22);
 }
 
-.wallet-balance-section {
-  padding-bottom: 14px;
-}
-
-.wallet-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.currency-symbol {
-  font-size: 1.35rem;
-  font-weight: 600;
-  opacity: 0.9;
-}
-
-.wallet-balance {
-  font-size: 2rem;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.balance-toggle {
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-
+/* ---------------------------------
+   WALLET SUMMARY
+---------------------------------- */
 
 .wallet-summary {
-  display: flex;
-  align-items: center;
-  padding-top: 13px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .wallet-summary-item {
-  flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease;
 }
 
-.summary-divider {
-  width: 1px;
-  height: 34px;
-  background: rgba(255, 255, 255, 0.15);
-  margin: 0 8px;
+.wallet-summary-item:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.11);
 }
 
 .summary-icon {
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -523,274 +519,288 @@ onMounted(() => {
   font-size: 0.8rem;
 }
 
-.credit-icon {
-  color: #72e6a3;
-  background: rgba(25, 135, 84, 0.18);
-}
-
-.debit-icon {
-  color: #ffd166;
-  background: rgba(255, 193, 7, 0.15);
-}
-
-.bet-icon {
-  color: #8fd3ff;
-  background: rgba(13, 110, 253, 0.16);
-}
-
-.win-icon {
-  color: #ffe082;
-  background: rgba(255, 193, 7, 0.16);
-}
-
 .summary-content {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
 }
 
 .summary-label {
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.65);
+  display: block;
+  font-size: 0.61rem;
+  color: rgba(255, 255, 255, 0.62);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .summary-value {
-  font-size: 0.76rem;
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------------------------------
+   TRANSACTIONS
+---------------------------------- */
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: #f7f9fc;
+}
+
+.transaction-card {
+  position: relative;
+  padding: 13px;
+  border-radius: 17px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.045);
+  box-shadow:
+    0 4px 14px rgba(20, 35, 70, 0.055);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.transaction-card:active {
+  transform: scale(0.985);
+}
+
+.transaction-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.transaction-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+
+.transaction-credit {
+  color: #198754;
+  background: linear-gradient(135deg,
+      rgba(25, 135, 84, 0.14),
+      rgba(25, 135, 84, 0.05));
+}
+
+.transaction-debit {
+  color: #dc3545;
+  background: linear-gradient(135deg,
+      rgba(220, 53, 69, 0.14),
+      rgba(220, 53, 69, 0.05));
+}
+
+.transaction-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.transaction-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.transaction-title {
+  min-width: 0;
+  color: #1d2635;
+  font-size: 0.84rem;
+  line-height: 1.25;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.credit-value {
-  color: #72e6a3;
+.transaction-amount {
+  flex-shrink: 0;
+  font-size: 0.84rem;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
-.debit-value {
-  color: #ffd166;
+.amount-credit {
+  color: #198754;
 }
 
-.bet-value {
-  color: #8fd3ff;
+.amount-debit {
+  color: #dc3545;
 }
 
-.win-value {
-  color: #ffe082;
-}
-
-
-
-.glow-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(50px);
-  opacity: 0.4;
-  animation: float 8s infinite alternate ease-in-out;
-  pointer-events: none;
-}
-
-.orb-1 {
-  width: 180px;
-  height: 180px;
-  background: #00f2fe;
-  top: -40px;
-  right: -40px;
-}
-
-.orb-2 {
-  width: 140px;
-  height: 140px;
-  background: #4facfe;
-  bottom: -30px;
-  left: 20%;
-  animation-delay: -4s;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-
-  100% {
-    transform: translateY(-20px) scale(1.1);
-  }
-}
-
-
-
-.card-hover {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  cursor: pointer;
-}
-
-.card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08) !important;
-}
-
-.icon-shape {
-  width: 45px;
-  height: 45px;
+.transaction-meta {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 5px;
+  margin-top: 4px;
+  color: #8993a4;
+  font-size: 0.65rem;
 }
 
-.bg-primary-soft {
-  background-color: rgba(13, 110, 253, 0.1);
+.transaction-meta span:first-child {
+  max-width: 115px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.bg-warning-soft {
-  background-color: rgba(255, 193, 7, 0.15);
+.meta-dot {
+  opacity: 0.5;
 }
 
-.bg-success-soft {
-  background-color: rgba(25, 135, 84, 0.12);
-}
-
-.bg-danger-soft {
-  background-color: rgba(220, 53, 69, 0.12);
-}
-
-
-
-.fs-7 {
-  font-size: 0.75rem;
-}
-
-.avatar-icon {
-  width: 40px;
-  height: 40px;
+.transaction-bottom {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 9px;
 }
 
-.transition-row {
-  transition: background-color 0.2s ease;
+.transaction-type,
+.transaction-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: capitalize;
 }
 
+.type-credit {
+  color: #198754;
+  background: rgba(25, 135, 84, 0.08);
+}
 
+.type-debit {
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.08);
+}
+
+/* ---------------------------------
+   FILTER
+---------------------------------- */
+
+.transaction-filter {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #f1f3f7;
+}
+
+.transaction-filter .btn {
+  min-width: 55px;
+  border: 0;
+  font-size: 0.68rem;
+}
+
+/* ---------------------------------
+   PAGINATION
+---------------------------------- */
+
+.pagination-wrapper {
+  padding: 12px;
+  background: #ffffff;
+}
 
 .pagination {
-  gap: 3px;
+  gap: 4px;
 }
 
 .pagination-btn {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 0 !important;
   border-radius: 50% !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6c757d;
   background: transparent;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: rgba(13, 110, 253, 0.08);
-  color: #0d6efd;
+  color: #6c757d;
+  font-size: 0.72rem;
 }
 
 .page-item.active .pagination-btn {
+  color: #fff;
   background: #0d6efd;
-  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.25);
 }
 
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.pagination-btn:hover:not(:disabled) {
+  color: #0d6efd;
+  background: rgba(13, 110, 253, 0.08);
 }
 
-.pagination-dots {
-  width: 30px;
-  height: 34px;
-  padding: 0;
-  border: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-}
-
-
-
-@media (max-width: 767px) {
-  .wallet-card {
-    padding: 15px;
-  }
-
-  .wallet-balance {
-    font-size: 1.75rem;
-  }
-
-  .wallet-summary {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .wallet-summary::-webkit-scrollbar {
-    display: none;
-  }
-
-  .wallet-summary-item {
-    flex: 0 0 auto;
-    min-width: 105px;
-  }
-
-  .summary-divider {
-    flex: 0 0 1px;
-  }
-
-  .summary-label {
-    font-size: 0.58rem;
-  }
-
-  .summary-value {
-    font-size: 0.7rem;
-  }
-
-  .summary-icon {
-    width: 27px;
-    height: 27px;
-    flex-basis: 27px;
-  }
-
-  .card-footer {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  .pagination {
-    gap: 0;
-  }
-
-  .pagination-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 0.75rem;
-  }
-}
-
-
+/* ---------------------------------
+   SMALL DEVICES
+---------------------------------- */
 
 @media (max-width: 360px) {
   .wallet-card {
-    padding: 13px;
+    padding: 14px;
   }
 
   .wallet-balance {
     font-size: 1.55rem;
   }
 
-  .wallet-summary-item {
-    min-width: 95px;
+  .wallet-summary {
+    gap: 7px;
   }
 
-  .summary-divider {
-    margin: 0 5px;
+  .wallet-summary-item {
+    padding: 8px;
+  }
+
+  .summary-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    font-size: 0.7rem;
+  }
+
+  .summary-label {
+    font-size: 0.56rem;
+  }
+
+  .summary-value {
+    font-size: 0.66rem;
+  }
+
+  .transaction-card {
+    padding: 11px;
+  }
+
+  .transaction-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+
+  .transaction-title {
+    font-size: 0.78rem;
+  }
+
+  .transaction-amount {
+    font-size: 0.76rem;
   }
 }
 </style>

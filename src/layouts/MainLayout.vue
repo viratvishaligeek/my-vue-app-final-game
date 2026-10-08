@@ -56,17 +56,15 @@
           <span>Withdraw History</span>
         </router-link>
 
-        <router-link to="/terms-conditions" class="sidebar-menu-item" @click="closeSidebar">
+        <router-link to="/page/terms-conditions" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">📄</span>
           <span>Terms & Conditions</span>
         </router-link>
-
-        <router-link to="/how-to-play" class="sidebar-menu-item" @click="closeSidebar">
+        <router-link to="/page/how-to-play" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">🎯</span>
           <span>How to Play</span>
         </router-link>
-
-        <router-link to="/game-rates" class="sidebar-menu-item" @click="closeSidebar">
+        <router-link to="/page/game-rates" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">📈</span>
           <span>Game Rates</span>
         </router-link>
@@ -146,25 +144,39 @@
     </main>
 
     <div class="bottom-nav">
+
       <router-link to="/dashboard" class="nav-item" active-class="active">
-        <i class="bi bi-house-door-fill"></i>
-        <span>Home</span>
+        <span class="nav-icon">
+          <i class="bi bi-house-door-fill"></i>
+        </span>
+        <span class="nav-label">Home</span>
       </router-link>
+
       <router-link to="/wallet" class="nav-item" active-class="active">
-        <i class="bi bi-wallet"></i>
-        <span>Wallet</span>
+        <span class="nav-icon">
+          <i class="bi bi-wallet"></i>
+        </span>
+        <span class="nav-label">Wallet</span>
       </router-link>
+
       <router-link to="/monthly-chart" class="nav-item" active-class="active">
-        <i class="bi bi-calendar"></i>
-        <span>Chart</span>
+        <span class="nav-icon">
+          <i class="bi bi-calendar"></i>
+        </span>
+        <span class="nav-label">Chart</span>
       </router-link>
+
       <router-link to="/offers" class="nav-item" active-class="active">
-        <i class="bi bi-gift"></i>
-        <span>Offers</span>
+        <span class="nav-icon">
+          <i class="bi bi-gift"></i>
+        </span>
+        <span class="nav-label">Offers</span>
       </router-link>
-      <router-link to="/" class="nav-item" active-class="active">
-        <i class="bi bi-whatsapp"></i>
-        <span>Whatsapp</span>
+      <router-link to="/" class="nav-item whatsapp-item" active-class="active">
+        <span class="nav-icon">
+          <i class="bi bi-whatsapp"></i>
+        </span>
+        <span class="nav-label">WhatsApp</span>
       </router-link>
     </div>
   </div>
@@ -502,6 +514,396 @@ See you there! ❤️`
   .notification-btn {
     width: 38px;
     height: 38px;
+  }
+}
+
+/* ----------------------------- */
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+
+  width: calc(100% - 18px);
+  max-width: 560px;
+
+  height: 68px;
+  padding: 7px 7px;
+
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+
+  z-index: 1050;
+
+  background:
+    linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.28),
+    0 5px 15px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  isolation: isolate;
+}
+
+/* Top shine */
+
+.bottom-nav::before {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 0;
+
+  height: 1px;
+
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 193, 7, 0.7),
+      transparent);
+
+  opacity: 0.7;
+}
+
+/* Moving glow */
+
+.bottom-nav::after {
+  content: '';
+  position: absolute;
+
+  width: 90px;
+  height: 90px;
+
+  top: -55px;
+  left: 10%;
+
+  border-radius: 50%;
+
+  background: rgba(13, 110, 253, 0.22);
+
+  filter: blur(30px);
+
+  pointer-events: none;
+
+  animation: navGlowMove 7s ease-in-out infinite alternate;
+}
+
+@keyframes navGlowMove {
+  0% {
+    left: 5%;
+    opacity: 0.35;
+  }
+
+  50% {
+    left: 45%;
+    opacity: 0.6;
+  }
+
+  100% {
+    left: 82%;
+    opacity: 0.35;
+  }
+}
+
+
+/* =========================================================
+   NAV ITEM
+========================================================= */
+
+.bottom-nav .nav-item {
+  position: relative;
+
+  height: 56px;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+
+  color: rgba(255, 255, 255, 0.52);
+
+  text-decoration: none;
+
+  border-radius: 17px;
+
+  transition:
+    color 0.25s ease,
+    transform 0.25s cubic-bezier(.2, .8, .2, 1);
+}
+
+
+/* =========================================================
+   ICON
+========================================================= */
+
+.bottom-nav .nav-icon {
+  position: relative;
+
+  width: 36px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  transition:
+    transform 0.3s cubic-bezier(.2, .8, .2, 1),
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.bottom-nav .nav-icon i {
+  position: relative;
+  z-index: 2;
+
+  font-size: 1.15rem;
+
+  transition:
+    transform 0.3s cubic-bezier(.2, .8, .2, 1),
+    color 0.25s ease,
+    filter 0.25s ease;
+}
+
+
+/* =========================================================
+   LABEL
+========================================================= */
+
+.bottom-nav .nav-label {
+  font-size: 0.58rem;
+  line-height: 1;
+
+  font-weight: 700;
+
+  letter-spacing: 0.01em;
+
+  white-space: nowrap;
+
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+
+/* =========================================================
+   ACTIVE ITEM
+========================================================= */
+
+.bottom-nav .nav-item.active {
+  color: #ffc107;
+}
+
+.bottom-nav .nav-item.active .nav-icon {
+  background:
+    linear-gradient(135deg,
+      rgba(255, 193, 7, 0.22),
+      rgba(255, 193, 7, 0.08));
+
+  box-shadow:
+    0 0 0 1px rgba(255, 193, 7, 0.18),
+    0 5px 18px rgba(255, 193, 7, 0.18);
+
+  transform: translateY(-3px);
+}
+
+.bottom-nav .nav-item.active .nav-icon i {
+  color: #ffc107;
+
+  transform: scale(1.12);
+
+  filter:
+    drop-shadow(0 0 6px rgba(255, 193, 7, 0.65));
+}
+
+.bottom-nav .nav-item.active .nav-label {
+  color: #ffc107;
+
+  transform: translateY(-1px);
+}
+
+
+/* Active indicator */
+
+.bottom-nav .nav-item.active::after {
+  content: '';
+
+  position: absolute;
+
+  bottom: 1px;
+  left: 50%;
+
+  width: 5px;
+  height: 5px;
+
+  transform: translateX(-50%);
+
+  border-radius: 50%;
+
+  background: #ffc107;
+
+  box-shadow:
+    0 0 7px rgba(255, 193, 7, 0.9),
+    0 0 14px rgba(255, 193, 7, 0.55);
+
+  animation: activeDot 1.8s ease-in-out infinite;
+}
+
+@keyframes activeDot {
+
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translateX(-50%) scale(1.45);
+    opacity: 1;
+  }
+}
+
+
+/* =========================================================
+   TAP / HOVER EFFECT
+========================================================= */
+
+.bottom-nav .nav-item:active {
+  transform: scale(0.9);
+}
+
+.bottom-nav .nav-item:active .nav-icon i {
+  transform: scale(0.88);
+}
+
+@media (hover: hover) {
+  .bottom-nav .nav-item:hover {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .bottom-nav .nav-item:hover .nav-icon {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-2px);
+  }
+
+  .bottom-nav .nav-item:hover .nav-icon i {
+    transform: scale(1.08);
+  }
+
+  .bottom-nav .nav-item.active:hover {
+    color: #ffc107;
+  }
+
+  .bottom-nav .nav-item.active:hover .nav-icon {
+    background:
+      linear-gradient(135deg,
+        rgba(255, 193, 7, 0.28),
+        rgba(255, 193, 7, 0.1));
+  }
+}
+
+
+/* =========================================================
+   WHATSAPP SPECIAL EFFECT
+========================================================= */
+
+.bottom-nav .whatsapp-item .nav-icon i {
+  color: #25d366;
+}
+
+.bottom-nav .whatsapp-item.active .nav-icon {
+  background:
+    linear-gradient(135deg,
+      rgba(37, 211, 102, 0.22),
+      rgba(37, 211, 102, 0.06));
+
+  box-shadow:
+    0 0 0 1px rgba(37, 211, 102, 0.18),
+    0 5px 18px rgba(37, 211, 102, 0.18);
+}
+
+.bottom-nav .whatsapp-item.active .nav-icon i {
+  color: #25d366;
+
+  filter:
+    drop-shadow(0 0 6px rgba(37, 211, 102, 0.65));
+}
+
+.bottom-nav .whatsapp-item.active .nav-label {
+  color: #25d366;
+}
+
+
+/* =========================================================
+   ICON FLOAT ANIMATION
+========================================================= */
+
+.bottom-nav .nav-item.active .nav-icon i {
+  animation: activeIconFloat 2.2s ease-in-out infinite;
+}
+
+@keyframes activeIconFloat {
+
+  0%,
+  100% {
+    transform: translateY(0) scale(1.1);
+  }
+
+  50% {
+    transform: translateY(-2px) scale(1.16);
+  }
+}
+
+
+/* =========================================================
+   MOBILE SAFE AREA
+========================================================= */
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-nav {
+    bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL DEVICES
+========================================================= */
+
+@media (max-width: 360px) {
+  .bottom-nav {
+    width: calc(100% - 12px);
+    height: 64px;
+    bottom: 7px;
+    padding: 5px;
+    border-radius: 19px;
+  }
+
+  .bottom-nav .nav-item {
+    height: 52px;
+    border-radius: 15px;
+  }
+
+  .bottom-nav .nav-icon {
+    width: 32px;
+    height: 27px;
+  }
+
+  .bottom-nav .nav-icon i {
+    font-size: 1.05rem;
+  }
+
+  .bottom-nav .nav-label {
+    font-size: 0.53rem;
   }
 }
 </style>

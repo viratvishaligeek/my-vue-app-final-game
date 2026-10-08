@@ -219,38 +219,96 @@
                 </div>
 
                 <div v-else-if="slip.mode === 'harup'" class="row g-2">
+
+                  <!-- RESULT -->
+                  <div v-if="slip.harup_result?.ander !== null || slip.harup_result?.bahar !== null" class="col-12">
+                    <div class="p-2 rounded-3 bg-dark text-white">
+                      <div class="d-flex align-items-center justify-content-between">
+                        <span class="fs-8 fw-bold">
+                          <i class="bi bi-trophy-fill text-warning me-1"></i>
+                          Result
+                        </span>
+
+                        <span class="font-monospace fw-black">
+                          {{ slip.harup_result?.ander ?? '-' }}
+                          -
+                          {{ slip.harup_result?.bahar ?? '-' }}
+                        </span>
+                      </div>
+
+                      <div class="d-flex gap-2 mt-1 fs-8">
+                        <span class="badge bg-primary">
+                          Ander: {{ slip.harup_result?.ander ?? '-' }}
+                        </span>
+
+                        <span class="badge bg-info text-dark">
+                          Bahar: {{ slip.harup_result?.bahar ?? '-' }}
+                        </span>
+
+                        <span v-if="slip.winning_number" class="badge bg-warning text-dark">
+                          Jodi: {{ slip.winning_number }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ANDER BETS -->
                   <div v-if="Object.keys(slip.harup_bets?.ander || {}).length" class="col-12 col-sm-6">
                     <div class="p-2 border rounded-3 bg-primary-subtle border-primary-subtle">
+
                       <span class="fs-8 fw-bold text-primary d-block mb-1">
                         🅰️ Ander (Inside):
                       </span>
 
                       <div class="d-flex flex-wrap gap-1">
+
                         <span v-for="(amt, digit) in slip.harup_bets.ander" :key="'a-' + digit"
-                          class="badge bg-white text-primary border border-primary p-1 rounded-2 fs-8 font-monospace">
+                          class="badge bg-white text-primary border border-primary p-1 rounded-2 fs-8 font-monospace"
+                          :class="{
+                            'border-success text-success bg-success-subtle':
+                              String(digit) === String(slip.harup_result?.ander)
+                          }">
                           Digit {{ digit }} =
                           ₹{{ formatCurrency(amt) }}
+
+                          <span v-if="String(digit) === String(slip.harup_result?.ander)" class="ms-1">
+                            ✓ WIN
+                          </span>
                         </span>
+
                       </div>
                     </div>
                   </div>
 
+                  <!-- BAHAR BETS -->
                   <div v-if="Object.keys(slip.harup_bets?.bahar || {}).length" class="col-12 col-sm-6">
                     <div class="p-2 border rounded-3 bg-info-subtle border-info-subtle">
+
                       <span class="fs-8 fw-bold text-info d-block mb-1">
                         🅱️ Bahar (Outside):
                       </span>
 
                       <div class="d-flex flex-wrap gap-1">
+
                         <span v-for="(amt, digit) in slip.harup_bets.bahar" :key="'b-' + digit"
-                          class="badge bg-white text-info border border-info p-1 rounded-2 fs-8 font-monospace">
+                          class="badge bg-white text-info border border-info p-1 rounded-2 fs-8 font-monospace" :class="{
+                            'border-success text-success bg-success-subtle':
+                              String(digit) === String(slip.harup_result?.bahar)
+                          }">
                           Digit {{ digit }} =
                           ₹{{ formatCurrency(amt) }}
+
+                          <span v-if="String(digit) === String(slip.harup_result?.bahar)" class="ms-1">
+                            ✓ WIN
+                          </span>
                         </span>
+
                       </div>
                     </div>
                   </div>
+
                 </div>
+
 
                 <div v-else-if="slip.mode === 'crossing'">
                   <div class="mb-2 d-flex align-items-center gap-1 fs-8 text-muted flex-wrap">
