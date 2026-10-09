@@ -364,10 +364,13 @@ import {
 } from 'vue'
 
 import { useSettings } from '@/composables/useSettings'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/utils/auth'
 import api from '@/plugins/axios'
 
 const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
 
 const {
   loadSettings,
@@ -996,7 +999,7 @@ const loadPendingPayments = async () => {
         PENDING_PAYMENT_ENDPOINT,
         {
           params: {
-            status: 'pending',
+            statuses: ['pending', 'processing'],
             type: 'credit',
           },
         }
@@ -1199,6 +1202,31 @@ onMounted(async () => {
     loadPaymentMethods(),
     loadPendingPayments(),
   ])
+
+  if (String(route.query.gateway_return || '') === '1') {
+    const status = String(route.query.status || '').toLowerCase()
+
+    if (status === 'approved') {
+      apiMessage.type = 'success'
+      apiMessage.text = 'Payment successful. Wallet balance has been refreshed.'
+    } else if (status === 'pending' || status === 'processing') {
+      apiMessage.type = 'error'
+      apiMessage.text = 'Payment is still being verified. Please refresh pending payments shortly.'
+    } else {
+      apiMessage.type = 'error'
+      apiMessage.text = 'Payment could not be completed. If money was deducted, please contact support.'
+    }
+
+    await authStore.verifyAuthToken()
+    await loadPendingPayments()
+
+    const remainingQuery = { ...route.query }
+    delete remainingQuery.gateway_return
+    delete remainingQuery.status
+    delete remainingQuery.request_id
+    await router.replace({ path: route.path, query: remainingQuery })
+  }
+
   startActivityRotation()
   startPendingRefresh()
 })
