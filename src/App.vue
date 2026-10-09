@@ -3,6 +3,8 @@ import { onMounted, ref } from 'vue'
 import { isGlobalLoading } from '@/utils/requestLoader'
 import { App } from '@capacitor/app'
 import { StatusBar, Style } from '@capacitor/status-bar'
+import router from '@/router'
+import { initNativePushNotifications, syncPushSubscription } from '@/services/pushNotifications'
 
 const showSplash = ref(true)
 
@@ -16,6 +18,8 @@ onMounted(async () => {
   }
 
   window.setTimeout(() => { showSplash.value = false }, 1150)
+  void initNativePushNotifications()
+  router.afterEach(() => { void syncPushSubscription() })
 
   let backButtonPressedOnce = false
 
