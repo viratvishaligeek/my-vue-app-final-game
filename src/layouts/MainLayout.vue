@@ -166,13 +166,13 @@
         <span class="nav-label">Chart</span>
       </router-link>
 
-      <router-link to="/offers" class="nav-item" active-class="active">
+      <router-link to="/page/offers" class="nav-item" active-class="active">
         <span class="nav-icon">
           <i class="bi bi-gift"></i>
         </span>
         <span class="nav-label">Offers</span>
       </router-link>
-      <router-link to="/" class="nav-item whatsapp-item" active-class="active">
+      <router-link to="/page/whatsapp" class="nav-item whatsapp-item" active-class="active">
         <span class="nav-icon">
           <i class="bi bi-whatsapp"></i>
         </span>

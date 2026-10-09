@@ -15,81 +15,61 @@
     <div v-if="marqueeText" class="row m-2 marquee-row">
       <div class="col-12 px-0">
         <div class="marquee-wrapper">
-
           <div class="marquee-icon">
             📢
           </div>
-
           <div class="marquee-viewport">
             <div class="marquee-track">
-
               <span class="marquee-item">
                 {{ marqueeText }}
               </span>
-
               <span class="marquee-item" aria-hidden="true">
                 {{ marqueeText }}
               </span>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>
-
 
     <!-- =========================================================
      NOTICE
 ========================================================= -->
     <div v-if="noticeEnabled && noticeText" class="row m-2 notice-row">
       <div class="col-12 px-0">
-
         <div class="notice-card">
-
           <div class="notice-header">
-
             <div class="notice-title-wrap">
               <span class="notice-title-icon">
                 ⚠️
               </span>
-
               <div>
                 <div class="notice-title">
                   Important Notice
                 </div>
-
                 <div class="notice-subtitle">
                   Please read carefully before playing
                 </div>
               </div>
             </div>
-
             <span class="notice-badge">
               NOTICE
             </span>
-
           </div>
-
           <div class="notice-divider"></div>
-
           <div class="notice-content">
             <div v-for="(line, index) in noticeLines" :key="index" class="notice-line">
               <span class="notice-bullet">
                 {{ index + 1 }}
               </span>
-
               <span class="notice-line-text">
                 {{ line }}
               </span>
             </div>
           </div>
-
         </div>
-
       </div>
     </div>
-
     <div class="row g-2 mb-4 ms-2 me-2">
       <div class="col-4">
         <router-link to="/wallet/add" class="btn bg-success w-100 text-light">
@@ -105,7 +85,7 @@
       </div>
       <div class="col-4">
         <router-link to="/live-support" class="btn bg-primary w-100 text-light">
-          <span class="icon-3d">🎧</span>
+          <span class="icon-3d">💬</span>
           Support
         </router-link>
       </div>
@@ -130,7 +110,7 @@
                 {{ formatTime(featuredGame.result_time) }}
               </small>
             </div>
-            <span class="live-tag">
+            <span class="live-tag text-white">
               <span class="live-dot"></span>
               {{ featuredGame.is_playable ? 'Live Market' : 'Latest Result' }}
             </span>
@@ -155,7 +135,8 @@
     </div>
     <div v-else class="row g-3 ms-2 me-2">
       <div v-for="(game, index) in games" :key="game.id" class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card" :class="{ 'game-closed': !isGamePlayable(game) }">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card"
+          :class="{ 'game-closed': !isGamePlayable(game) }">
           <div class="bg-white p-3 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt-fill fs-5 icon-color"></i>
@@ -271,7 +252,6 @@ const noticeLines = computed(() => {
   if (!noticeText.value) {
     return []
   }
-
   return noticeText.value
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
@@ -286,13 +266,10 @@ const syncServerTime = (serverTime) => {
   if (!serverTime) {
     return
   }
-
   const timestamp = new Date(serverTime).getTime()
-
   if (Number.isNaN(timestamp)) {
     return
   }
-
   /*
    * Browser clock is only used for ticking.
    * Server time remains the authority.
@@ -310,9 +287,7 @@ const getTimestamp = (value) => {
   if (!value) {
     return null
   }
-
   const timestamp = new Date(value).getTime()
-
   return Number.isNaN(timestamp)
     ? null
     : timestamp
@@ -332,16 +307,12 @@ const isGamePlayable = (game) => {
   if (!game || game.status !== 'active') {
     return false
   }
-
   const start = getTimestamp(game.play_window_start_at)
   const end = getTimestamp(game.play_window_end_at)
-
   if (!start || !end) {
     return false
   }
-
   const now = serverNow.value.getTime()
-
   return now >= start && now < end
 }
 
@@ -355,42 +326,30 @@ const getRemainingTime = (game) => {
   if (!game) {
     return null
   }
-
   const end = getTimestamp(game.play_window_end_at)
-
   if (!end) {
     return null
   }
-
   const now = serverNow.value.getTime()
-
   const diff = end - now
-
   if (diff <= 0) {
     return null
   }
-
   /*
    * Don't show countdown outside play window.
    */
   if (!isGamePlayable(game)) {
     return null
   }
-
   const totalSeconds = Math.floor(diff / 1000)
-
   const hours = Math.floor(totalSeconds / 3600)
-
   const minutes = Math.floor(
     (totalSeconds % 3600) / 60
   )
-
   const seconds = totalSeconds % 60
-
   if (hours > 0) {
     return `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`
   }
-
   return `${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`
 }
 
@@ -404,7 +363,6 @@ const getGameStatus = (game) => {
   if (!game || game.status !== 'active') {
     return 'CLOSED'
   }
-
   return isGamePlayable(game)
     ? 'RUNNING'
     : 'CLOSED'
@@ -420,31 +378,25 @@ const formatTime = (time) => {
   if (!time) {
     return '--'
   }
-
   /*
    * API normally returns H:i:s.
    */
   const parts = String(time)
     .split(':')
     .map(Number)
-
   if (parts.length < 2 || parts.some(Number.isNaN)) {
     return '--'
   }
-
   const hours = parts[0]
   const minutes = parts[1]
   const seconds = parts[2] || 0
-
   const date = new Date()
-
   date.setHours(
     hours,
     minutes,
     seconds,
     0
   )
-
   return date.toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
@@ -463,15 +415,11 @@ const formatTime = (time) => {
 const normalizeGame = (game) => {
   return {
     ...game,
-
     latest_result: game.latest_result ?? game.today_result ?? null,
-
     previous_result: game.previous_result ?? null,
-
     is_playable: Boolean(
       game.is_playable
     ),
-
     remaining_seconds: Number(
       game.remaining_seconds ?? 0
     ),
@@ -492,34 +440,26 @@ const fetchGames = async () => {
   if (games.value.length === 0) {
     isLoading.value = true
   }
-
   errorMessage.value = ''
-
   try {
     const response = await api.get('/games/list')
-
     const data = response.data
-
     if (!data?.status) {
       throw new Error(
         data?.message || 'Unable to load games.'
       )
     }
-
     /*
     |--------------------------------------------------------------------------
     | Server Clock
     |--------------------------------------------------------------------------
     */
-
     syncServerTime(data.server_time)
-
     /*
     |--------------------------------------------------------------------------
     | Banners
     |--------------------------------------------------------------------------
     */
-
     const nextBanners = Array.isArray(data.banners)
       ? data.banners.map((banner) => ({
         id: banner.id,
@@ -527,68 +467,55 @@ const fetchGames = async () => {
         imageUrl: banner.image_url || banner.image,
       }))
       : []
-
     const previousBannerSignature = banners.value.map(banner => `${banner.id}:${banner.imageUrl}`).join('|')
     const nextBannerSignature = nextBanners.map(banner => `${banner.id}:${banner.imageUrl}`).join('|')
-
     if (previousBannerSignature !== nextBannerSignature) {
       banners.value = nextBanners
       activeBannerIndex.value = 0
       await nextTick()
       initializeBannerCarousel()
     }
-
     /*
     |--------------------------------------------------------------------------
     | Marquee
     |--------------------------------------------------------------------------
     */
-
     marqueeText.value =
       typeof data.marquee?.content === 'string'
         ? data.marquee.content.trim()
         : ''
-
     /*
-    |--------------------------------------------------------------------------
-    | Notice
-    |--------------------------------------------------------------------------
-    */
-
+|--------------------------------------------------------------------------
+| Notice
+|--------------------------------------------------------------------------
+*/
     noticeEnabled.value =
       Boolean(data.notice?.status)
-
     noticeText.value =
       typeof data.notice?.content === 'string'
         ? data.notice.content.trim()
         : ''
-
     /*
-    |--------------------------------------------------------------------------
-    | Featured Game
-    |--------------------------------------------------------------------------
-    */
-
+|--------------------------------------------------------------------------
+| Featured Game
+|--------------------------------------------------------------------------
+*/
     featuredGame.value = data.featured_game
       ? normalizeGame(data.featured_game)
       : null
-
     /*
-    |--------------------------------------------------------------------------
-    | Games
-    |--------------------------------------------------------------------------
-    */
-
+  |--------------------------------------------------------------------------
+  | Games
+  |--------------------------------------------------------------------------
+  */
     games.value = Array.isArray(data.games)
       ? data.games.map(normalizeGame)
       : []
-
   } catch (error) {
     console.error(
       'Games API Error:',
       error
     )
-
     errorMessage.value =
       error.response?.data?.message ||
       error.message ||
@@ -614,12 +541,10 @@ const initializeBannerCarousel = () => {
     activeBannerIndex.value = 0
     return
   }
-
   if (heroCarouselInstance) {
     heroCarouselElement.value.removeEventListener('slid.bs.carousel', handleBannerSlid)
     heroCarouselInstance.dispose()
   }
-
   heroCarouselInstance = new Carousel(heroCarouselElement.value, {
     interval: 4000,
     ride: 'carousel',
@@ -627,7 +552,6 @@ const initializeBannerCarousel = () => {
     wrap: true,
     touch: true,
   })
-
   heroCarouselElement.value.addEventListener('slid.bs.carousel', handleBannerSlid)
   heroCarouselInstance.to(activeBannerIndex.value)
   heroCarouselInstance.cycle()
@@ -652,7 +576,6 @@ const startRefreshTimer = () => {
   if (refreshTimer) {
     clearInterval(refreshTimer)
   }
-
   refreshTimer = setInterval(() => {
     fetchGames()
   }, 30000)
@@ -666,7 +589,6 @@ const startRefreshTimer = () => {
 
 onMounted(async () => {
   await fetchGames()
-
   /*
    * Only local ticking.
    *
@@ -676,7 +598,6 @@ onMounted(async () => {
   clockTimer = setInterval(() => {
     currentTime.value = Date.now()
   }, 1000)
-
   startRefreshTimer()
 })
 
@@ -686,12 +607,10 @@ onUnmounted(() => {
     heroCarouselInstance.dispose()
   }
   heroCarouselInstance = null
-
   if (clockTimer) {
     clearInterval(clockTimer)
     clockTimer = null
   }
-
   if (refreshTimer) {
     clearInterval(refreshTimer)
     refreshTimer = null
@@ -790,16 +709,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   overflow: hidden;
-
   border-radius: 14px;
-
   background:
     linear-gradient(135deg,
       #ffffff,
       #f8fffc);
-
   border: 1px solid #dceee8;
-
   box-shadow:
     0 7px 20px rgba(21, 47, 61, .07),
     inset 0 1px 0 rgba(255, 255, 255, .9);
@@ -812,27 +727,20 @@ onUnmounted(() => {
 .marquee-icon {
   position: relative;
   z-index: 10;
-
   width: 45px;
   min-width: 45px;
   height: 100%;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background:
     linear-gradient(135deg,
       var(--primary-color),
       var(--primary-light));
-
   border-radius: 13px 0 0 13px;
-
   font-size: 17px;
-
   box-shadow:
     5px 0 14px rgba(0, 126, 92, .12);
-
   animation:
     marqueeSpeaker 2.5s ease-in-out infinite;
 }
@@ -843,16 +751,11 @@ onUnmounted(() => {
 
 .marquee-viewport {
   position: relative;
-
   flex: 1;
-
   height: 100%;
-
   overflow: hidden;
-
   display: flex;
   align-items: center;
-
   /*
    * Fade edges
    */
@@ -862,7 +765,6 @@ onUnmounted(() => {
       black 4%,
       black 96%,
       transparent 100%);
-
   -webkit-mask-image:
     linear-gradient(to right,
       transparent 0,
@@ -877,13 +779,9 @@ onUnmounted(() => {
 
 .marquee-track {
   display: flex;
-
   width: max-content;
-
   flex-shrink: 0;
-
   white-space: nowrap;
-
   animation:
     marqueeScroll 32s linear infinite;
 }
@@ -904,17 +802,11 @@ onUnmounted(() => {
 .marquee-item {
   display: inline-flex;
   align-items: center;
-
   flex-shrink: 0;
-
   padding-right: 100px;
-
   color: #344054;
-
   font-size: 12px;
-
   font-weight: 700;
-
   letter-spacing: .15px;
 }
 
@@ -923,7 +815,6 @@ onUnmounted(() => {
 ========================================================= */
 
 @keyframes marqueeScroll {
-
   from {
     transform: translateX(0);
   }
@@ -963,24 +854,17 @@ onUnmounted(() => {
 
 .notice-card {
   position: relative;
-
   overflow: hidden;
-
   padding: 14px;
-
   border-radius: 17px;
-
   background:
     linear-gradient(145deg,
       #ffffff 0%,
       #fafffd 100%);
-
   border: 1px solid #dfeee9;
-
   box-shadow:
     0 9px 25px rgba(20, 45, 55, .075),
     0 2px 5px rgba(20, 45, 55, .035);
-
   animation:
     noticeCardEnter .6s cubic-bezier(.2, .8, .2, 1) both;
 }
@@ -991,22 +875,17 @@ onUnmounted(() => {
 
 .notice-card::before {
   content: "";
-
   position: absolute;
-
   top: 0;
   left: -30%;
-
   width: 40%;
   height: 2px;
-
   background:
     linear-gradient(90deg,
       transparent,
       #00c895,
       #74ffd8,
       transparent);
-
   animation:
     noticeTopLine 4s linear infinite;
 }
@@ -1017,23 +896,16 @@ onUnmounted(() => {
 
 .notice-card::after {
   content: "";
-
   position: absolute;
-
   width: 110px;
   height: 110px;
-
   right: -50px;
   top: -55px;
-
   border-radius: 50%;
-
   background:
     rgba(0, 200, 149, .055);
-
   box-shadow:
     0 0 40px rgba(0, 200, 149, .08);
-
   animation:
     noticeOrb 5s ease-in-out infinite;
 }
@@ -1045,70 +917,50 @@ onUnmounted(() => {
 .notice-header {
   position: relative;
   z-index: 2;
-
   display: flex;
-
   align-items: center;
   justify-content: space-between;
-
   gap: 10px;
 }
 
 .notice-title-wrap {
   display: flex;
-
   align-items: center;
-
   gap: 10px;
 }
 
 .notice-title-icon {
   width: 38px;
   height: 38px;
-
   flex: 0 0 38px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 12px;
-
   background:
     linear-gradient(135deg,
       #fff4dc,
       #fff9ee);
-
   border: 1px solid #ffe5b0;
-
   font-size: 18px;
-
   box-shadow:
     0 5px 12px rgba(255, 167, 0, .10);
-
   animation:
     noticeIconPulse 2.4s ease-in-out infinite;
 }
 
 .notice-title {
   color: #172033;
-
   font-size: 14px;
-
   font-weight: 900;
-
   line-height: 1.2;
-
   letter-spacing: .1px;
 }
 
 .notice-subtitle {
   margin-top: 3px;
-
   color: #7a8696;
-
   font-size: 9px;
-
   font-weight: 700;
 }
 
@@ -1119,29 +971,19 @@ onUnmounted(() => {
 .notice-badge {
   position: relative;
   z-index: 3;
-
   padding: 5px 8px;
-
   border-radius: 20px;
-
   background:
     linear-gradient(135deg,
       #fff1f1,
       #fff8f8);
-
   border: 1px solid #ffd9dc;
-
   color: #d6374b;
-
   font-size: 8px;
-
   font-weight: 900;
-
   letter-spacing: .6px;
-
   box-shadow:
     0 4px 10px rgba(214, 55, 75, .07);
-
   animation:
     noticeBadge 2.5s ease-in-out infinite;
 }
@@ -1153,13 +995,9 @@ onUnmounted(() => {
 .notice-divider {
   position: relative;
   z-index: 2;
-
   width: 100%;
-
   height: 1px;
-
   margin: 12px 0;
-
   background:
     linear-gradient(90deg,
       transparent,
@@ -1174,32 +1012,22 @@ onUnmounted(() => {
 .notice-content {
   position: relative;
   z-index: 2;
-
   display: flex;
-
   flex-direction: column;
-
   gap: 8px;
 }
 
 .notice-line {
   display: flex;
-
   align-items: flex-start;
-
   gap: 8px;
-
   padding: 8px 9px;
-
   border-radius: 11px;
-
   background:
     linear-gradient(135deg,
       #fbfefd,
       #f6fbf9);
-
   border: 1px solid #edf4f1;
-
   transition:
     transform .25s ease,
     box-shadow .25s ease,
@@ -1208,10 +1036,8 @@ onUnmounted(() => {
 
 .notice-line:hover {
   transform: translateX(3px);
-
   background:
     #ffffff;
-
   box-shadow:
     0 5px 14px rgba(20, 45, 55, .06);
 }
@@ -1223,28 +1049,19 @@ onUnmounted(() => {
 .notice-bullet {
   width: 20px;
   height: 20px;
-
   min-width: 20px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   margin-top: 1px;
-
   border-radius: 50%;
-
   background:
     linear-gradient(135deg,
       var(--primary-color),
       var(--primary-light));
-
   color: #fff;
-
   font-size: 8px;
-
   font-weight: 900;
-
   box-shadow:
     0 3px 8px rgba(0, 150, 110, .18);
 }
@@ -1255,13 +1072,9 @@ onUnmounted(() => {
 
 .notice-line-text {
   color: #4c5868;
-
   font-size: 10px;
-
   line-height: 1.55;
-
   font-weight: 650;
-
   word-break: break-word;
 }
 
@@ -1270,17 +1083,14 @@ onUnmounted(() => {
 ========================================================= */
 
 @keyframes noticeCardEnter {
-
   from {
     opacity: 0;
-
     transform:
       translateY(12px) scale(.985);
   }
 
   to {
     opacity: 1;
-
     transform:
       translateY(0) scale(1);
   }
@@ -1288,7 +1098,6 @@ onUnmounted(() => {
 }
 
 @keyframes noticeTopLine {
-
   from {
     left: -40%;
   }
@@ -1683,7 +1492,7 @@ onUnmounted(() => {
 .custom-card.game-closed::after,
 .custom-card.game-closed .btn-light::before,
 .custom-card.game-closed .btn-success::before,
-.custom-card.game-closed > .bg-success::before {
+.custom-card.game-closed>.bg-success::before {
   display: none;
 }
 

@@ -27,11 +27,8 @@
               ₹{{ currentWithdrawActivity.amount }}
             </div>
           </div>
-
         </transition>
-
       </section>
-
       <transition name="slide-fade">
         <div v-if="apiMessage.text" class="api-message" :class="apiMessage.type === 'error'
           ? 'message-error'
@@ -49,11 +46,8 @@
           <button type="button" class="message-close" @click="apiMessage.text = ''">
             ×
           </button>
-
         </div>
       </transition>
-
-
       <form @submit.prevent="handleWithdraw" enctype="multipart/form-data" novalidate>
         <section class="withdraw-card">
           <div class="section-heading">
@@ -67,7 +61,6 @@
               </small>
             </div>
           </div>
-
           <div class="field-label">
             Withdrawal destination
           </div>
@@ -105,8 +98,6 @@
               </span>
             </button>
           </div>
-
-
           <div class="form-field amount-field">
             <div class="field-label-row">
               <label class="field-label">
@@ -133,8 +124,6 @@
               {{ errors.amount }}
             </div>
           </div>
-
-
           <div class="quick-amounts">
             <button v-for="amount in quickWithdrawAmounts" :key="amount" type="button" :class="{
               selected:
@@ -149,8 +138,6 @@
               ₹{{ formatCurrency(amount) }}
             </button>
           </div>
-
-
           <div v-if="transferMode === 'bank'" class="details-panel">
             <div class="details-heading">
               <span class="details-heading-icon">
@@ -194,8 +181,6 @@
               </div>
             </div>
           </div>
-
-
           <div v-else class="details-panel">
             <div class="details-heading">
               <span class="details-heading-icon upi-heading">
@@ -262,8 +247,6 @@
               </div>
             </div>
           </div>
-
-
           <button type="submit" class="withdraw-button" :disabled="isLoading">
             <span v-if="isLoading" class="spinner-border spinner-border-sm"></span>
             <template v-else>
@@ -277,17 +260,13 @@
               </span>
             </template>
           </button>
-
           <div class="secure-note">
             <i class="bi bi-shield-check"></i>
             Your withdrawal request is processed securely.
           </div>
-
         </section>
       </form>
-
       <section class="pending-section">
-
         <div class="section-heading pending-heading">
           <div>
             <strong>Pending withdrawals</strong>
@@ -295,18 +274,13 @@
               Your recent withdrawal requests
             </small>
           </div>
-
           <button type="button" class="refresh-btn" :class="{
             spinning: pendingLoading
           }" @click="loadPendingWithdrawals">
             <i class="bi bi-arrow-clockwise"></i>
           </button>
-
         </div>
-
-
         <!-- Loading -->
-
         <div v-if="
           pendingLoading &&
           pendingWithdrawals.length === 0
@@ -315,12 +289,8 @@
           <span>
             Loading withdrawals...
           </span>
-
         </div>
-
-
         <!-- Empty -->
-
         <div v-else-if="
           !pendingLoading &&
           pendingWithdrawals.length === 0
@@ -334,12 +304,8 @@
           <span>
             Your recent withdrawal requests will appear here.
           </span>
-
         </div>
-
-
         <!-- List -->
-
         <div v-else class="pending-list">
           <div v-for="withdrawal in pendingWithdrawals" :key="withdrawal.id" class="pending-item">
             <div class="pending-left">
@@ -378,8 +344,6 @@
           </div>
         </div>
       </section>
-
-
       <div class="page-footer-note">
         <i class="bi bi-info-circle"></i>
         Withdrawal requests are reviewed and processed securely.
@@ -429,7 +393,6 @@ const form = reactive({
 const populateWithdrawalDetails = () => {
   const user = authStore.user
   if (!user) return
-
   form.accountName = user.account_holder_name || user.holdername || ''
   form.accountNumber = user.account_number || user.acc || ''
   form.ifsc = user.ifsc_code || user.ifsc || ''
@@ -460,7 +423,6 @@ const maxWithdrawAmount = computed(() => {
 })
 
 const availableBalance = computed(() => {
-
   return Number(
     balance.value || 0
   )
@@ -468,17 +430,11 @@ const availableBalance = computed(() => {
 })
 
 
-/*
-|--------------------------------------------------------------------------
-| Quick withdrawal amounts
-|--------------------------------------------------------------------------
-*/
+
 
 const quickWithdrawAmounts = computed(() => {
-
   const minimum =
     minWithdrawAmount.value
-
 
   const defaults = [
     100,
@@ -487,12 +443,10 @@ const quickWithdrawAmounts = computed(() => {
     2000,
   ]
 
-
   const amounts = [
     minimum,
     ...defaults,
   ]
-
 
   return [
     ...new Set(
@@ -506,11 +460,7 @@ const quickWithdrawAmounts = computed(() => {
 })
 
 
-/*
-|--------------------------------------------------------------------------
-| Dummy activity
-|--------------------------------------------------------------------------
-*/
+
 
 const demoWithdrawActivities = [
   {
@@ -557,11 +507,9 @@ const withdrawActivityIndex =
 
 const currentWithdrawActivity =
   computed(() => {
-
     return demoWithdrawActivities[
       withdrawActivityIndex.value
     ]
-
   })
 
 
@@ -569,11 +517,7 @@ let activityTimer = null
 let pendingTimer = null
 
 
-/*
-|--------------------------------------------------------------------------
-| Pending withdrawals
-|--------------------------------------------------------------------------
-*/
+
 
 const PENDING_WITHDRAWAL_ENDPOINT =
   '/wallet/get-money-request'
@@ -585,7 +529,6 @@ const pendingLoading =
   ref(false)
 
 const formatCurrency = (value) => {
-
   return new Intl.NumberFormat(
     'en-IN',
     {
@@ -599,35 +542,25 @@ const formatCurrency = (value) => {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Date
-|--------------------------------------------------------------------------
-*/
+
 
 const formatWithdrawalDate = (
   value
 ) => {
-
   if (!value) {
     return '--'
   }
 
-
   const date =
     new Date(value)
-
 
   if (
     Number.isNaN(
       date.getTime()
     )
   ) {
-
     return String(value)
-
   }
-
 
   return date.toLocaleString(
     'en-IN',
@@ -642,21 +575,15 @@ const formatWithdrawalDate = (
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Status
-|--------------------------------------------------------------------------
-*/
+
 
 const formatStatus = (
   status
 ) => {
-
   const value =
     String(
       status || ''
     ).toLowerCase()
-
 
   const map = {
     pending: 'Pending',
@@ -667,7 +594,6 @@ const formatStatus = (
     rejected: 'Rejected',
     failed: 'Failed',
   }
-
 
   return (
     map[value] ||
@@ -680,98 +606,70 @@ const formatStatus = (
 const getStatusClass = (
   status
 ) => {
-
   const value =
     String(
       status || ''
     ).toLowerCase()
-
 
   if (
     value === 'approved' ||
     value === 'success' ||
     value === 'completed'
   ) {
-
     return 'status-success'
-
   }
-
 
   if (
     value === 'rejected' ||
     value === 'failed'
   ) {
-
     return 'status-danger'
-
   }
-
 
   return 'status-pending'
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Load balance
-|--------------------------------------------------------------------------
-*/
+
 
 const loadBalance = async () => {
-
   try {
-
     const response =
       await api.get(
         '/wallet'
       )
-
-
     if (
       response.data?.success
     ) {
-
       balance.value =
         Number(
           response.data.data.available_balance ??
           response.data.data.balance ??
           0
         )
-
     }
-
   } catch (error) {
-
     console.error(
       'Balance error:',
       error
     )
-
   }
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| QR upload
-|--------------------------------------------------------------------------
-*/
+
 
 const handleQrUpload = (
   event
 ) => {
-
   const file =
     event.target.files?.[0]
-
 
   if (!file) {
     return
   }
-
 
   if (
     ![
@@ -780,41 +678,28 @@ const handleQrUpload = (
       'image/webp',
     ].includes(file.type)
   ) {
-
     errors.qrImage =
       'Please upload PNG, JPG or WEBP.'
-
     return
-
   }
-
 
   if (
     file.size >
     2 * 1024 * 1024
   ) {
-
     errors.qrImage =
       'File size should not exceed 2MB.'
-
     return
-
   }
 
-
   errors.qrImage = ''
-
   form.qrImage = file
 
-
   if (qrPreviewUrl.value) {
-
     URL.revokeObjectURL(
       qrPreviewUrl.value
     )
-
   }
-
 
   qrPreviewUrl.value =
     URL.createObjectURL(
@@ -824,25 +709,16 @@ const handleQrUpload = (
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Remove QR
-|--------------------------------------------------------------------------
-*/
+
 
 const removeQrCode = () => {
-
   form.qrImage = null
 
-
   if (qrPreviewUrl.value) {
-
     URL.revokeObjectURL(
       qrPreviewUrl.value
     )
-
   }
-
 
   qrPreviewUrl.value =
     null
@@ -850,93 +726,64 @@ const removeQrCode = () => {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Withdrawal
-|--------------------------------------------------------------------------
-*/
+
 
 const handleWithdraw = async () => {
-
   apiMessage.text = ''
-
   errors.amount = ''
-
   errors.qrImage = ''
-
 
   const amount =
     Number(form.amount)
 
-
   /*
-   * Basic validation
-   */
-
+ * Basic validation
+ */
   if (
     !amount ||
     Number.isNaN(amount) ||
     amount <= 0
   ) {
-
     errors.amount =
       'Enter a valid withdrawal amount.'
-
     return
-
   }
-
 
   /*
    * Minimum withdrawal
    */
-
   if (
     amount <
     minWithdrawAmount.value
   ) {
-
     errors.amount =
       `Minimum withdrawal amount is ₹${formatCurrency(minWithdrawAmount.value)}.`
-
     return
-
   }
-
   if (
     maxWithdrawAmount.value > 0 &&
     amount > maxWithdrawAmount.value
   ) {
-
     errors.amount =
       `Maximum withdrawal amount is ₹${formatCurrency(maxWithdrawAmount.value)}.`
-
     return
-
   }
-
 
   /*
    * Balance
    */
-
   if (
     amount >
     availableBalance.value
   ) {
-
     errors.amount =
       'Amount exceeds available balance.'
-
     return
-
   }
-
 
   /*
    * Bank validation
    */
-
   if (
     transferMode.value === 'bank' &&
     (
@@ -945,181 +792,116 @@ const handleWithdraw = async () => {
       !form.ifsc
     )
   ) {
-
     apiMessage.type =
       'error'
-
     apiMessage.text =
       'Please enter complete bank details.'
-
     return
-
   }
-
 
   /*
    * UPI validation
    */
-
   if (
     transferMode.value === 'upi' &&
     !form.upiId
   ) {
-
     apiMessage.type =
       'error'
-
     apiMessage.text =
       'Please enter your UPI ID.'
-
     return
-
   }
-
 
   isLoading.value = true
 
-
   try {
-
     const formData =
       new FormData()
-
-
     formData.append(
       'amount',
       amount
     )
-
-
     formData.append(
       'mode',
       transferMode.value
     )
-
-
     if (
       transferMode.value === 'bank'
     ) {
-
       formData.append(
         'account_name',
         form.accountName
       )
-
-
       formData.append(
         'account_number',
         form.accountNumber
       )
-
-
       formData.append(
         'ifsc',
         form.ifsc.toUpperCase()
       )
-
     }
-
-
     if (
       transferMode.value === 'upi'
     ) {
-
       formData.append(
         'upi_id',
         form.upiId
       )
-
-
       if (form.qrImage) {
-
         formData.append(
           'qr_code_image',
           form.qrImage
         )
-
       }
-
     }
-
-
     const response =
       await api.post(
         '/wallet/withdraw',
         formData
       )
-
-
     if (
       response.data?.success
     ) {
-
       apiMessage.type =
         'success'
-
-
       apiMessage.text =
         response.data.message ||
         'Withdrawal request submitted successfully.'
-
-
       await loadBalance()
-
       await loadPendingWithdrawals()
-
-
       setTimeout(() => {
-
         router.push(
           '/wallet'
         )
-
       }, 1500)
-
     }
-
   } catch (error) {
-
     console.error(
       'Withdrawal error:',
       error
     )
-
-
     apiMessage.type =
       'error'
-
-
     apiMessage.text =
       error.response?.data?.message ||
       'Withdrawal failed. Try again.'
-
   } finally {
-
     isLoading.value =
       false
-
   }
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Pending withdrawals API
-|--------------------------------------------------------------------------
-*/
+
 
 const loadPendingWithdrawals =
   async () => {
-
     pendingLoading.value =
       true
-
-
     try {
-
       const response =
         await api.get(
           PENDING_WITHDRAWAL_ENDPOINT,
@@ -1134,7 +916,6 @@ const loadPendingWithdrawals =
         response.data
       let list =
         responseData?.data
-
       if (
         list &&
         !Array.isArray(list) &&
@@ -1142,109 +923,69 @@ const loadPendingWithdrawals =
           list.data
         )
       ) {
-
         list =
           list.data
-
       }
-
-
       pendingWithdrawals.value =
         Array.isArray(list)
           ? list.map((item) => ({
-              ...item,
-              mode: item.mode || item.payment_method || '',
-            }))
+            ...item,
+            mode: item.mode || item.payment_method || '',
+          }))
           : []
-
     } catch (error) {
-
       console.error(
         'Pending withdrawals error:',
         error
       )
-
     } finally {
-
       pendingLoading.value =
         false
-
     }
-
   }
 
 
-/*
-|--------------------------------------------------------------------------
-| Activity rotation
-|--------------------------------------------------------------------------
-*/
+
 
 const startActivityRotation =
   () => {
-
     if (activityTimer) {
-
       clearInterval(
         activityTimer
       )
-
     }
-
-
     activityTimer =
       setInterval(() => {
-
         withdrawActivityIndex.value =
           (
             withdrawActivityIndex.value +
             1
           ) %
           demoWithdrawActivities.length
-
       }, 4500)
-
   }
 
 
-/*
-|--------------------------------------------------------------------------
-| Pending refresh
-|--------------------------------------------------------------------------
-*/
+
 
 const startPendingRefresh =
   () => {
-
     if (pendingTimer) {
-
       clearInterval(
         pendingTimer
       )
-
     }
-
-
     pendingTimer =
       setInterval(() => {
-
         loadPendingWithdrawals()
-
       }, 30000)
-
   }
 
 
-/*
-|--------------------------------------------------------------------------
-| Lifecycle
-|--------------------------------------------------------------------------
-*/
+
 
 onMounted(async () => {
-
   populateWithdrawalDetails()
-
   await Promise.all([
     loadBalance(),
     loadSettings([
@@ -1253,44 +994,31 @@ onMounted(async () => {
     loadPendingWithdrawals(),
   ])
 
-
   startActivityRotation()
-
   startPendingRefresh()
 
 })
 
 
 onBeforeUnmount(() => {
-
   if (activityTimer) {
-
     clearInterval(
       activityTimer
     )
-
     activityTimer = null
-
   }
 
-
   if (pendingTimer) {
-
     clearInterval(
       pendingTimer
     )
-
     pendingTimer = null
-
   }
 
-
   if (qrPreviewUrl.value) {
-
     URL.revokeObjectURL(
       qrPreviewUrl.value
     )
-
   }
 
 })
@@ -1309,7 +1037,6 @@ onBeforeUnmount(() => {
       #f7faf9 0%,
       #f5f7f8 45%,
       #f8f9fa 100%);
-
   color: #172033;
   overflow-x: hidden;
 }
@@ -1356,7 +1083,6 @@ onBeforeUnmount(() => {
       35,
       45,
       .06);
-
   transition: .2s ease;
 }
 
@@ -1413,7 +1139,6 @@ onBeforeUnmount(() => {
     linear-gradient(145deg,
       #ffffff,
       #f7fffb);
-
   box-shadow:
     0 8px 25px rgba(24,
       40,
@@ -1462,7 +1187,6 @@ onBeforeUnmount(() => {
       182,
       125,
       .5);
-
   animation:
     pulse 1.3s infinite;
 }
@@ -1501,11 +1225,9 @@ onBeforeUnmount(() => {
     linear-gradient(135deg,
       #d32f2f,
       #f04d4d);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 11px;
   font-weight: 900;
 }
@@ -1558,13 +1280,11 @@ onBeforeUnmount(() => {
     linear-gradient(135deg,
       #171c25,
       #252c37);
-
   box-shadow:
     0 10px 28px rgba(20,
       25,
       35,
       .16);
-
   position: relative;
   overflow: hidden;
 }
@@ -1602,7 +1322,6 @@ onBeforeUnmount(() => {
       255,
       255,
       .58);
-
   font-size: 9px;
   font-weight: 800;
   text-transform: uppercase;
@@ -1623,7 +1342,6 @@ onBeforeUnmount(() => {
       255,
       255,
       .55);
-
   font-size: 9px;
 }
 
@@ -1637,13 +1355,10 @@ onBeforeUnmount(() => {
     linear-gradient(135deg,
       #d32f2f,
       #ed4545);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 19px;
-
   box-shadow:
     0 7px 16px rgba(211,
       47,
@@ -1655,21 +1370,17 @@ onBeforeUnmount(() => {
 .balance-bottom {
   position: relative;
   z-index: 1;
-
   margin-top: 13px;
   padding-top: 10px;
-
   border-top:
     1px solid rgba(255,
       255,
       255,
       .08);
-
   color: rgba(255,
       255,
       255,
       .53);
-
   font-size: 8px;
 }
 
@@ -1868,7 +1579,7 @@ onBeforeUnmount(() => {
 .destination-text strong {
   display: block;
   color: #26313d;
-  font-size: 10px;
+  font-size: 20px;
   font-weight: 900;
 }
 
@@ -2024,7 +1735,6 @@ onBeforeUnmount(() => {
   grid-template-columns:
     repeat(4,
       1fr);
-
   gap: 7px;
   margin-top: 9px;
 }
@@ -2285,18 +1995,15 @@ onBeforeUnmount(() => {
       #b8232e,
       #d8323d,
       #e64a54);
-
   box-shadow:
     0 10px 24px rgba(211,
       47,
       47,
       .22);
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-
   transition: .2s ease;
 }
 
@@ -2617,7 +2324,6 @@ onBeforeUnmount(() => {
 
 
 @keyframes spin {
-
   to {
     transform: rotate(360deg);
   }
@@ -2667,26 +2373,21 @@ onBeforeUnmount(() => {
     padding: 14px;
   }
 
-
   .destination-option {
     padding: 10px 8px;
   }
-
 
   .destination-text strong {
     font-size: 9px;
   }
 
-
   .destination-text small {
     font-size: 6px;
   }
 
-
   .quick-amounts {
     gap: 5px;
   }
-
 
   .amount-input input {
     font-size: 22px;
@@ -2700,7 +2401,6 @@ onBeforeUnmount(() => {
 ========================================================= */
 
 @media (min-width: 768px) {
-
   .page-header {
     padding-top: 18px;
   }
