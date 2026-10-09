@@ -45,7 +45,7 @@ async function initNativePush() {
     receive = (await PushNotifications.requestPermissions()).receive
   }
   if (receive !== 'granted') {
-    return { ok: false, message: 'Notification permission was not granted.' }
+    return { ok: false, message: 'Notifications are blocked. Enable permission in your device or browser settings, then try again.' }
   }
 
   try {
