@@ -126,7 +126,7 @@ export const useAuthStore = defineStore('auth', {
         return
       }
       this.user = {
-        ...(this.user || {}),
+        ...this.user,
         ...userData,
       }
       const remember = Boolean(localStorage.getItem(AUTH_TOKEN_KEY))

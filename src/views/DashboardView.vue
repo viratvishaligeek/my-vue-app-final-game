@@ -1,5 +1,11 @@
 <template>
-  <div class="content-area">
+  <div v-if="!hasInitialLoadCompleted" class="content-area dashboard-initial-loading" aria-busy="true">
+    <div class="px-3 pt-4 pb-3"><LoadingState variant="featured" /><LoadingState variant="market-list" :count="4" /></div>
+  </div>
+  <div v-else-if="errorMessage && games.length === 0" class="content-area dashboard-initial-error">
+    <div class="alert alert-danger m-3" role="alert">{{ errorMessage }} <button class="btn btn-sm btn-danger ms-2" @click="fetchGames">Retry</button></div>
+  </div>
+  <div v-else class="content-area">
     <div id="heroCarousel" ref="heroCarouselElement" class="carousel slide m-1 mb-2">
       <div class="carousel-indicators" v-if="banners.length > 1">
         <button v-for="(banner, index) in banners" :key="banner.id" type="button"
@@ -70,55 +76,13 @@
         </div>
       </div>
     </div>
-    <div class="row g-2 mb-4 ms-2 me-2">
-      <div class="col-4">
-        <router-link to="/wallet/add" class="btn bg-success w-100 text-light">
-          <span class="icon-3d">💰</span>
-          <span>Add Money</span>
-        </router-link>
-      </div>
-      <div class="col-4">
-        <router-link to="/wallet/withdraw" class="btn bg-danger w-100 text-light">
-          <span class="icon-3d">💸</span>
-          Withdraw
-        </router-link>
-      </div>
-      <div class="col-4">
-        <router-link to="/live-support" class="btn bg-primary w-100 text-light">
-          <span class="icon-3d">💬</span>
-          Support
-        </router-link>
-      </div>
-    </div>
+    <DashboardQuickActions />
     <div class="d-flex justify-content-between align-items-center px-2 mb-2">
       <h6 class="p-1 pb-0 text-black fw-bold mb-0">🗓️ Today's Result</h6>
       <span class="badge bg-primary-soft text-primary"> {{ marketCount }} Markets </span>
     </div>
     <LoadingState v-if="isLoading" variant="featured" />
-    <div v-else-if="featuredGame" class="row g-2 px-3 mb-4">
-      <div class="col-12">
-        <div class="live-result-box">
-          <div class="horizontal-result-content">
-            <div>
-              <h4 class="city-name text-white mb-0">
-                {{ featuredGame.name }}
-              </h4>
-              <small class="opacity-75  text-white">
-                Result Time:
-                {{ formatTime(featuredGame.result_time) }}
-              </small>
-            </div>
-            <span class="live-tag text-white">
-              <span class="live-dot"></span>
-              {{ featuredGame.is_playable ? 'Live Market' : 'Latest Result' }}
-            </span>
-            <h3 class="result-number mb-0">
-              {{ featuredGame.last_result ?? '--' }}
-            </h3>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DashboardFeaturedResult v-else-if="featuredGame" :game="featuredGame" :format-time="formatTime" />
     <h3 class="p-1 pt-0 text-black fw-bold">📊 Live Market</h3>
     <div v-if="errorMessage" class="alert alert-danger mx-2">
       {{ errorMessage }}
@@ -204,6 +168,8 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Carousel } from 'bootstrap'
 import api from '../plugins/axios'
 import LoadingState from '@/components/LoadingState.vue'
+import DashboardQuickActions from '@/components/DashboardQuickActions.vue'
+import DashboardFeaturedResult from '@/components/DashboardFeaturedResult.vue'
 
 const games = ref([])
 const featuredGame = ref(null)
@@ -213,6 +179,7 @@ const activeBannerIndex = ref(0)
 let heroCarouselInstance = null
 
 const isLoading = ref(false)
+const hasInitialLoadCompleted = ref(false)
 const errorMessage = ref('')
 
 const marqueeText = ref('')
@@ -441,6 +408,7 @@ const fetchGames = async () => {
    */
   if (games.value.length === 0) {
     isLoading.value = true
+    hasInitialLoadCompleted.value = false
   }
   errorMessage.value = ''
   try {
@@ -524,6 +492,7 @@ const fetchGames = async () => {
       'Unable to load games.'
   } finally {
     isLoading.value = false
+    hasInitialLoadCompleted.value = true
   }
 }
 
