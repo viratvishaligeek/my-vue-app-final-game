@@ -11,16 +11,16 @@
             <h6 class="mb-1">{{ authStore.name }}</h6>
           </div>
         </div>
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="bg-white px-1 rounded-2">
-            <div class="d-flex align-items-center text-danger fw-bold">
-              <span class="icon-3d pe-2">💸</span>
-              <span>₹ {{ authStore.amount }}</span>
+        <div class="sidebar-header-actions">
+          <div class="sidebar-wallet-card" aria-label="Wallet balance">
+            <span class="sidebar-wallet-symbol">₹</span>
+            <div class="sidebar-wallet-copy">
+              <small>Wallet balance</small>
+              <strong class="sidebar-wallet-amount">₹ {{ formatWalletAmount }}</strong>
             </div>
           </div>
-          <router-link to="/profile" class="btn btn-sm profile-edit-btn rounded-3" @click="closeSidebar">
-            <span class="icon-3d pe-2">🛠️</span>
-            Edit Profile
+          <router-link to="/profile" class="btn btn-sm profile-edit-btn sidebar-profile-btn rounded-3" @click="closeSidebar">
+            <span class="icon-3d">🛠️</span><span>Edit Profile</span>
           </router-link>
         </div>
       </div>
@@ -107,9 +107,10 @@
     <div class="app-header sticky-top bg-white border-bottom shadow-sm px-2 py-2">
       <div class="d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center min-width-0">
-          <button id="menuBtn" type="button"
+          <button id="menuBtn" ref="menuButtonElement" type="button"
             class="btn btn-light rounded-circle header-menu-btn d-flex align-items-center justify-content-center p-0"
-            @click="toggleSidebar" aria-label="Open menu">
+            @click="toggleSidebar" :aria-label="isSidebarOpen ? 'Close menu' : 'Open menu'"
+            :aria-expanded="isSidebarOpen" aria-controls="sidebar">
             <i class="bi bi-list fs-4"></i>
           </button>
           <router-link to="/dashboard" class="d-flex align-items-center ms-2 min-width-0">
@@ -137,7 +138,7 @@
                 WALLET
               </small>
               <span class="fw-bold text-success wallet-amount">
-                ₹ {{ authStore.amount }}
+                ₹ {{ formatWalletAmount }}
               </span>
             </div>
           </router-link>
@@ -195,7 +196,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/utils/auth'
 
@@ -206,18 +207,24 @@ const isSidebarOpen = ref(false)
 const shareMenuOpen = ref(false)
 const isLoggingOut = ref(false)
 const sidebarElement = ref(null)
+const menuButtonElement = ref(null)
+const formatWalletAmount = computed(() => new Intl.NumberFormat('en-IN', {
+  maximumFractionDigits: 2,
+}).format(Number(authStore.amount) || 0))
 
-const toggleSidebar = () => {
-  isSidebarOpen.value = !isSidebarOpen.value
+const setSidebarOpen = (open) => {
+  isSidebarOpen.value = open
+  document.body.classList.toggle('sidebar-open', open)
 }
 
-const closeSidebar = () => {
-  isSidebarOpen.value = false
-}
+const toggleSidebar = () => setSidebarOpen(!isSidebarOpen.value)
+const closeSidebar = () => setSidebarOpen(false)
 
 const handleOutsidePointerDown = (event) => {
   if (!isSidebarOpen.value) return
   if (sidebarElement.value?.contains(event.target)) return
+  // Do not close on pointerdown before the menu button's click toggles the panel.
+  if (menuButtonElement.value?.contains(event.target)) return
   closeSidebar()
 }
 
@@ -233,13 +240,15 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('pointerdown', handleOutsidePointerDown)
   document.removeEventListener('keydown', handleEscapeKey)
+  document.body.classList.remove('sidebar-open')
 })
 
 const handleLogout = async () => {
   isLoggingOut.value = true
   try {
     await authStore.performLogout()
-    router.push({ name: 'login' })
+    closeSidebar()
+    await router.replace({ name: 'login' })
   } finally {
     isLoggingOut.value = false
   }
@@ -977,4 +986,33 @@ See you there! ❤️`
     font-size: 0.53rem;
   }
 }
+/* Responsive wallet header and a pinned sign-out action. */
+.sidebar { padding-bottom: 0 !important; overflow: hidden; }
+.sidebar-header { flex: 0 0 auto; padding: 16px 16px 14px; }
+.sidebar-header-actions { display:flex; align-items:stretch; gap:8px; min-width:0; }
+.sidebar-wallet-card {
+  display:flex; align-items:center; gap:8px; flex:1 1 auto; min-width:0;
+  padding:8px 9px; border:1px solid rgba(25,135,84,.16); border-radius:12px;
+  color:#145c3a; background:linear-gradient(135deg,#fff,#eafaf1); box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+.sidebar-wallet-symbol {
+  display:grid; place-items:center; width:30px; height:30px; flex:0 0 30px;
+  border-radius:9px; color:#fff; background:linear-gradient(135deg,#198754,#20c997); font-size:17px; font-weight:900;
+}
+.sidebar-wallet-copy { display:flex; flex-direction:column; min-width:0; gap:3px; line-height:1.1; }
+.sidebar-wallet-copy small { color:#6c757d; font-size:10px; font-weight:700; white-space:nowrap; }
+.sidebar-wallet-amount {
+  display:block; max-width:100%; overflow:hidden; color:#145c3a; font-size:14px; font-weight:900;
+  text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums;
+}
+.sidebar-profile-btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; flex:0 0 auto; min-width:0; padding:7px 9px; white-space:nowrap; font-size:11px; font-weight:700; }
+.sidebar-profile-btn .icon-3d { margin:0; }
+.sidebar-menu { flex:1 1 auto; min-height:0; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
+.sidebar>.p-3.text-center { flex:0 0 auto; padding:12px 16px max(12px,env(safe-area-inset-bottom)) !important; background:var(--surface,#fff); border-top:1px solid #f0f0f0; }
+@media (max-width:320px) {
+  .sidebar-header { padding-left:12px; padding-right:12px; }
+  .sidebar-profile-btn { padding-left:6px; padding-right:6px; font-size:10px; }
+  .sidebar-wallet-card { gap:6px; padding-left:7px; padding-right:7px; }
+}
+@media (prefers-reduced-motion:reduce) { .sidebar-menu-item .icon-3d { transition:none; } }
 </style>

@@ -94,9 +94,7 @@
       <h6 class="p-1 pb-0 text-black fw-bold mb-0">🗓️ Today's Result</h6>
       <span class="badge bg-primary-soft text-primary"> {{ marketCount }} Markets </span>
     </div>
-    <div v-if="isLoading" class="col-12 text-center py-3">
-      <div class="spinner-border spinner-border-sm text-primary"></div>
-    </div>
+    <LoadingState v-if="isLoading" variant="featured" />
     <div v-else-if="featuredGame" class="row g-2 px-3 mb-4">
       <div class="col-12">
         <div class="live-result-box">
@@ -126,7 +124,10 @@
       {{ errorMessage }}
       <button class="btn btn-sm btn-danger ms-2" @click="fetchGames">Retry</button>
     </div>
-    <div v-else-if="!isLoading && games.length === 0" class="card mx-2 border-0 shadow-sm">
+    <div v-else-if="isLoading" class="px-2">
+      <LoadingState variant="market-list" :count="3" />
+    </div>
+    <div v-else-if="games.length === 0" class="card mx-2 border-0 shadow-sm">
       <div class="card-body text-center py-5">
         <div class="fs-1">📊</div>
         <h5 class="fw-bold mt-2">No Markets Available</h5>
@@ -202,6 +203,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Carousel } from 'bootstrap'
 import api from '../plugins/axios'
+import LoadingState from '@/components/LoadingState.vue'
 
 const games = ref([])
 const featuredGame = ref(null)

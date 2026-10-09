@@ -1,9 +1,6 @@
 <template>
-  <div class="content-area pb-5 mb-5 position-relative">
-    <div v-if="isLoading" class="text-center py-5">
-      <div class="spinner-border text-primary"></div>
-      <div class="mt-2 text-muted">Loading game...</div>
-    </div>
+  <div class="content-area pb-5 mb-5 position-relative play-game-page">
+    <LoadingState v-if="isLoading" variant="play-game" />
 
     <div v-else-if="errorMessage" class="alert alert-danger m-2">
       {{ errorMessage }}
@@ -12,7 +9,7 @@
       </div>
     </div>
     <template v-else-if="game">
-      <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded-3 shadow-sm border">
+      <div class="d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 shadow-sm border play-game-header">
         <h5 class="m-0 text-dark fw-bold d-flex align-items-center gap-2">
           <i class="bi bi-controller text-warning fs-4"></i>
           {{ game.name }}
@@ -38,7 +35,7 @@
 
       <template v-else>
         <div class="px-1 mb-3">
-          <ul class="nav nav-pills nav-fill bg-light p-1 rounded-4 border shadow-xs">
+          <ul class="nav nav-pills nav-fill p-1 rounded-4 border shadow-xs play-game-tabs">
             <li class="nav-item">
               <button class="nav-link fw-bold rounded-3 py-2" :class="{
                 'active bg-warning text-dark shadow-sm': activeTab === 'single',
@@ -285,6 +282,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import LoadingState from '@/components/LoadingState.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import Swal from 'sweetalert2'
@@ -750,11 +748,53 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.content-area {
-  width: 100%;
-  overflow-x: hidden;
-  padding-bottom: 130px !important;
+.content-area { width:100%; overflow-x:hidden; padding-bottom:130px !important; }
+.play-game-page {
+  min-height:calc(100vh - 58px); padding:10px 8px 150px !important;
+  background:radial-gradient(circle at 100% 0%,rgba(187,134,252,.12),transparent 28%),linear-gradient(180deg,#f6f7fb 0%,#eef2f8 100%);
+  color:#20263a;
 }
+.play-game-header {
+  min-height:74px; padding:13px 15px !important; color:#fff;
+  background:linear-gradient(135deg,#250f42 0%,#4c2477 62%,#6a3b99 100%);
+  border:0 !important; box-shadow:0 10px 24px rgba(37,15,66,.18) !important;
+}
+.play-game-header h5 { min-width:0; color:#fff !important; font-size:1rem; line-height:1.2; }
+.play-game-header h5 i { color:#ffc107 !important; }
+.play-game-header .text-end { flex:0 0 auto; padding:6px 9px; border:1px solid rgba(255,255,255,.16); border-radius:10px; background:rgba(255,255,255,.09); }
+.play-game-header .text-end small { color:rgba(255,255,255,.72) !important; font-size:.68rem; }
+.play-game-header .text-end .fw-bold { color:#fff !important; font-variant-numeric:tabular-nums; }
+.play-game-tabs { gap:5px; padding:5px !important; background:rgba(255,255,255,.88); border:1px solid #e4e8f1 !important; box-shadow:0 6px 18px rgba(26,35,55,.06) !important; backdrop-filter:blur(10px); }
+.play-game-tabs .nav-item { min-width:0; }
+.play-game-tabs .nav-link {
+  width:100%; min-height:44px; padding:9px 6px !important; border:1px solid transparent;
+  border-radius:11px !important; color:#5d6475; background:transparent; font-size:.76rem;
+  font-weight:800; line-height:1.2; white-space:normal;
+  transition:color 160ms ease,background-color 160ms ease,box-shadow 160ms ease,transform 160ms ease;
+}
+.play-game-tabs .nav-link.active { color:#fff !important; background:linear-gradient(135deg,#250f42,#60338b) !important; border-color:rgba(37,15,66,.12); box-shadow:0 5px 13px rgba(37,15,66,.22) !important; }
+.play-game-tabs .nav-link:active { transform:scale(.97); }
+.play-game-page .card { border:1px solid #e7eaf2 !important; background:rgba(255,255,255,.96) !important; box-shadow:0 5px 18px rgba(30,40,60,.055) !important; }
+.play-game-page .card > small,.play-game-page .card small.fw-bold { color:#343b50 !important; }
+.play-game-page .btn-warning { color:#2a1a06 !important; background:linear-gradient(135deg,#ffd45c,#ffb900) !important; border-color:#f2b300 !important; box-shadow:0 4px 12px rgba(255,185,0,.18); }
+.play-game-page .btn-outline-secondary { color:#555d70; border-color:#dce1eb; background:#fff; }
+.play-game-page .btn-success { background:linear-gradient(135deg,#198754,#20b982) !important; border-color:#198754 !important; box-shadow:0 4px 12px rgba(25,135,84,.18) !important; }
+.play-game-page .btn-white { border-color:#e2e6ef !important; box-shadow:0 2px 6px rgba(30,40,60,.035); }
+.play-game-page .form-control,.play-game-page .input-group-text { border-color:#dfe4ee; border-radius:10px; }
+.play-game-page .form-control:focus { border-color:#8e6db5; box-shadow:0 0 0 .2rem rgba(96,51,139,.12); }
+.play-game-page .sticky-bottom-bar { background:linear-gradient(to top,rgba(238,242,248,.98),rgba(238,242,248,.88),transparent); }
+.play-game-page .sticky-bottom-bar .card { background:linear-gradient(135deg,#211034,#35204d) !important; border-top-color:#ffc107 !important; box-shadow:0 12px 28px rgba(25,14,40,.28) !important; }
+.play-game-page .alert-warning { border:1px solid #ffe49a; border-radius:13px; background:#fff9e7; }
+@media (max-width:360px) {
+  .play-game-page { padding-left:5px !important; padding-right:5px !important; }
+  .play-game-header { padding:10px !important; gap:8px; }
+  .play-game-header h5 { font-size:.86rem; }
+  .play-game-header .text-end { padding:5px 6px; }
+  .play-game-header .text-end small { font-size:.6rem; }
+  .play-game-tabs { gap:3px; }
+  .play-game-tabs .nav-link { font-size:.65rem; padding:8px 3px !important; }
+}
+@media (prefers-reduced-motion:reduce) { .play-game-tabs .nav-link,.play-game-page .btn { transition:none !important; } }
 
 
 
