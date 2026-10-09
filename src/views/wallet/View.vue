@@ -386,6 +386,8 @@ const formatDate = (dateStr) => {
 const getStatusBadge = (status) => {
   switch (String(status || '').toLowerCase()) {
     case 'success':
+    case 'successful':
+    case 'completed':
       return 'bg-success-subtle text-success'
     case 'pending':
       return 'bg-warning-subtle text-warning'

@@ -365,6 +365,8 @@ import {
 
 import { useSettings } from '@/composables/useSettings'
 import { useRouter, useRoute } from 'vue-router'
+import { Capacitor } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
 import { useAuthStore } from '@/utils/auth'
 import api from '@/plugins/axios'
 
@@ -382,7 +384,10 @@ const minAddMoney = computed(() => {
 })
 
 const maxAddMoney = computed(() => {
-  return Number(getSetting('max_deposit', 0)) || 0
+  const configuredMaximum = Number(getSetting('max_deposit', 0)) || 0
+  return configuredMaximum > 0
+    ? Math.min(configuredMaximum, 1000000)
+    : 1000000
 })
 
 
@@ -399,6 +404,7 @@ const gatewayEnabled = ref(false)
 const showManualModal = ref(false)
 
 const pendingLoading = ref(false)
+const pendingGatewayRequestId = ref(null)
 
 const quickAmounts = [
   100,
@@ -510,6 +516,7 @@ const currentActivity = computed(() => {
 
 let activityTimer = null
 let pendingTimer = null
+let browserFinishedListener = null
 
 
 /*
@@ -759,11 +766,17 @@ const createGatewayOrder = async () => {
     }
 
 
-    /*
-     * Gateway controls the actual UPI app list.
-     */
-    window.location.href =
-      paymentUrl
+    pendingGatewayRequestId.value =
+      response.data?.data?.request_id
+        ? String(response.data.data.request_id)
+        : null
+
+    if (Capacitor.isNativePlatform()) {
+      // Keep the app's WebView and auth storage alive while payment runs externally.
+      await Browser.open({ url: paymentUrl })
+    } else {
+      window.location.href = paymentUrl
+    }
 
   } catch (error) {
 
@@ -1060,6 +1073,50 @@ const loadPendingPayments = async () => {
 }
 
 
+const refreshGatewayPaymentStatus = async () => {
+  const requestId = pendingGatewayRequestId.value
+  if (!requestId) return
+
+  try {
+    await authStore.verifyAuthToken()
+
+    const response = await api.get(PENDING_PAYMENT_ENDPOINT, {
+      params: {
+        type: 'credit',
+        per_page: 50,
+      },
+    })
+
+    let list = response.data?.data
+    if (list && !Array.isArray(list) && Array.isArray(list.data)) {
+      list = list.data
+    }
+
+    const request = Array.isArray(list)
+      ? list.find((item) => String(item.id) === String(requestId))
+      : null
+    const status = String(request?.status || '').toLowerCase()
+
+    if (status === 'approved') {
+      apiMessage.type = 'success'
+      apiMessage.text = 'Payment successful. Wallet balance has been refreshed.'
+    } else if (status === 'failed' || status === 'rejected') {
+      apiMessage.type = 'error'
+      apiMessage.text = 'Payment failed. If money was deducted, please contact support.'
+    } else {
+      apiMessage.type = 'error'
+      apiMessage.text = 'Payment is still being verified. Please refresh pending payments shortly.'
+    }
+
+    await loadPendingPayments()
+  } catch (error) {
+    console.warn('Unable to refresh gateway payment status:', error)
+    apiMessage.type = 'error'
+    apiMessage.text = 'Payment status could not be refreshed. Please check your wallet again shortly.'
+  }
+}
+
+
 /*
 |--------------------------------------------------------------------------
 | Reset manual form
@@ -1194,6 +1251,19 @@ const startPendingRefresh = () => {
 */
 
 onMounted(async () => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      browserFinishedListener = await Browser.addListener(
+        'browserFinished',
+        () => {
+          void refreshGatewayPaymentStatus()
+        },
+      )
+    } catch (error) {
+      console.warn('Unable to register payment browser listener:', error)
+    }
+  }
+
   await Promise.all([
     loadSettings(['min_deposit']),
     loadPaymentMethods(),
@@ -1201,21 +1271,22 @@ onMounted(async () => {
   ])
 
   if (String(route.query.gateway_return || '') === '1') {
-    const status = String(route.query.status || '').toLowerCase()
+    pendingGatewayRequestId.value = String(route.query.request_id || '')
 
-    if (status === 'approved') {
-      apiMessage.type = 'success'
-      apiMessage.text = 'Payment successful. Wallet balance has been refreshed.'
-    } else if (status === 'pending' || status === 'processing') {
-      apiMessage.type = 'error'
-      apiMessage.text = 'Payment is still being verified. Please refresh pending payments shortly.'
+    if (pendingGatewayRequestId.value) {
+      await refreshGatewayPaymentStatus()
     } else {
-      apiMessage.type = 'error'
-      apiMessage.text = 'Payment could not be completed. If money was deducted, please contact support.'
-    }
+      const status = String(route.query.status || '').toLowerCase()
+      apiMessage.type = status === 'approved' ? 'success' : 'error'
+      apiMessage.text = status === 'approved'
+        ? 'Payment successful. Wallet balance has been refreshed.'
+        : status === 'pending' || status === 'processing'
+          ? 'Payment is still being verified. Please refresh pending payments shortly.'
+          : 'Payment could not be completed. If money was deducted, please contact support.'
 
-    await authStore.verifyAuthToken()
-    await loadPendingPayments()
+      await authStore.verifyAuthToken()
+      await loadPendingPayments()
+    }
 
     const remainingQuery = { ...route.query }
     delete remainingQuery.gateway_return
@@ -1230,7 +1301,12 @@ onMounted(async () => {
 
 
 
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
+
+  if (browserFinishedListener) {
+    await browserFinishedListener.remove()
+    browserFinishedListener = null
+  }
 
   if (activityTimer) {
 

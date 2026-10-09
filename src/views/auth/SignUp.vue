@@ -180,8 +180,8 @@ const passwordScore = computed(() => {
   const p = form.password
   let score = 0
   if (!p) return 0
-  if (p.length >= 6) score++
   if (p.length >= 8) score++
+  if (p.length >= 12) score++
   if (/[A-Z]/.test(p) && /[0-9]/.test(p)) score++
   if (/[^A-Za-z0-9]/.test(p)) score++
   return score

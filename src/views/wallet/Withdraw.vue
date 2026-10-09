@@ -426,6 +426,15 @@ const form = reactive({
   qrImage: null,
 })
 
+const populateWithdrawalDetails = () => {
+  const user = authStore.user
+  if (!user) return
+
+  form.accountName = user.account_holder_name || user.holdername || ''
+  form.accountNumber = user.account_number || user.acc || ''
+  form.ifsc = user.ifsc_code || user.ifsc || ''
+}
+
 
 const errors = reactive({
   amount: '',
@@ -444,7 +453,10 @@ const minWithdrawAmount = computed(() => {
 })
 
 const maxWithdrawAmount = computed(() => {
-  return Number(getSetting('max_withdraw', 0)) || 0
+  const configuredMaximum = Number(getSetting('max_withdraw', 0)) || 0
+  return configuredMaximum > 0
+    ? Math.min(configuredMaximum, 1000000)
+    : 1000000
 })
 
 const availableBalance = computed(() => {
@@ -723,7 +735,8 @@ const loadBalance = async () => {
 
       balance.value =
         Number(
-          response.data.data.balance ||
+          response.data.data.available_balance ??
+          response.data.data.balance ??
           0
         )
 
@@ -1229,6 +1242,8 @@ const startPendingRefresh =
 */
 
 onMounted(async () => {
+
+  populateWithdrawalDetails()
 
   await Promise.all([
     loadBalance(),
