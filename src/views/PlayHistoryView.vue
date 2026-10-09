@@ -475,13 +475,17 @@ const fetchPlayHistory = async (page = 1) => {
   activeExpandedId.value = null
 
   try {
-    const response = await api.get('/play-history', {
-      params: {
-        date: selectedDate.value,
-        page,
-        per_page: 50,
-      },
-    })
+    const params = {
+      page,
+      per_page: 50,
+    }
+
+    // Let the backend apply each game's current business date for today's history.
+    if (selectedDate.value !== todayDateStr) {
+      params.date = selectedDate.value
+    }
+
+    const response = await api.get('/play-history', { params })
 
     if (response.data?.success) {
       const data = response.data.data

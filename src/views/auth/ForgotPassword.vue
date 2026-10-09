@@ -216,8 +216,8 @@ const handleResetPassword = async () => {
   if (!form.password) {
     errors.password = 'New password is required.'
     isValid = false
-  } else if (form.password.length < 6) {
-    errors.password = 'Password must be at least 6 characters.'
+  } else if (form.password.length < 8) {
+    errors.password = 'Password must be at least 8 characters.'
     isValid = false
   }
 
