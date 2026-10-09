@@ -1115,7 +1115,7 @@ const loadPendingWithdrawals =
           PENDING_WITHDRAWAL_ENDPOINT,
           {
             params: {
-              status: 'pending',
+              statuses: ['pending', 'processing'],
               type: 'debit',
             },
           }
@@ -1141,7 +1141,10 @@ const loadPendingWithdrawals =
 
       pendingWithdrawals.value =
         Array.isArray(list)
-          ? list
+          ? list.map((item) => ({
+              ...item,
+              mode: item.mode || item.payment_method || '',
+            }))
           : []
 
     } catch (error) {
