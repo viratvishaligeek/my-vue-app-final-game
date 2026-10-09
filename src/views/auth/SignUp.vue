@@ -137,9 +137,11 @@ const clearFieldError = (field) => {
 }
 
 // Client Validation
+const normalizePhone = (value) => value.replace(/[\s-]/g, '')
+
 const validateForm = () => {
   let isValid = true
-  const phoneRegex = /^[0-9+\-\s]{7,15}$/
+  const phoneRegex = /^\+?[0-9]{7,15}$/
 
   if (!form.fullName) {
     errors.fullName = 'Full name is required.'
@@ -152,7 +154,7 @@ const validateForm = () => {
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
     isValid = false
-  } else if (!phoneRegex.test(form.phone)) {
+  } else if (!phoneRegex.test(normalizePhone(form.phone))) {
     errors.phone = 'Please enter a valid phone number.'
     isValid = false
   }
@@ -235,7 +237,7 @@ const handleSignUp = async () => {
   try {
     const response = await api.post('/register', {
       name: form.fullName,
-      phone: form.phone,
+      phone: normalizePhone(form.phone),
       password: form.password,
     })
 

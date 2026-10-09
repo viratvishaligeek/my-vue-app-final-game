@@ -161,15 +161,17 @@ const clearFieldError = (field) => {
   apiMessage.text = ''
 }
 
+const normalizePhone = (value) => value.replace(/[\s-]/g, '')
+
 // Send OTP Handler
 const handleSendOtp = async () => {
   apiMessage.text = ''
-  const phoneRegex = /^[0-9+\-\s]{7,15}$/
+  const phoneRegex = /^\+?[0-9]{7,15}$/
 
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
     return
-  } else if (!phoneRegex.test(form.phone)) {
+  } else if (!phoneRegex.test(normalizePhone(form.phone))) {
     errors.phone = 'Please enter a valid phone number.'
     return
   }
@@ -178,7 +180,7 @@ const handleSendOtp = async () => {
 
   try {
     const response = await api.post('/forgot/send-otp', {
-      phone: form.phone,
+      phone: normalizePhone(form.phone),
     })
 
     if (response.data?.success) {
@@ -232,7 +234,7 @@ const handleResetPassword = async () => {
 
   try {
     const response = await api.post('/forgot/reset', {
-      phone: form.phone,
+      phone: normalizePhone(form.phone),
       otp: form.otp,
       password: form.password,
       password_confirmation: form.passwordConfirmation,
