@@ -106,7 +106,7 @@
             </div>
             <div class="lh-sm min-width-0">
               <div class="fw-bold text-dark text-truncate brand-title">
-                Gali Disawar
+                Online Khaiwal
               </div>
               <small class="text-muted d-flex align-items-center gap-1">
                 <span class="brand-live-dot"></span>
@@ -268,7 +268,7 @@ See you there! ❤️`
   -webkit-overflow-scrolling: touch;
 }
 
-.sidebar > .p-3.text-center {
+.sidebar>.p-3.text-center {
   flex: 0 0 auto;
   padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
   background: var(--surface, #fff);

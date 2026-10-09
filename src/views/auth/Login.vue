@@ -5,7 +5,7 @@
       <div class="app-logo mb-3">
         <img src="../../assets/img/logo.png" style="height: 90px; width: auto;" alt="">
       </div>
-      <h4 class="fw-bold text-primary-color">Gali Disawar Bazar</h4>
+      <h4 class="fw-bold text-primary-color">Play Online Khaiwal</h4>
       <p class="text-muted">Sign in to your account</p>
     </div>
     <div v-if="errors.api" class="alert alert-danger alert-dismissible fade show" role="alert">

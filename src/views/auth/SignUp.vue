@@ -6,7 +6,7 @@
       <div class="app-logo mb-3">
         <img src="../../assets/img/logo.png" style="height: 90px; width: auto;" alt="">
       </div>
-      <h4 class="fw-bold text-primary-color">Gali Disawar Bazar</h4>
+      <h4 class="fw-bold text-primary-color">Play Online Khaiwal</h4>
       <p class="text-muted">Sign up to get started with BusGo</p>
     </div>
 
