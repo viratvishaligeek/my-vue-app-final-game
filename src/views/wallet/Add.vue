@@ -375,9 +375,11 @@ const {
 } = useSettings()
 
 const minAddMoney = computed(() => {
-  return Number(
-    getSetting('min_deposit', 1)
-  ) || 1
+  return Number(getSetting('min_deposit', 1)) || 1
+})
+
+const maxAddMoney = computed(() => {
+  return Number(getSetting('max_deposit', 0)) || 0
 })
 
 
@@ -686,6 +688,18 @@ const handleAddMoney = async () => {
     return
   }
 
+  if (
+    maxAddMoney.value > 0 &&
+    amount > maxAddMoney.value
+  ) {
+
+    apiMessage.type = 'error'
+
+    apiMessage.text =
+      `Maximum add money amount is ₹${formatCurrency(maxAddMoney.value)}.`
+
+    return
+  }
 
 
   if (
