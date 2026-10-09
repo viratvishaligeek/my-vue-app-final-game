@@ -210,7 +210,7 @@ const handleResetPassword = async () => {
   apiMessage.text = ''
   let isValid = true
 
-  if (!form.otp || form.otp.length < 6) {
+  if (!/^\d{6}$/.test(form.otp)) {
     errors.otp = 'Please enter valid 6-digit OTP.'
     isValid = false
   }
