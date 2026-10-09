@@ -242,6 +242,24 @@ const handleUpdateProfile = async () => {
 const handleChangePassword = async () => {
   Object.keys(passErrors).forEach((k) => (passErrors[k] = ''))
   statusMessage.text = ''
+
+  if (!passwordForm.current_password) {
+    passErrors.current_password = 'Current password is required.'
+  }
+  if (!passwordForm.new_password) {
+    passErrors.new_password = 'New password is required.'
+  } else if (passwordForm.new_password.length < 8) {
+    passErrors.new_password = 'New password must be at least 8 characters.'
+  }
+  if (Object.values(passErrors).some(Boolean)) {
+    return
+  }
+  if (passwordForm.new_password !== passwordForm.new_password_confirmation) {
+    statusMessage.type = 'danger'
+    statusMessage.text = 'New password and confirmation do not match.'
+    return
+  }
+
   isPasswordLoading.value = true
 
   try {
