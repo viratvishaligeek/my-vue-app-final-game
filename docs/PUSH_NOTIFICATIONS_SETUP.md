@@ -30,6 +30,7 @@ Add the Firebase project's matching `google-services.json` to `android/app/googl
 
 ```sh
 npm ci
+npm run assets:android
 npx cap sync android
 cd android && ./gradlew assembleDebug
 ```
@@ -38,4 +39,4 @@ Install the newly built APK and grant notification permission when asked. The ap
 
 ## Sound
 
-FCM payloads request the system default notification sound on Android/iOS. Android uses the notification channel and the user's device settings. iOS and browsers control sound behavior; web pages cannot reliably force an audible tune while backgrounded or when the device/browser is muted. A branded custom ringtone requires adding an actual audio resource and configuring native notification channels/platform assets.
+FCM payloads request the bundled three-note chime on Android through the `notification_tune` channel resource. iOS uses the system default sound. iOS and browsers control sound behavior; web pages cannot reliably force an audible tune while backgrounded or when the device/browser is muted. A branded custom ringtone requires adding an actual audio resource and configuring native notification channels/platform assets.
