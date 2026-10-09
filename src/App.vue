@@ -62,7 +62,24 @@ onMounted(async () => {
 </template>
 
 <style>
-body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }\n.launch-splash { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; overflow: hidden; color: #fff; background: radial-gradient(ellipse at 50% 35%, #263b48 0%, #17232f 45%, #101820 100%); }\n.launch-splash__content { position: relative; z-index: 1; width: min(88vw, 420px); text-align: center; animation: splash-rise .65s cubic-bezier(.2,.8,.2,1) both; }\n.launch-splash__logo { width: 94px; height: 94px; display: grid; place-items: center; margin: 0 auto 24px; border: 1px solid rgba(255,255,255,.35); border-radius: 28px; background: linear-gradient(145deg,#22c997,#128b76); box-shadow: 0 14px 40px rgba(20,201,151,.25), inset 0 1px rgba(255,255,255,.45); transform: rotate(-5deg); }\n.launch-splash__logo span { font-size: 34px; font-weight: 900; letter-spacing: -3px; transform: rotate(5deg); }\n.launch-splash__eyebrow { margin: 0 0 7px; color: #9fe8d6; font-size: 10px; font-weight: 800; letter-spacing: .34em; }\n.launch-splash h1 { margin: 0; font-size: clamp(21px,6vw,30px); font-weight: 900; letter-spacing: .035em; }\n.launch-splash__tagline { margin: 9px 0 28px; color: #c1cbd2; font-size: 13px; letter-spacing: .06em; }\n.launch-splash__loader { display: flex; align-items: center; justify-content: center; gap: 7px; height: 20px; }\n.launch-splash__loader span { width: 6px; height: 6px; border-radius: 50%; background: #22c997; animation: splash-dot .8s ease-in-out infinite alternate; }\n.launch-splash__loader span:nth-child(2) { animation-delay: .16s; } .launch-splash__loader span:nth-child(3) { animation-delay: .32s; }\n.launch-splash__status { margin: 9px 0 0; color: #84959f; font-size: 11px; }\n.launch-splash__glow { position: absolute; width: 58vw; aspect-ratio: 1; border-radius: 50%; filter: blur(55px); opacity: .17; animation: splash-float 5s ease-in-out infinite alternate; }\n.launch-splash__glow--one { top: -20%; left: -20%; background: #20c997; } .launch-splash__glow--two { right: -24%; bottom: -28%; background: #4175ff; animation-delay: -2s; }\n.launch-splash-enter-active, .launch-splash-leave-active { transition: opacity .35s ease, transform .35s ease; } .launch-splash-leave-to { opacity: 0; transform: scale(1.02); }\n@keyframes splash-rise { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }\n@keyframes splash-dot { from { opacity: .35; transform: translateY(0) scale(.8); } to { opacity: 1; transform: translateY(-4px) scale(1.2); } }\n@keyframes splash-float { to { transform: translate3d(12%,8%,0) scale(1.12); } }
+body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+.launch-splash { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; overflow: hidden; color: #fff; background: radial-gradient(ellipse at 50% 35%, #263b48 0%, #17232f 45%, #101820 100%); }
+.launch-splash__content { position: relative; z-index: 1; width: min(88vw, 420px); text-align: center; animation: splash-rise .65s cubic-bezier(.2,.8,.2,1) both; }
+.launch-splash__logo { width: 94px; height: 94px; display: grid; place-items: center; margin: 0 auto 24px; border: 1px solid rgba(255,255,255,.35); border-radius: 28px; background: linear-gradient(145deg,#22c997,#128b76); box-shadow: 0 14px 40px rgba(20,201,151,.25), inset 0 1px rgba(255,255,255,.45); transform: rotate(-5deg); }
+.launch-splash__logo span { font-size: 34px; font-weight: 900; letter-spacing: -3px; transform: rotate(5deg); }
+.launch-splash__eyebrow { margin: 0 0 7px; color: #9fe8d6; font-size: 10px; font-weight: 800; letter-spacing: .34em; }
+.launch-splash h1 { margin: 0; font-size: clamp(21px,6vw,30px); font-weight: 900; letter-spacing: .035em; }
+.launch-splash__tagline { margin: 9px 0 28px; color: #c1cbd2; font-size: 13px; letter-spacing: .06em; }
+.launch-splash__loader { display: flex; align-items: center; justify-content: center; gap: 7px; height: 20px; }
+.launch-splash__loader span { width: 6px; height: 6px; border-radius: 50%; background: #22c997; animation: splash-dot .8s ease-in-out infinite alternate; }
+.launch-splash__loader span:nth-child(2) { animation-delay: .16s; } .launch-splash__loader span:nth-child(3) { animation-delay: .32s; }
+.launch-splash__status { margin: 9px 0 0; color: #84959f; font-size: 11px; }
+.launch-splash__glow { position: absolute; width: 58vw; aspect-ratio: 1; border-radius: 50%; filter: blur(55px); opacity: .17; animation: splash-float 5s ease-in-out infinite alternate; }
+.launch-splash__glow--one { top: -20%; left: -20%; background: #20c997; } .launch-splash__glow--two { right: -24%; bottom: -28%; background: #4175ff; animation-delay: -2s; }
+.launch-splash-enter-active, .launch-splash-leave-active { transition: opacity .35s ease, transform .35s ease; } .launch-splash-leave-to { opacity: 0; transform: scale(1.02); }
+@keyframes splash-rise { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes splash-dot { from { opacity: .35; transform: translateY(0) scale(.8); } to { opacity: 1; transform: translateY(-4px) scale(1.2); } }
+@keyframes splash-float { to { transform: translate3d(12%,8%,0) scale(1.12); } }
 .global-loading-indicator {
   position: fixed; inset: 0 0 auto; height: 3px; overflow: hidden;
   z-index: 2000; pointer-events: none; background: rgba(37,15,66,.08);
@@ -81,5 +98,6 @@ body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verda
 }
 @media (prefers-reduced-motion: reduce) {
   .global-loading-indicator__bar { animation: none; width: 100%; }
+  .launch-splash *, .launch-splash { animation: none !important; transition: none !important; }
 }
 </style>
