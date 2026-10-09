@@ -1008,41 +1008,41 @@ onMounted(() => {
 
 
 
-.mobile-bet-swal {
-  width: calc(100% - 28px) !important;
-  max-width: 390px !important;
-  border-radius: 22px !important;
-  padding: 22px 18px !important;
+:global(.mobile-bet-swal) {
+  width: calc(100% - 32px) !important;
+  max-width: 330px !important;
+  border-radius: 18px !important;
+  padding: 16px 14px !important;
 }
 
-.mobile-bet-swal-title {
-  font-size: 1.25rem !important;
+:global(.mobile-bet-swal-title) {
+  font-size: 1.05rem !important;
   font-weight: 800 !important;
 }
 
-.mobile-bet-swal-content {
+:global(.mobile-bet-swal-content) {
   margin-top: 5px !important;
 }
 
-.bet-confirm-box {
+:global(.mobile-bet-swal .bet-confirm-box) {
   padding-top: 2px;
 }
 
-.bet-confirm-amount {
-  font-size: 2rem;
+:global(.mobile-bet-swal .bet-confirm-amount) {
+  font-size: 1.65rem;
   line-height: 1;
   font-weight: 900;
   color: #f0ad00;
   margin-bottom: 8px;
 }
 
-.bet-confirm-text {
+:global(.mobile-bet-swal .bet-confirm-text) {
   color: #6c757d;
   font-size: 0.82rem;
   font-weight: 600;
 }
 
-.bet-confirm-warning {
+:global(.mobile-bet-swal .bet-confirm-warning) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1060,15 +1060,16 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.swal2-actions {
+:global(.swal2-actions) {
   width: 100%;
   gap: 7px;
 }
 
-.swal2-actions .btn {
-  min-height: 42px;
+:global(.swal2-actions .btn) {
+  min-height: 36px;
   flex: 1;
-  font-size: 0.76rem;
+  padding: 7px 10px !important;
+  font-size: 0.72rem;
 }
 
 
