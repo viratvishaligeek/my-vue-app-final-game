@@ -1,15 +1,15 @@
 <template>
   <div class="content-area">
     <div class="page-content">
-      <div v-if="!isNativeApp" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
+      <div class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
         <div>
           <div class="fw-bold text-dark"><i class="bi bi-bell-fill me-2"></i>Stay up to date</div>
-          <div class="small text-muted">Enable browser notifications for public announcements.</div>
+          <div class="small text-muted">{{ isNativeApp ? 'Enable app notifications for public announcements and account updates.' : 'Enable browser notifications for public announcements.' }}</div>
           <div v-if="pushStatus" class="small mt-1" role="status">{{ pushStatus }}</div>
         </div>
         <button type="button" class="btn btn-sm btn-primary flex-shrink-0" :disabled="pushLoading" @click="enablePush">
           <span v-if="pushLoading" class="spinner-border spinner-border-sm me-1"></span>
-          {{ pushLoading ? 'Enabling…' : 'Enable' }}
+          {{ pushLoading ? 'Enabling…' : (isNativeApp ? 'Enable app alerts' : 'Enable browser alerts') }}
         </button>
       </div>
       <div v-if="isInitialLoading" class="text-center py-5">
