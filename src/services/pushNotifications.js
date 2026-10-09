@@ -54,6 +54,7 @@ async function initNativePush() {
       description: 'Public announcements and account updates',
       importance: 5,
       vibration: true,
+      sound: 'notification_tune.wav',
     })
   } catch (error) {
     // iOS has no Android notification channels; continue with normal registration.
@@ -82,7 +83,7 @@ async function initNativePush() {
             body: notification.body || '',
             schedule: { at: new Date(Date.now() + 250) },
             channelId: 'default',
-            sound: Capacitor.getPlatform() === 'ios' ? 'default' : undefined,
+            sound: Capacitor.getPlatform() === 'ios' ? 'default' : 'notification_tune.wav',
             extra: notification.data || {},
           }],
         })
@@ -141,6 +142,7 @@ async function initWebPush() {
         badge: '/favicon.ico',
         silent: false,
       })
+      void new Audio('/notification-tune.wav').play().catch(() => {})
       notification.onclick = () => {
         window.focus()
         window.location.assign(payload.data?.url || '/notifications')
