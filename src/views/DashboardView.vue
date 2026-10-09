@@ -788,18 +788,6 @@ onUnmounted(() => {
     marqueeScroll 32s linear infinite;
 }
 
-/*
- * Important:
- * Same text twice.
- *
- * First text:
- * 0% -> -50%
- *
- * Second text:
- * exactly same content.
- *
- * Isliye loop seamless rahega.
- */
 
 .marquee-item {
   display: inline-flex;

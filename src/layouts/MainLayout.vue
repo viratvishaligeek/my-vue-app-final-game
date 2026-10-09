@@ -19,7 +19,8 @@
               <strong class="sidebar-wallet-amount">₹ {{ formatWalletAmount }}</strong>
             </div>
           </div>
-          <router-link to="/profile" class="btn btn-sm profile-edit-btn sidebar-profile-btn rounded-3" @click="closeSidebar">
+          <router-link to="/profile" class="btn btn-sm profile-edit-btn sidebar-profile-btn rounded-3"
+            @click="closeSidebar">
             <span class="icon-3d">🛠️</span><span>Edit Profile</span>
           </router-link>
         </div>
@@ -74,23 +75,10 @@
           <span>Notification</span>
         </router-link>
 
-        <a href="#" class="sidebar-menu-item" @click.prevent="shareMenuOpen = !shareMenuOpen"
-          :aria-expanded="shareMenuOpen">
-          <span class="icon-3d">🚀</span>
-          <span class="flex-grow-1">Share</span>
-          <i :class="['bi', shareMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down']"></i>
-        </a>
-        <div v-if="shareMenuOpen" class="share-submenu">
-          <a href="#" class="sidebar-menu-item" @click.prevent="shareApp">
-            <span class="icon-3d">📤</span>
-            <span>Share Now</span>
-          </a>
-          <router-link to="/referrals" class="sidebar-menu-item" @click="closeSidebar">
-            <span class="icon-3d">🎁</span>
-            <span>Referral Code</span>
-          </router-link>
-        </div>
-
+        <router-link to="/referrals" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">🎁</span>
+          <span>Referral Code</span>
+        </router-link>
       </div>
 
       <div class="p-3 text-center">
@@ -254,17 +242,6 @@ const handleLogout = async () => {
   }
 }
 // -------------
-const shareApp = () => {
-  const appUrl = 'https://google.com/panga'
-  const message = `🚀 Hey! Check out this amazing app!
-I’ve been using it and thought you might like it too. 😊
-Join me here:
-${appUrl}
-See you there! ❤️`
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
-  window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
-  closeSidebar()
-}
 </script>
 
 <style scoped>
@@ -301,6 +278,7 @@ See you there! ❤️`
   margin-left: 12px;
   border-left: 2px solid #e7f5ee;
 }
+
 .share-submenu .sidebar-menu-item {
   padding-left: 12px;
 }
@@ -986,33 +964,135 @@ See you there! ❤️`
     font-size: 0.53rem;
   }
 }
+
 /* Responsive wallet header and a pinned sign-out action. */
-.sidebar { padding-bottom: 0 !important; overflow: hidden; }
-.sidebar-header { flex: 0 0 auto; padding: 16px 16px 14px; }
-.sidebar-header-actions { display:flex; align-items:stretch; gap:8px; min-width:0; }
+.sidebar {
+  padding-bottom: 0 !important;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  flex: 0 0 auto;
+  padding: 16px 16px 14px;
+}
+
+.sidebar-header-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+
 .sidebar-wallet-card {
-  display:flex; align-items:center; gap:8px; flex:1 1 auto; min-width:0;
-  padding:8px 9px; border:1px solid rgba(25,135,84,.16); border-radius:12px;
-  color:#145c3a; background:linear-gradient(135deg,#fff,#eafaf1); box-shadow:0 3px 10px rgba(0,0,0,.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid rgba(25, 135, 84, .16);
+  border-radius: 12px;
+  color: #145c3a;
+  background: linear-gradient(135deg, #fff, #eafaf1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
 }
+
 .sidebar-wallet-symbol {
-  display:grid; place-items:center; width:30px; height:30px; flex:0 0 30px;
-  border-radius:9px; color:#fff; background:linear-gradient(135deg,#198754,#20c997); font-size:17px; font-weight:900;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 9px;
+  color: #fff;
+  background: linear-gradient(135deg, #198754, #20c997);
+  font-size: 17px;
+  font-weight: 900;
 }
-.sidebar-wallet-copy { display:flex; flex-direction:column; min-width:0; gap:3px; line-height:1.1; }
-.sidebar-wallet-copy small { color:#6c757d; font-size:10px; font-weight:700; white-space:nowrap; }
+
+.sidebar-wallet-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 3px;
+  line-height: 1.1;
+}
+
+.sidebar-wallet-copy small {
+  color: #6c757d;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .sidebar-wallet-amount {
-  display:block; max-width:100%; overflow:hidden; color:#145c3a; font-size:14px; font-weight:900;
-  text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: #145c3a;
+  font-size: 14px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
-.sidebar-profile-btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; flex:0 0 auto; min-width:0; padding:7px 9px; white-space:nowrap; font-size:11px; font-weight:700; }
-.sidebar-profile-btn .icon-3d { margin:0; }
-.sidebar-menu { flex:1 1 auto; min-height:0; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
-.sidebar>.p-3.text-center { flex:0 0 auto; padding:12px 16px max(12px,env(safe-area-inset-bottom)) !important; background:var(--surface,#fff); border-top:1px solid #f0f0f0; }
+
+.sidebar-profile-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 7px 9px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sidebar-profile-btn .icon-3d {
+  margin: 0;
+}
+
+.sidebar-menu {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.sidebar>.p-3.text-center {
+  flex: 0 0 auto;
+  padding: 12px 16px max(12px, env(safe-area-inset-bottom)) !important;
+  background: var(--surface, #fff);
+  border-top: 1px solid #f0f0f0;
+}
+
 @media (max-width:320px) {
-  .sidebar-header { padding-left:12px; padding-right:12px; }
-  .sidebar-profile-btn { padding-left:6px; padding-right:6px; font-size:10px; }
-  .sidebar-wallet-card { gap:6px; padding-left:7px; padding-right:7px; }
+  .sidebar-header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .sidebar-profile-btn {
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 10px;
+  }
+
+  .sidebar-wallet-card {
+    gap: 6px;
+    padding-left: 7px;
+    padding-right: 7px;
+  }
 }
-@media (prefers-reduced-motion:reduce) { .sidebar-menu-item .icon-3d { transition:none; } }
+
+@media (prefers-reduced-motion:reduce) {
+  .sidebar-menu-item .icon-3d {
+    transition: none;
+  }
+}
 </style>
