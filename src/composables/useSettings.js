@@ -7,7 +7,7 @@ const loading = ref(false)
 
 let settingsPromise = null
 
-const loadSettings = async (keys = []) => {
+const loadSettings = async () => {
   if (loaded.value) {
     return settings.value
   }
@@ -18,13 +18,9 @@ const loadSettings = async (keys = []) => {
   settingsPromise = (async () => {
     loading.value = true
     try {
-      const params = {}
-      if (keys.length) {
-        params.keys = keys
-      }
-      const response = await api.get('/settings', {
-        params,
-      })
+      // Load the complete allow-listed settings payload once. A partial
+      // response cached here could leave later screens without their keys.
+      const response = await api.get('/settings')
 
       if (response.data?.success) {
         const data = response.data.data || {}
@@ -47,11 +43,11 @@ const hasSetting = (key) => {
   return Object.prototype.hasOwnProperty.call(settings.value, key)
 }
 
-const refreshSettings = async (keys = []) => {
+const refreshSettings = async () => {
   loaded.value = false
   settings.value = {}
 
-  return loadSettings(keys)
+  return loadSettings()
 }
 
 export function useSettings() {
