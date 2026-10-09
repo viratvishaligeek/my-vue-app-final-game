@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Online Khaiwal</string>
-    <string name="title_activity_main">Online Khaiwal</string>
+    <string name="app_name">Play Online Khaiwal</string>
+    <string name="title_activity_main">Play Online Khaiwal</string>
     <string name="package_name">com.galidisawar.playgame</string>
     <string name="custom_url_scheme">com.galidisawar.playgame</string>
 </resources>
