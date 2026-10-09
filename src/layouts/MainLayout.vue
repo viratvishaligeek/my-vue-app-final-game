@@ -79,6 +79,11 @@
           <span>Share Now</span>
         </a>
 
+        <router-link to="/referrals" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">🎁</span>
+          <span>Referral Code</span>
+        </router-link>
+
       </div>
 
       <div class="p-3 text-center">
