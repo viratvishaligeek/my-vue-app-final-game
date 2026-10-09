@@ -4,8 +4,8 @@ import router from '../router'
 import { getAuthToken, clearAuthStorage } from '../utils/auth'
 
 const api = axios.create({
-  // baseURL: 'https://galidisawar.com/api/v1',
-  baseURL: 'http://127.0.0.1:8000/api/v1',
+  // Set VITE_API_BASE_URL for local/staging environments; use the live API by default.
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://galidisawar.com/api/v1',
   headers: {
     Accept: 'application/json',
   },
