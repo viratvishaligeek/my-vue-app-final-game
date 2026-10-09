@@ -234,7 +234,7 @@ const handleResetPassword = async () => {
 
   try {
     const response = await api.post('/forgot/reset', {
-      phone: form.phone,
+      phone: normalizePhone(form.phone),
       otp: form.otp,
       password: form.password,
       password_confirmation: form.passwordConfirmation,
