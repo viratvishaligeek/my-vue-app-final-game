@@ -73,6 +73,22 @@
         </div>
       </div>
 
+      <div class="mb-3">
+        <label for="referralCode" class="form-label">Referral Code (Optional)</label>
+        <div class="input-group">
+          <span class="input-group-text bg-transparent border-end-0">
+            <i class="bi bi-gift text-muted"></i>
+          </span>
+          <input type="text" class="form-control border-start-0 text-uppercase"
+            :class="{ 'is-invalid': errors.referralCode }" id="referralCode"
+            v-model.trim="form.referralCode" placeholder="Enter referral code if you have one"
+            @input="form.referralCode = form.referralCode.toUpperCase(); clearFieldError('referralCode')" />
+        </div>
+        <div v-if="errors.referralCode" class="invalid-feedback d-block small mt-1">
+          {{ errors.referralCode }}
+        </div>
+      </div>
+
       <div class="mb-3 form-check">
         <input type="checkbox" class="form-check-input" :class="{ 'is-invalid': errors.termsAgree }" id="termsAgree"
           v-model="form.termsAgree" @change="clearFieldError('termsAgree')" />
@@ -106,17 +122,19 @@
 
 <script setup>
 import { reactive, ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import api from '@/plugins/axios'
 import { useAuthStore } from '@/utils/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const form = reactive({
   fullName: '',
   phone: '',
   password: '',
+  referralCode: typeof route.query.ref === 'string' ? route.query.ref.toUpperCase() : '',
   termsAgree: false,
 })
 
@@ -127,6 +145,7 @@ const errors = reactive({
   fullName: '',
   phone: '',
   password: '',
+  referralCode: '',
   termsAgree: '',
   api: '',
 })
@@ -239,6 +258,7 @@ const handleSignUp = async () => {
       name: form.fullName,
       phone: normalizePhone(form.phone),
       password: form.password,
+      ...(form.referralCode ? { referral_code: form.referralCode.trim().toUpperCase() } : {}),
     })
 
     const responseData = response.data
@@ -268,6 +288,7 @@ const handleSignUp = async () => {
         errors.fullName = data.errors.name?.[0] || ''
         errors.phone = data.errors.phone?.[0] || ''
         errors.password = data.errors.password?.[0] || ''
+        errors.referralCode = data.errors.referral_code?.[0] || ''
 
         errors.api =
           data.message ||

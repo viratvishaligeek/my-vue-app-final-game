@@ -74,10 +74,22 @@
           <span>Notification</span>
         </router-link>
 
-        <a href="#" class="sidebar-menu-item" @click.prevent="shareApp">
+        <a href="#" class="sidebar-menu-item" @click.prevent="shareMenuOpen = !shareMenuOpen"
+          :aria-expanded="shareMenuOpen">
           <span class="icon-3d">🚀</span>
-          <span>Share Now</span>
+          <span class="flex-grow-1">Share</span>
+          <i :class="['bi', shareMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down']"></i>
         </a>
+        <div v-if="shareMenuOpen" class="share-submenu">
+          <a href="#" class="sidebar-menu-item" @click.prevent="shareApp">
+            <span class="icon-3d">📤</span>
+            <span>Share Now</span>
+          </a>
+          <router-link to="/referrals" class="sidebar-menu-item" @click="closeSidebar">
+            <span class="icon-3d">🎁</span>
+            <span>Referral Code</span>
+          </router-link>
+        </div>
 
       </div>
 
@@ -191,6 +203,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const isSidebarOpen = ref(false)
+const shareMenuOpen = ref(false)
 const isLoggingOut = ref(false)
 const sidebarElement = ref(null)
 
@@ -273,6 +286,14 @@ See you there! ❤️`
   padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
   background: var(--surface, #fff);
   border-top: 1px solid #f0f0f0;
+}
+
+.share-submenu {
+  margin-left: 12px;
+  border-left: 2px solid #e7f5ee;
+}
+.share-submenu .sidebar-menu-item {
+  padding-left: 12px;
 }
 
 .sidebar-menu-item .icon-3d {

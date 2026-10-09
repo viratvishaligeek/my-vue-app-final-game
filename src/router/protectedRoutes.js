@@ -56,6 +56,11 @@ export default [
         name: 'notifications',
         component: () => import('../views/Notification.vue'),
       },
+      {
+        path: '/referrals',
+        name: 'referrals',
+        component: () => import('../views/ReferralView.vue'),
+      },
       // for /terms-conditions /how-to-play /game-rates
       {
         path: '/page/:slug',
