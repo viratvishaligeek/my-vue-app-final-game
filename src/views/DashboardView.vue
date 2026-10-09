@@ -606,7 +606,10 @@ const fetchGames = async () => {
 
 const initializeBannerCarousel = () => {
   if (!heroCarouselElement.value || banners.value.length < 2) {
-    heroCarouselInstance?.dispose()
+    if (heroCarouselInstance && heroCarouselElement.value) {
+      heroCarouselElement.value.removeEventListener('slid.bs.carousel', handleBannerSlid)
+      heroCarouselInstance.dispose()
+    }
     heroCarouselInstance = null
     activeBannerIndex.value = 0
     return
@@ -1667,15 +1670,11 @@ onUnmounted(() => {
 
 /* Closed markets stay visually still to reduce continuous paint work. */
 .custom-card.game-closed,
+.custom-card.game-closed *,
+.custom-card.game-closed *::before,
+.custom-card.game-closed *::after,
 .custom-card.game-closed::before,
-.custom-card.game-closed::after,
-.custom-card.game-closed .dot-running,
-.custom-card.game-closed .icon-color,
-.custom-card.game-closed .text-dark.fs-3,
-.custom-card.game-closed .btn-light::before,
-.custom-card.game-closed .btn-success::before,
-.custom-card.game-closed .btn-success i,
-.custom-card.game-closed > .bg-success::before {
+.custom-card.game-closed::after {
   animation: none !important;
   transition: none !important;
 }
