@@ -996,7 +996,7 @@ const loadPendingPayments = async () => {
         PENDING_PAYMENT_ENDPOINT,
         {
           params: {
-            status: 'pending',
+            statuses: ['pending', 'processing'],
             type: 'credit',
           },
         }
