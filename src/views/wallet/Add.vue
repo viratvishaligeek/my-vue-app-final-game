@@ -1217,7 +1217,10 @@ onMounted(async () => {
     await authStore.verifyAuthToken()
     await loadPendingPayments()
 
-    const { gateway_return, status: returnedStatus, request_id, ...remainingQuery } = route.query
+    const remainingQuery = { ...route.query }
+    delete remainingQuery.gateway_return
+    delete remainingQuery.status
+    delete remainingQuery.request_id
     await router.replace({ path: route.path, query: remainingQuery })
   }
 
