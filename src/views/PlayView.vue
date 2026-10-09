@@ -289,9 +289,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import Swal from 'sweetalert2'
 import api from '../plugins/axios'
+import { useAuthStore } from '@/utils/auth'
+import { useSettings } from '@/composables/useSettings'
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
+const { loadSettings, getSetting } = useSettings()
 
 
 const game = ref(null)
@@ -529,6 +533,42 @@ const submitBetsAPI = async () => {
     return
   }
 
+  // Match the server's per-bet limits before sending a request that will be rejected.
+  try {
+    await loadSettings()
+  } catch (settingsError) {
+    console.warn('Unable to load bet limits; the API will validate the bet.', settingsError)
+  }
+
+  const isHarup = activeTab.value === 'harup'
+  const minimumKey = isHarup ? 'min_bid_amount_haruf' : 'min_bid_amount_jodi'
+  const maximumKey = isHarup ? 'max_bid_amount_haruf' : 'max_bid_amount_jodi'
+  const minimumBetAmount = Number(getSetting(minimumKey, 1)) || 1
+  const maximumBetAmount = Number(getSetting(maximumKey, 0)) || 0
+  const selectedAmounts = activeTab.value === 'single'
+    ? Object.values(singleBets.value).map(Number)
+    : activeTab.value === 'harup'
+      ? [
+        ...Object.values(harupBets.value.ander).map(Number),
+        ...Object.values(harupBets.value.bahar).map(Number),
+      ]
+      : generatedCrossingJodis.value.length
+        ? [Number(crossingAmount.value)]
+        : []
+
+  if (selectedAmounts.some((amount) => amount < minimumBetAmount)) {
+    toast.warning(`Minimum bet amount is ₹${minimumBetAmount} per selection.`)
+    return
+  }
+
+  if (
+    maximumBetAmount > 0 &&
+    selectedAmounts.some((amount) => amount > maximumBetAmount)
+  ) {
+    toast.warning(`Maximum bet amount is ₹${maximumBetAmount} per selection.`)
+    return
+  }
+
   /*
   |--------------------------------------------------------------------------
   | CONFIRM
@@ -612,7 +652,11 @@ const submitBetsAPI = async () => {
     const data = response.data?.data
 
     const placedAmount = Number(data?.total_amount ?? totalAmount)
-    const remainingBalance = data?.balance
+    const remainingBalance = Number(data?.balance)
+
+    if (Number.isFinite(remainingBalance) && remainingBalance >= 0) {
+      authStore.updateUserData({ balance: remainingBalance })
+    }
 
     toast.success(
       `Bet placed successfully • ₹${placedAmount.toFixed(2)}`,
