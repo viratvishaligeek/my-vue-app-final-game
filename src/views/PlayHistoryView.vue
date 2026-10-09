@@ -134,7 +134,7 @@
                   </span>
 
                   <span v-else-if="slip.status === 'loss' || slip.status === 'lost'"
-                    class="badge bg-danger text-white fw-semibold px-2 py-1 rounded-pill fs-8">
+                    class="badge bg-secondary text-white fw-semibold px-2 py-1 rounded-pill fs-8">
                     LOST
                     <span v-if="slip.winning_number">
                       ({{ slip.winning_number }})
