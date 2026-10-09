@@ -726,7 +726,8 @@ const loadBalance = async () => {
 
       balance.value =
         Number(
-          response.data.data.balance ||
+          response.data.data.available_balance ??
+          response.data.data.balance ??
           0
         )
 
