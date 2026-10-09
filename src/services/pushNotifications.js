@@ -57,7 +57,7 @@ async function initNativePush() {
       vibration: true,
       sound: 'notification_tune.wav',
     })
-  } catch (error) {
+  } catch {
     // iOS has no Android notification channels; continue with normal registration.
   }
 
