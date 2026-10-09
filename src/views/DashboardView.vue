@@ -1,5 +1,11 @@
 <template>
-  <div class="content-area">
+  <div v-if="!hasInitialLoadCompleted" class="content-area dashboard-initial-loading" aria-busy="true">
+    <div class="px-3 pt-4 pb-3"><LoadingState variant="featured" /><LoadingState variant="market-list" :count="4" /></div>
+  </div>
+  <div v-else-if="errorMessage && games.length === 0" class="content-area dashboard-initial-error">
+    <div class="alert alert-danger m-3" role="alert">{{ errorMessage }} <button class="btn btn-sm btn-danger ms-2" @click="fetchGames">Retry</button></div>
+  </div>
+  <div v-else class="content-area">
     <div id="heroCarousel" ref="heroCarouselElement" class="carousel slide m-1 mb-2">
       <div class="carousel-indicators" v-if="banners.length > 1">
         <button v-for="(banner, index) in banners" :key="banner.id" type="button"
@@ -197,6 +203,7 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script setup>
@@ -213,6 +220,7 @@ const activeBannerIndex = ref(0)
 let heroCarouselInstance = null
 
 const isLoading = ref(false)
+const hasInitialLoadCompleted = ref(false)
 const errorMessage = ref('')
 
 const marqueeText = ref('')
@@ -524,6 +532,7 @@ const fetchGames = async () => {
       'Unable to load games.'
   } finally {
     isLoading.value = false
+    hasInitialLoadCompleted.value = true
   }
 }
 
