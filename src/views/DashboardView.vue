@@ -1,10 +1,10 @@
 <template>
   <div class="content-area">
-    <div id="heroCarousel" class="carousel slide m-1 mb-2" data-bs-ride="carousel">
+    <div id="heroCarousel" ref="heroCarouselElement" class="carousel slide m-1 mb-2">
       <div class="carousel-indicators" v-if="banners.length > 1">
-        <button v-for="(banner, index) in banners" :key="banner.id" type="button" data-bs-target="#heroCarousel"
-          :data-bs-slide-to="index" :class="{ active: index === 0 }"
-          :aria-current="index === 0 ? 'true' : undefined"></button>
+        <button v-for="(banner, index) in banners" :key="banner.id" type="button"
+          :class="{ active: index === activeBannerIndex }" :aria-label="`Show banner ${index + 1}`"
+          :aria-current="index === activeBannerIndex ? 'true' : undefined" @click="goToBanner(index)"></button>
       </div>
       <div class="carousel-inner rounded-3">
         <div v-for="(banner, index) in banners" :key="banner.id" class="carousel-item" :class="{ active: index === 0 }">
@@ -155,7 +155,7 @@
     </div>
     <div v-else class="row g-3 ms-2 me-2">
       <div v-for="(game, index) in games" :key="game.id" class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card" :class="{ 'game-closed': !isGamePlayable(game) }">
           <div class="bg-white p-3 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt-fill fs-5 icon-color"></i>
@@ -218,12 +218,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { Carousel } from 'bootstrap'
 import api from '../plugins/axios'
 
 const games = ref([])
 const featuredGame = ref(null)
 const banners = ref([])
+const heroCarouselElement = ref(null)
+const activeBannerIndex = ref(0)
+let heroCarouselInstance = null
 
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -516,13 +520,23 @@ const fetchGames = async () => {
     |--------------------------------------------------------------------------
     */
 
-    banners.value = Array.isArray(data.banners)
+    const nextBanners = Array.isArray(data.banners)
       ? data.banners.map((banner) => ({
         id: banner.id,
         title: banner.title || banner.name || 'Banner',
         imageUrl: banner.image_url || banner.image,
       }))
       : []
+
+    const previousBannerSignature = banners.value.map(banner => `${banner.id}:${banner.imageUrl}`).join('|')
+    const nextBannerSignature = nextBanners.map(banner => `${banner.id}:${banner.imageUrl}`).join('|')
+
+    if (previousBannerSignature !== nextBannerSignature) {
+      banners.value = nextBanners
+      activeBannerIndex.value = 0
+      await nextTick()
+      initializeBannerCarousel()
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -586,6 +600,38 @@ const fetchGames = async () => {
 
 /*
 |--------------------------------------------------------------------------
+| Banner carousel
+|--------------------------------------------------------------------------
+*/
+
+const initializeBannerCarousel = () => {
+  if (!heroCarouselElement.value || banners.value.length < 2) {
+    heroCarouselInstance?.dispose()
+    heroCarouselInstance = null
+    activeBannerIndex.value = 0
+    return
+  }
+
+  heroCarouselInstance?.dispose()
+  heroCarouselInstance = new Carousel(heroCarouselElement.value, {
+    interval: 4000,
+    ride: 'carousel',
+    pause: false,
+    wrap: true,
+    touch: true,
+  })
+
+  heroCarouselInstance.to(activeBannerIndex.value)
+  heroCarouselInstance.cycle()
+}
+
+const goToBanner = (index) => {
+  activeBannerIndex.value = index
+  heroCarouselInstance?.to(index)
+}
+
+/*
+|--------------------------------------------------------------------------
 | Refresh
 |--------------------------------------------------------------------------
 */
@@ -623,6 +669,9 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  heroCarouselInstance?.dispose()
+  heroCarouselInstance = null
+
   if (clockTimer) {
     clearInterval(clockTimer)
     clockTimer = null
@@ -651,34 +700,6 @@ onUnmounted(() => {
   isolation: isolate;
 }
 
-.content-area::before {
-  content: "";
-  position: fixed;
-  z-index: -2;
-  width: 280px;
-  height: 280px;
-  top: 70px;
-  left: -170px;
-  border-radius: 50%;
-  background: rgba(0, 168, 120, .055);
-  filter: blur(45px);
-  animation: ambientLeft 8s ease-in-out infinite alternate;
-}
-
-.content-area::after {
-  content: "";
-  position: fixed;
-  z-index: -2;
-  width: 260px;
-  height: 260px;
-  right: -160px;
-  bottom: 120px;
-  border-radius: 50%;
-  background: rgba(57, 119, 255, .045);
-  filter: blur(50px);
-  animation: ambientRight 9s ease-in-out infinite alternate;
-}
-
 #heroCarousel {
   position: relative;
   margin: 6px 5px 10px !important;
@@ -687,7 +708,6 @@ onUnmounted(() => {
   box-shadow:
     0 14px 35px rgba(18, 35, 52, .11),
     0 3px 8px rgba(18, 35, 52, .06);
-  animation: heroEnter .8s cubic-bezier(.2, .8, .2, 1) both;
 }
 
 #heroCarousel .carousel-inner {
@@ -699,35 +719,6 @@ onUnmounted(() => {
   width: 100%;
   border-radius: 18px;
   object-fit: cover;
-  transform: scale(1.02);
-  transition:
-    transform 1s cubic-bezier(.2, .8, .2, 1),
-    filter 1s ease;
-}
-
-#heroCarousel .carousel-item.active img {
-  animation: heroBreathing 8s ease-in-out infinite alternate;
-}
-
-/* moving glass reflection */
-
-#heroCarousel .carousel-inner::after {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  left: -80%;
-  width: 45%;
-  height: 100%;
-  transform: skewX(-20deg);
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, .08),
-      rgba(255, 255, 255, .42),
-      rgba(255, 255, 255, .08),
-      transparent);
-  animation: heroLight 4.5s ease-in-out infinite;
-  pointer-events: none;
 }
 
 /* premium bottom fade */
@@ -755,25 +746,17 @@ onUnmounted(() => {
   width: 6px !important;
   height: 6px !important;
   margin: 0 3px !important;
+  padding: 0 !important;
   border: 0 !important;
   border-radius: 50% !important;
   opacity: 1 !important;
-  background: rgba(255, 255, 255, .65) !important;
-  transition:
-    width .35s ease,
-    background .35s ease,
-    box-shadow .35s ease,
-    transform .35s ease !important;
+  background: rgba(255, 255, 255, .72) !important;
+  transition: background .2s ease, opacity .2s ease !important;
 }
 
 .carousel-indicators button.active {
-  width: 24px !important;
-  border-radius: 20px !important;
   background: #00c895 !important;
-  box-shadow:
-    0 0 8px rgba(0, 200, 149, .9),
-    0 0 18px rgba(0, 200, 149, .45);
-  transform: scaleY(1.25);
+  box-shadow: 0 0 5px rgba(0, 200, 149, .55);
 }
 
 /* =========================================================
@@ -1663,11 +1646,34 @@ onUnmounted(() => {
     0 9px 24px rgba(20, 36, 48, .075),
     0 2px 5px rgba(20, 36, 48, .04);
   transform: translateZ(0);
-  animation: marketCardEnter .65s cubic-bezier(.2, .8, .2, 1) both;
   transition:
     transform .35s cubic-bezier(.2, .8, .2, 1),
     box-shadow .35s ease,
     border-color .35s ease;
+}
+
+
+/* Closed markets stay visually still to reduce continuous paint work. */
+.custom-card.game-closed,
+.custom-card.game-closed::before,
+.custom-card.game-closed::after,
+.custom-card.game-closed .dot-running,
+.custom-card.game-closed .icon-color,
+.custom-card.game-closed .text-dark.fs-3,
+.custom-card.game-closed .btn-light::before,
+.custom-card.game-closed .btn-success::before,
+.custom-card.game-closed .btn-success i,
+.custom-card.game-closed > .bg-success::before {
+  animation: none !important;
+  transition: none !important;
+}
+
+.custom-card.game-closed::before,
+.custom-card.game-closed::after,
+.custom-card.game-closed .btn-light::before,
+.custom-card.game-closed .btn-success::before,
+.custom-card.game-closed > .bg-success::before {
+  display: none;
 }
 
 /* animated edge */
