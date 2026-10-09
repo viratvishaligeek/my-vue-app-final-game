@@ -40,7 +40,7 @@ export async function syncPushSubscription() {
 async function initNativePush() {
   const permission = await PushNotifications.checkPermissions()
   let receive = permission.receive
-  if (receive !== 'granted') {
+  if (receive === 'prompt' || receive === 'prompt-with-rationale') {
     receive = (await PushNotifications.requestPermissions()).receive
   }
   if (receive !== 'granted') {
