@@ -82,7 +82,7 @@ async function initNativePush() {
             body: notification.body || '',
             schedule: { at: new Date(Date.now() + 250) },
             channelId: 'default',
-            sound: 'default',
+            sound: Capacitor.getPlatform() === 'ios' ? 'default' : undefined,
             extra: notification.data || {},
           }],
         })
