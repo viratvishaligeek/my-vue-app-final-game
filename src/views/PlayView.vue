@@ -289,9 +289,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import Swal from 'sweetalert2'
 import api from '../plugins/axios'
+import { useAuthStore } from '@/utils/auth'
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 
 const game = ref(null)
@@ -612,7 +614,11 @@ const submitBetsAPI = async () => {
     const data = response.data?.data
 
     const placedAmount = Number(data?.total_amount ?? totalAmount)
-    const remainingBalance = data?.balance
+    const remainingBalance = Number(data?.balance)
+
+    if (Number.isFinite(remainingBalance) && remainingBalance >= 0) {
+      authStore.updateUserData({ balance: remainingBalance })
+    }
 
     toast.success(
       `Bet placed successfully • ₹${placedAmount.toFixed(2)}`,
