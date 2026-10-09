@@ -444,7 +444,10 @@ const minWithdrawAmount = computed(() => {
 })
 
 const maxWithdrawAmount = computed(() => {
-  return Number(getSetting('max_withdraw', 0)) || 0
+  const configuredMaximum = Number(getSetting('max_withdraw', 0)) || 0
+  return configuredMaximum > 0
+    ? Math.min(configuredMaximum, 1000000)
+    : 1000000
 })
 
 const availableBalance = computed(() => {
