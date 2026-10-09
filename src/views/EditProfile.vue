@@ -198,7 +198,10 @@ const populateUserData = () => {
 
     Object.keys(profileForm).forEach((key) => {
       const userKey = userFieldByFormField[key] || key
-      profileForm[key] = user[userKey] || user[key] || ''
+      const value = user[userKey] || user[key] || ''
+      profileForm[key] = key === 'gender'
+        ? String(value).toLowerCase()
+        : value
     })
   }
 }
