@@ -106,7 +106,7 @@ async function initNativePush() {
   return { ok: true, message: 'Device notifications enabled.' }
 }
 
-async function initWebPush() {
+async function initWebPush(allowPermissionPrompt = true) {
   if (!('Notification' in window) || !('serviceWorker' in navigator)) {
     return { ok: false, message: 'This browser does not support push notifications.' }
   }
@@ -117,7 +117,10 @@ async function initWebPush() {
     return { ok: false, message: 'Browser notifications require HTTPS.' }
   }
 
-  const permission = await Notification.requestPermission()
+  let permission = Notification.permission
+  if (permission !== 'granted' && allowPermissionPrompt) {
+    permission = await Notification.requestPermission()
+  }
   if (permission !== 'granted') {
     return { ok: false, message: 'Notification permission was not granted.' }
   }
@@ -169,6 +172,14 @@ export async function subscribeToPush() {
     console.error('Push notification setup failed:', error)
     return { ok: false, message: error?.message || 'Unable to enable notifications.' }
   }
+}
+
+export async function restorePushSubscription() {
+  if (Capacitor.isNativePlatform()) return { ok: false, message: 'Native registration is handled separately.' }
+  if (!('Notification' in window) || Notification.permission !== 'granted') {
+    return { ok: false, message: 'Browser push has not been granted.' }
+  }
+  return initWebPush(false)
 }
 
 export async function initNativePushNotifications() {
