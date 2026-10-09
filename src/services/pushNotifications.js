@@ -175,11 +175,16 @@ export async function subscribeToPush() {
 }
 
 export async function restorePushSubscription() {
-  if (Capacitor.isNativePlatform()) return { ok: false, message: 'Native registration is handled separately.' }
-  if (!('Notification' in window) || Notification.permission !== 'granted') {
-    return { ok: false, message: 'Browser push has not been granted.' }
+  try {
+    if (Capacitor.isNativePlatform()) return { ok: false, message: 'Native registration is handled separately.' }
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+      return { ok: false, message: 'Browser push has not been granted.' }
+    }
+    return await initWebPush(false)
+  } catch (error) {
+    console.warn('Unable to restore browser push subscription:', error?.message || error)
+    return { ok: false, message: 'Unable to restore browser notifications.' }
   }
-  return initWebPush(false)
 }
 
 export async function initNativePushNotifications() {
