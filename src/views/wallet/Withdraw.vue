@@ -426,6 +426,15 @@ const form = reactive({
   qrImage: null,
 })
 
+const populateWithdrawalDetails = () => {
+  const user = authStore.user
+  if (!user) return
+
+  form.accountName = user.account_holder_name || user.holdername || ''
+  form.accountNumber = user.account_number || user.acc || ''
+  form.ifsc = user.ifsc_code || user.ifsc || ''
+}
+
 
 const errors = reactive({
   amount: '',
@@ -1233,6 +1242,8 @@ const startPendingRefresh =
 */
 
 onMounted(async () => {
+
+  populateWithdrawalDetails()
 
   await Promise.all([
     loadBalance(),
