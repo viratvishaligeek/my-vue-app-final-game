@@ -189,8 +189,16 @@ const passwordForm = reactive({
 const populateUserData = () => {
   const user = authStore.user
   if (user) {
+    const userFieldByFormField = {
+      bank: 'bank_name',
+      acc: 'account_number',
+      ifsc: 'ifsc_code',
+      holdername: 'account_holder_name',
+    }
+
     Object.keys(profileForm).forEach((key) => {
-      profileForm[key] = user[key] || ''
+      const userKey = userFieldByFormField[key] || key
+      profileForm[key] = user[userKey] || user[key] || ''
     })
   }
 }
