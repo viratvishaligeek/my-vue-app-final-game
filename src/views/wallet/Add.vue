@@ -379,7 +379,10 @@ const minAddMoney = computed(() => {
 })
 
 const maxAddMoney = computed(() => {
-  return Number(getSetting('max_deposit', 0)) || 0
+  const configuredMaximum = Number(getSetting('max_deposit', 0)) || 0
+  return configuredMaximum > 0
+    ? Math.min(configuredMaximum, 1000000)
+    : 1000000
 })
 
 
