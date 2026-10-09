@@ -1,6 +1,17 @@
 <template>
   <div class="content-area">
     <div class="page-content">
+      <div v-if="!isNativeApp" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
+        <div>
+          <div class="fw-bold text-dark"><i class="bi bi-bell-fill me-2"></i>Stay up to date</div>
+          <div class="small text-muted">Enable browser notifications for public announcements.</div>
+          <div v-if="pushStatus" class="small mt-1" role="status">{{ pushStatus }}</div>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary flex-shrink-0" :disabled="pushLoading" @click="enablePush">
+          <span v-if="pushLoading" class="spinner-border spinner-border-sm me-1"></span>
+          {{ pushLoading ? 'Enabling…' : 'Enable' }}
+        </button>
+      </div>
       <div v-if="isInitialLoading" class="text-center py-5">
         <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
         <div class="text-muted mt-2">
@@ -66,9 +77,25 @@
 
 <script setup>
 import api from '@/plugins/axios'
+import { Capacitor } from '@capacitor/core'
+import { subscribeToPush } from '@/services/pushNotifications'
 import { computed, onMounted, ref } from 'vue'
 
 const notifications = ref([])
+const isNativeApp = Capacitor.isNativePlatform()
+const pushLoading = ref(false)
+const pushStatus = ref('')
+
+const enablePush = async () => {
+  pushLoading.value = true
+  pushStatus.value = ''
+  try {
+    const result = await subscribeToPush()
+    pushStatus.value = result.message
+  } finally {
+    pushLoading.value = false
+  }
+}
 const isLoading = ref(false)
 const errorMessage = ref('')
 
