@@ -612,7 +612,11 @@ const initializeBannerCarousel = () => {
     return
   }
 
-  heroCarouselInstance?.dispose()
+  if (heroCarouselInstance) {
+    heroCarouselElement.value.removeEventListener('slid.bs.carousel', handleBannerSlid)
+    heroCarouselInstance.dispose()
+  }
+
   heroCarouselInstance = new Carousel(heroCarouselElement.value, {
     interval: 4000,
     ride: 'carousel',
@@ -621,8 +625,13 @@ const initializeBannerCarousel = () => {
     touch: true,
   })
 
+  heroCarouselElement.value.addEventListener('slid.bs.carousel', handleBannerSlid)
   heroCarouselInstance.to(activeBannerIndex.value)
   heroCarouselInstance.cycle()
+}
+
+const handleBannerSlid = (event) => {
+  activeBannerIndex.value = event.to
 }
 
 const goToBanner = (index) => {
@@ -669,7 +678,10 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  heroCarouselInstance?.dispose()
+  if (heroCarouselInstance && heroCarouselElement.value) {
+    heroCarouselElement.value.removeEventListener('slid.bs.carousel', handleBannerSlid)
+    heroCarouselInstance.dispose()
+  }
   heroCarouselInstance = null
 
   if (clockTimer) {
