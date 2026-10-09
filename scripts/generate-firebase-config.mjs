@@ -1,7 +1,8 @@
 import { writeFile } from 'node:fs/promises'
 import { loadEnv } from 'vite'
 
-const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '')
+const mode = process.argv[2] || process.env.NODE_ENV || 'development'
+const env = loadEnv(mode, process.cwd(), '')
 
 const config = {
   apiKey: env.VITE_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY || '',
