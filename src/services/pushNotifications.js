@@ -3,6 +3,7 @@ import { PushNotifications } from '@capacitor/push-notifications'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import api from '@/plugins/axios'
 import { getAuthToken } from '@/utils/auth'
+import router from '@/router'
 
 let currentToken = ''
 let currentPlatform = 'web'
@@ -71,6 +72,14 @@ async function initNativePush() {
     })
     await PushNotifications.addListener('registrationError', (error) => {
       console.warn('Native push registration failed:', error)
+    })
+    await PushNotifications.addListener('pushNotificationActionPerformed', ({ notification }) => {
+      const targetUrl = notification.data?.url || '/notifications'
+      void router.push(targetUrl)
+    })
+    await LocalNotifications.addListener('localNotificationActionPerformed', ({ notification }) => {
+      const targetUrl = notification.extra?.url || '/notifications'
+      void router.push(targetUrl)
     })
     await PushNotifications.addListener('pushNotificationReceived', async (notification) => {
       // Remote notifications received in the foreground need a local notification to
