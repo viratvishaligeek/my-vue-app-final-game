@@ -409,6 +409,7 @@ const fetchGames = async () => {
    */
   if (games.value.length === 0) {
     isLoading.value = true
+    hasInitialLoadCompleted.value = false
   }
   errorMessage.value = ''
   try {
