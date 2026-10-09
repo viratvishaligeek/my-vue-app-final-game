@@ -440,7 +440,11 @@ const apiMessage = reactive({
 
 
 const minWithdrawAmount = computed(() => {
-  return Number(getSetting('min_withdraw'), 100)
+  return Number(getSetting('min_withdraw', 1)) || 1
+})
+
+const maxWithdrawAmount = computed(() => {
+  return Number(getSetting('max_withdraw', 0)) || 0
 })
 
 const availableBalance = computed(() => {
@@ -881,6 +885,18 @@ const handleWithdraw = async () => {
 
     errors.amount =
       `Minimum withdrawal amount is ₹${formatCurrency(minWithdrawAmount.value)}.`
+
+    return
+
+  }
+
+  if (
+    maxWithdrawAmount.value > 0 &&
+    amount > maxWithdrawAmount.value
+  ) {
+
+    errors.amount =
+      `Maximum withdrawal amount is ₹${formatCurrency(maxWithdrawAmount.value)}.`
 
     return
 
