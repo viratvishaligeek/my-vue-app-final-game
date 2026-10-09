@@ -1,7 +1,7 @@
 <template>
   <div class="app-layout">
     <!-- Sidebar -->
-    <div class="sidebar" :class="{ active: isSidebarOpen }" id="sidebar">
+    <div ref="sidebarElement" class="sidebar" :class="{ active: isSidebarOpen }" id="sidebar">
       <div class="sidebar-header">
         <div class="d-flex align-items-center mb-3">
           <div class="user-avatar me-3">
@@ -183,7 +183,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/utils/auth'
 
@@ -192,6 +192,7 @@ const authStore = useAuthStore()
 
 const isSidebarOpen = ref(false)
 const isLoggingOut = ref(false)
+const sidebarElement = ref(null)
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
@@ -200,6 +201,26 @@ const toggleSidebar = () => {
 const closeSidebar = () => {
   isSidebarOpen.value = false
 }
+
+const handleOutsidePointerDown = (event) => {
+  if (!isSidebarOpen.value) return
+  if (sidebarElement.value?.contains(event.target)) return
+  closeSidebar()
+}
+
+const handleEscapeKey = (event) => {
+  if (event.key === 'Escape') closeSidebar()
+}
+
+onMounted(() => {
+  document.addEventListener('pointerdown', handleOutsidePointerDown)
+  document.addEventListener('keydown', handleEscapeKey)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('pointerdown', handleOutsidePointerDown)
+  document.removeEventListener('keydown', handleEscapeKey)
+})
 
 const handleLogout = async () => {
   isLoggingOut.value = true
@@ -225,6 +246,35 @@ See you there! ❤️`
 </script>
 
 <style scoped>
+/* Keep the sign-out action visible while the menu list scrolls. */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+}
+
+.sidebar-header {
+  flex: 0 0 auto;
+}
+
+.sidebar-menu {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sidebar > .p-3.text-center {
+  flex: 0 0 auto;
+  padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  background: var(--surface, #fff);
+  border-top: 1px solid #f0f0f0;
+}
+
 .sidebar-menu-item .icon-3d {
   font-size: 1.2rem;
   margin-right: 10px;
