@@ -42,6 +42,7 @@ export async function syncPushSubscription() {
 async function initNativePush() {
   const permission = await PushNotifications.checkPermissions()
   let receive = permission.receive
+  console.info('Native push permission state checked.', { platform: Capacitor.getPlatform(), receive })
   if (receive === 'prompt' || receive === 'prompt-with-rationale') {
     receive = (await PushNotifications.requestPermissions()).receive
   }
@@ -69,6 +70,7 @@ async function initNativePush() {
   if (!nativeListenersRegistered) {
     nativeListenersRegistered = true
     await PushNotifications.addListener('registration', async ({ value }) => {
+      console.info('Native FCM token received; registering token with backend.', { platform: Capacitor.getPlatform() })
       try {
         await registerToken(value, Capacitor.getPlatform())
       } catch (error) {
@@ -139,6 +141,7 @@ async function initWebPush(allowPermissionPrompt = true) {
   if (permission !== 'granted' && allowPermissionPrompt) {
     permission = await Notification.requestPermission()
   }
+  console.info('Browser notification permission state checked.', { permission })
   if (permission !== 'granted') {
     return { ok: false, message: 'Notification permission was not granted.' }
   }
@@ -163,6 +166,7 @@ async function initWebPush(allowPermissionPrompt = true) {
   if (!token) return { ok: false, message: 'Could not register this browser for notifications.' }
 
   await registerToken(token, 'web')
+  console.info('Browser push token registered with backend.')
   if (!webMessageListenerRegistered) {
     webMessageListenerRegistered = true
     messagingSdk.onMessage(messaging, (payload) => {
