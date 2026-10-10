@@ -197,6 +197,14 @@ export const useAuthStore = defineStore('auth', {
       const token = getAuthToken()
       try {
         if (token) {
+          const pushToken = localStorage.getItem('push_registration_token')
+          if (pushToken) {
+            try {
+              await api.post('/push/unregister-user', { token: pushToken })
+            } catch (pushError) {
+              console.warn('Unable to detach this device from private notifications during logout:', pushError)
+            }
+          }
           await api.post('/logout')
         }
       } catch (error) {

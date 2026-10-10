@@ -25,6 +25,7 @@ async function registerToken(token, platform) {
   currentPlatform = platform
   const endpoint = getAuthToken() ? '/push/register-user' : '/push/subscribe'
   await api.post(endpoint, { token, platform })
+  localStorage.setItem('push_registration_token', token)
   return true
 }
 
@@ -41,20 +42,22 @@ export async function syncPushSubscription() {
 async function initNativePush() {
   const permission = await PushNotifications.checkPermissions()
   let receive = permission.receive
+  console.info('Native push permission state checked.', { platform: Capacitor.getPlatform(), receive })
   if (receive === 'prompt' || receive === 'prompt-with-rationale') {
     receive = (await PushNotifications.requestPermissions()).receive
   }
   if (receive !== 'granted') {
     return {
       ok: false,
-      message:
-        'Notifications are blocked. Enable permission in your device or browser settings, then try again.',
+      message: Capacitor.getPlatform() === 'android'
+        ? 'Notifications are blocked. Open Android Settings → Apps → Play Online Khaiwal → Notifications and enable them, then reopen the app.'
+        : 'Notifications are blocked. Enable them in your device notification settings, then try again.',
     }
   }
 
   try {
     await PushNotifications.createChannel({
-      id: 'default',
+      id: 'game-alerts-v2',
       name: 'Game and account notifications',
       description: 'Public announcements and account updates',
       importance: 5,
@@ -68,6 +71,7 @@ async function initNativePush() {
   if (!nativeListenersRegistered) {
     nativeListenersRegistered = true
     await PushNotifications.addListener('registration', async ({ value }) => {
+      console.info('Native FCM token received; registering token with backend.', { platform: Capacitor.getPlatform() })
       try {
         await registerToken(value, Capacitor.getPlatform())
       } catch (error) {
@@ -88,20 +92,22 @@ async function initNativePush() {
     await PushNotifications.addListener('pushNotificationReceived', async (notification) => {
       // Remote notifications received in the foreground need a local notification to
       // remain visible and audible. Android channel sound follows the device settings.
+      console.info('Native push received in foreground.', { platform: Capacitor.getPlatform(), hasTitle: Boolean(notification.title), hasBody: Boolean(notification.body) })
       try {
-        await LocalNotifications.schedule({
+        const scheduled = await LocalNotifications.schedule({
           notifications: [
             {
               id: Math.max(1, Date.now() % 2147483647),
               title: notification.title || 'Play Online Khaiwal',
               body: notification.body || '',
               schedule: { at: new Date(Date.now() + 250) },
-              channelId: 'default',
+              channelId: 'game-alerts-v2',
               sound: Capacitor.getPlatform() === 'ios' ? 'default' : 'notification_tune.wav',
               extra: notification.data || {},
             },
           ],
         })
+        console.info('Foreground notification scheduled.', { count: scheduled?.notifications?.length ?? 1 })
       } catch (error) {
         console.warn('Unable to display foreground notification:', error?.message || error)
       }
@@ -136,6 +142,7 @@ async function initWebPush(allowPermissionPrompt = true) {
   if (permission !== 'granted' && allowPermissionPrompt) {
     permission = await Notification.requestPermission()
   }
+  console.info('Browser notification permission state checked.', { permission })
   if (permission !== 'granted') {
     return { ok: false, message: 'Notification permission was not granted.' }
   }
@@ -160,6 +167,7 @@ async function initWebPush(allowPermissionPrompt = true) {
   if (!token) return { ok: false, message: 'Could not register this browser for notifications.' }
 
   await registerToken(token, 'web')
+  console.info('Browser push token registered with backend.')
   if (!webMessageListenerRegistered) {
     webMessageListenerRegistered = true
     messagingSdk.onMessage(messaging, (payload) => {

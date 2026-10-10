@@ -12,5 +12,13 @@ const config = {
   appId: env.VITE_FIREBASE_APP_ID || process.env.VITE_FIREBASE_APP_ID || '',
 }
 const vapidKey = env.VITE_FIREBASE_VAPID_KEY || process.env.VITE_FIREBASE_VAPID_KEY || ''
+
+if (mode === 'production') {
+  const missing = Object.entries({ ...config, vapidKey }).filter(([, value]) => !value).map(([key]) => key)
+  if (missing.length) {
+    throw new Error(`Missing required VITE_FIREBASE_* production settings: ${missing.join(', ')}`)
+  }
+}
+
 const output = `// Generated from VITE_FIREBASE_* build environment values. Do not put service-account secrets here.\nself.FIREBASE_CONFIG = ${JSON.stringify(config, null, 2)};\nself.FIREBASE_VAPID_KEY = ${JSON.stringify(vapidKey)};\n`
 await writeFile(new URL('../public/firebase-config.js', import.meta.url), output, 'utf8')
