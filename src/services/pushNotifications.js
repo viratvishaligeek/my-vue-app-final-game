@@ -45,7 +45,11 @@ async function initNativePush() {
     receive = (await PushNotifications.requestPermissions()).receive
   }
   if (receive !== 'granted') {
-    return { ok: false, message: 'Notifications are blocked. Enable permission in your device or browser settings, then try again.' }
+    return {
+      ok: false,
+      message:
+        'Notifications are blocked. Enable permission in your device or browser settings, then try again.',
+    }
   }
 
   try {
@@ -86,15 +90,17 @@ async function initNativePush() {
       // remain visible and audible. Android channel sound follows the device settings.
       try {
         await LocalNotifications.schedule({
-          notifications: [{
-            id: Math.max(1, Date.now() % 2147483647),
-            title: notification.title || 'Play Online Khaiwal',
-            body: notification.body || '',
-            schedule: { at: new Date(Date.now() + 250) },
-            channelId: 'default',
-            sound: Capacitor.getPlatform() === 'ios' ? 'default' : 'notification_tune.wav',
-            extra: notification.data || {},
-          }],
+          notifications: [
+            {
+              id: Math.max(1, Date.now() % 2147483647),
+              title: notification.title || 'Play Online Khaiwal',
+              body: notification.body || '',
+              schedule: { at: new Date(Date.now() + 250) },
+              channelId: 'default',
+              sound: Capacitor.getPlatform() === 'ios' ? 'default' : 'notification_tune.wav',
+              extra: notification.data || {},
+            },
+          ],
         })
       } catch (error) {
         console.warn('Unable to display foreground notification:', error?.message || error)
@@ -110,8 +116,17 @@ async function initWebPush(allowPermissionPrompt = true) {
   if (!('Notification' in window) || !('serviceWorker' in navigator)) {
     return { ok: false, message: 'This browser does not support push notifications.' }
   }
-  if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.messagingSenderId || !firebaseConfig.appId || !vapidKey) {
-    return { ok: false, message: 'Browser push is not configured yet. Firebase web settings are required.' }
+  if (
+    !firebaseConfig.apiKey ||
+    !firebaseConfig.projectId ||
+    !firebaseConfig.messagingSenderId ||
+    !firebaseConfig.appId ||
+    !vapidKey
+  ) {
+    return {
+      ok: false,
+      message: 'Browser push is not configured yet. Firebase web settings are required.',
+    }
   }
   if (!window.isSecureContext) {
     return { ok: false, message: 'Browser notifications require HTTPS.' }
@@ -135,7 +150,9 @@ async function initWebPush(allowPermissionPrompt = true) {
 
   const app = appSdk.getApps().length ? appSdk.getApp() : appSdk.initializeApp(firebaseConfig)
   const messaging = messagingSdk.getMessaging(app)
-  const serviceWorkerRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+  const serviceWorkerRegistration = await navigator.serviceWorker.register(
+    '/firebase-messaging-sw.js',
+  )
   const token = await messagingSdk.getToken(messaging, {
     vapidKey,
     serviceWorkerRegistration,
@@ -176,7 +193,8 @@ export async function subscribeToPush() {
 
 export async function restorePushSubscription() {
   try {
-    if (Capacitor.isNativePlatform()) return { ok: false, message: 'Native registration is handled separately.' }
+    if (Capacitor.isNativePlatform())
+      return { ok: false, message: 'Native registration is handled separately.' }
     if (!('Notification' in window) || Notification.permission !== 'granted') {
       return { ok: false, message: 'Browser push has not been granted.' }
     }

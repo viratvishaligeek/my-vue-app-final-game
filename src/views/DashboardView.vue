@@ -1,9 +1,13 @@
 <template>
   <div v-if="!hasInitialLoadCompleted" class="content-area dashboard-initial-loading" aria-busy="true">
-    <div class="px-3 pt-4 pb-3"><LoadingState variant="featured" /><LoadingState variant="market-list" :count="4" /></div>
+    <div class="px-3 pt-4 pb-3">
+      <LoadingState variant="featured" />
+      <LoadingState variant="market-list" :count="4" />
+    </div>
   </div>
   <div v-else-if="errorMessage && games.length === 0" class="content-area dashboard-initial-error">
-    <div class="alert alert-danger m-3" role="alert">{{ errorMessage }} <button class="btn btn-sm btn-danger ms-2" @click="fetchGames">Retry</button></div>
+    <div class="alert alert-danger m-3" role="alert">{{ errorMessage }} <button class="btn btn-sm btn-danger ms-2"
+        @click="fetchGames">Retry</button></div>
   </div>
   <div v-else class="content-area">
     <div id="heroCarousel" ref="heroCarouselElement" class="carousel slide m-1 mb-2">
