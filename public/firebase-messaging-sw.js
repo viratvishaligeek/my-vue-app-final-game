@@ -7,6 +7,11 @@ if (self.FIREBASE_CONFIG && self.FIREBASE_CONFIG.apiKey && self.FIREBASE_CONFIG.
   const messaging = firebase.messaging()
 
   messaging.onBackgroundMessage((payload) => {
+    // FCM automatically displays messages containing a notification payload while
+    // this app is in the background. Only synthesize a notification for data-only
+    // messages to avoid showing every push twice.
+    if (payload.notification) return
+
     const title = payload.notification?.title || 'Play Online Khaiwal'
     const options = {
       body: payload.notification?.body || '',
