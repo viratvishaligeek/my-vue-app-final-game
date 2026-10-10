@@ -11,7 +11,7 @@
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
-    "assets:android": "capacitor-assets generate --android",
+    "assets:android": "npx --yes @capacitor/assets generate --android",
     "build:android": "npm run assets:android && npm run build && npx cap sync android && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
