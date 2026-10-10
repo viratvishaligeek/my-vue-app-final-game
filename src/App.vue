@@ -7,6 +7,7 @@ import router from '@/router'
 import { initNativePushNotifications, restorePushSubscription, syncPushSubscription } from '@/services/pushNotifications'
 
 const showSplash = ref(true)
+const pushPermissionNotice = ref('')
 
 onMounted(async () => {
   try {
@@ -18,7 +19,11 @@ onMounted(async () => {
   }
 
   window.setTimeout(() => { showSplash.value = false }, 1150)
-  void initNativePushNotifications()
+  void initNativePushNotifications().then((result) => {
+    if (!result?.ok && result?.message && result.message !== 'Not running as a native app.') {
+      pushPermissionNotice.value = result.message
+    }
+  })
   void restorePushSubscription()
   router.afterEach(() => { void syncPushSubscription() })
 
@@ -49,6 +54,10 @@ onMounted(async () => {
       <span class="visually-hidden">Loading content…</span>
     </div>
     <router-view />
+    <div v-if="pushPermissionNotice" class="push-permission-notice" role="alert">
+      <span>{{ pushPermissionNotice }}</span>
+      <button type="button" aria-label="Dismiss notification permission message" @click="pushPermissionNotice = ''">Dismiss</button>
+    </div>
     <Transition name="launch-splash">
       <div v-if="showSplash" class="launch-splash" role="status" aria-label="Loading Play Online Khaiwal">
         <div class="launch-splash__glow launch-splash__glow--one"></div>
@@ -67,6 +76,8 @@ onMounted(async () => {
 </template>
 
 <style>
+.push-permission-notice { position: fixed; left: 12px; right: 12px; bottom: 16px; z-index: 10001; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 10px; background: #fff3cd; color: #664d03; box-shadow: 0 4px 18px rgba(0,0,0,.18); font-size: 14px; }
+.push-permission-notice button { flex-shrink: 0; border: 0; border-radius: 6px; padding: 6px 10px; background: #664d03; color: #fff; }
 body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 .launch-splash { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; overflow: hidden; color: #fff; background: radial-gradient(ellipse at 50% 35%, #263b48 0%, #17232f 45%, #101820 100%); }
 .launch-splash__content { position: relative; z-index: 1; width: min(88vw, 420px); text-align: center; animation: splash-rise .65s cubic-bezier(.2,.8,.2,1) both; }
