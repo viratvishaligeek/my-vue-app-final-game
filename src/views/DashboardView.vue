@@ -564,6 +564,10 @@ const startRefreshTimer = () => {
 
 onMounted(async () => {
   await fetchGames()
+  // The first fetch can run before the loading template renders the carousel.
+  // Re-initialize after Vue has mounted the banner element so autoplay starts reliably.
+  await nextTick()
+  initializeBannerCarousel()
   /*
    * Only local ticking.
    *
