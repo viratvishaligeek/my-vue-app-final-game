@@ -29,7 +29,7 @@ onMounted(async () => {
 
   // Handle verified HTTPS App Links when the payment provider returns to the app.
   // Only accept the production wallet return URL; never navigate to arbitrary incoming URLs.
-  void App.addListener('appUrlOpen', async ({ url }) => {
+  const handlePaymentReturnLink = async (url) => {
     if (!url) return
 
     try {
@@ -37,11 +37,21 @@ onMounted(async () => {
       if (incoming.protocol !== 'https:' || incoming.hostname !== 'playonlinekhaiwal.com') return
       if (incoming.pathname !== '/wallet/add') return
 
-      const query = Object.fromEntries(incoming.searchParams.entries())
-      await router.replace({ path: incoming.pathname, query })
+      await router.replace({
+        path: incoming.pathname,
+        query: Object.fromEntries(incoming.searchParams.entries()),
+      })
     } catch (error) {
       console.warn('Unable to handle payment return link:', error)
     }
+  }
+
+  void App.addListener('appUrlOpen', ({ url }) => handlePaymentReturnLink(url))
+  // Also check the launch URL for the cold-start case (app was not already running).
+  void App.getLaunchUrl().then((launch) => {
+    if (launch?.url) return handlePaymentReturnLink(launch.url)
+  }).catch((error) => {
+    console.warn('Unable to read native app launch URL:', error)
   })
 
   let backButtonPressedOnce = false
