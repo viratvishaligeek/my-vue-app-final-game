@@ -254,6 +254,23 @@
               <i class="bi bi-x-lg"></i>
             </button>
           </div>
+          <transition name="slide-fade">
+            <div v-if="apiMessage.text" class="api-message"
+              :class="apiMessage.type === 'error' ? 'message-error' : 'message-success'">
+              <div class="message-icon">
+                <i :class="apiMessage.type === 'error'
+                  ? 'bi bi-exclamation-circle-fill'
+                  : 'bi bi-check-circle-fill'
+                  "></i>
+              </div>
+              <div class="flex-grow-1">
+                {{ apiMessage.text }}
+              </div>
+              <button type="button" class="message-close" @click="apiMessage.text = ''">
+                ×
+              </button>
+            </div>
+          </transition>
           <div class="modal-body-custom">
             <div class="qr-container">
               <div class="qr-label">

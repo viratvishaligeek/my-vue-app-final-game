@@ -3,11 +3,11 @@
 
   <div class="auth-container">
     <div class="text-center mb-4">
-      <div class="app-logo mb-3">
-        <img src="../../assets/img/logo.png" style="height: 90px; width: auto;" alt="">
+      <div class=" mb-3">
+        <img src="../../assets/img/logo.png" style="height: 150px; width: auto;" alt="">
       </div>
       <h4 class="fw-bold text-primary-color">Play Online Khaiwal</h4>
-      <p class="text-muted">Sign up to get started with BusGo</p>
+      <p class="text-muted">Sign up & Win with Online Khaiwal</p>
     </div>
 
     <div v-if="errors.api" class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -80,8 +80,8 @@
             <i class="bi bi-gift text-muted"></i>
           </span>
           <input type="text" class="form-control border-start-0 text-uppercase"
-            :class="{ 'is-invalid': errors.referralCode }" id="referralCode"
-            v-model.trim="form.referralCode" placeholder="Enter referral code if you have one"
+            :class="{ 'is-invalid': errors.referralCode }" id="referralCode" v-model.trim="form.referralCode"
+            placeholder="Enter referral code if you have one"
             @input="form.referralCode = form.referralCode.toUpperCase(); clearFieldError('referralCode')" />
         </div>
         <div v-if="errors.referralCode" class="invalid-feedback d-block small mt-1">

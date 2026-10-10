@@ -4,8 +4,8 @@
     <div ref="sidebarElement" class="sidebar" :class="{ active: isSidebarOpen }" id="sidebar">
       <div class="sidebar-header">
         <div class="d-flex align-items-center mb-3">
-          <div class="user-avatar me-3">
-            <i class="bi bi-person"></i>
+          <div class="bg-white rounded me-2">
+            <img src="../assets/img/logo.png" style="height: 50px; width: auto;" alt="">
           </div>
           <div>
             <h6 class="mb-1">{{ authStore.name }}</h6>
@@ -102,7 +102,7 @@
             <i class="bi bi-list fs-4"></i>
           </button>
           <router-link to="/dashboard" class="d-flex align-items-center ms-2 min-width-0">
-            <div class="brand-crown me-2">
+            <div class=" me-2">
               <img src="../assets/img/logo.png" style="height: 50px; width: auto;" alt="">
             </div>
             <div class="lh-sm min-width-0">
@@ -987,9 +987,9 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
-  padding: 8px 9px;
+  padding: 8px 8px;
   border: 1px solid rgba(25, 135, 84, .16);
   border-radius: 12px;
   color: #145c3a;
@@ -1000,13 +1000,13 @@ const handleLogout = async () => {
 .sidebar-wallet-symbol {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-  border-radius: 9px;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border-radius: 6px;
   color: #fff;
-  background: linear-gradient(135deg, #198754, #20c997);
-  font-size: 17px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  font-size: 14px;
   font-weight: 900;
 }
 
@@ -1020,7 +1020,7 @@ const handleLogout = async () => {
 
 .sidebar-wallet-copy small {
   color: #6c757d;
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -1030,7 +1030,7 @@ const handleLogout = async () => {
   max-width: 100%;
   overflow: hidden;
   color: #145c3a;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 900;
   text-overflow: ellipsis;
   white-space: nowrap;

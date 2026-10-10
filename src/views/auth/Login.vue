@@ -2,8 +2,8 @@
   <div class="overlay" id="overlay"></div>
   <div class="auth-container">
     <div class="text-center mb-4">
-      <div class="app-logo mb-3">
-        <img src="../../assets/img/logo.png" style="height: 90px; width: auto;" alt="">
+      <div class=" mb-3">
+        <img src="../../assets/img/logo.png" style="height: 150px; width: auto;" alt="">
       </div>
       <h4 class="fw-bold text-primary-color">Play Online Khaiwal</h4>
       <p class="text-muted">Sign in to your account</p>
