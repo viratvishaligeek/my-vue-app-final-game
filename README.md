@@ -123,8 +123,13 @@ Note: App Icon aur Splash Screen ko initially configure/generate karne ke baad, 
    Agar project mein android/ folder already present hai aur Android project working hai, to:
 
 Ye command dobara run na karein:
+npm run build
+
+npx cap sync android
 
 npx cap add android
+
+npx cap sync android
 
 Aur:
 
