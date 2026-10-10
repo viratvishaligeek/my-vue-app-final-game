@@ -564,6 +564,11 @@ const startRefreshTimer = () => {
 
 onMounted(async () => {
   await fetchGames()
+  // The first fetch runs while the initial-loading template still hides the
+  // carousel element, so its in-fetch initialization can run before the DOM exists.
+  // Initialize once more after the loading state has rendered the banner carousel.
+  await nextTick()
+  initializeBannerCarousel()
   /*
    * Only local ticking.
    *
