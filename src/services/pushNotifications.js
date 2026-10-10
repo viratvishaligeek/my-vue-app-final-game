@@ -25,6 +25,7 @@ async function registerToken(token, platform) {
   currentPlatform = platform
   const endpoint = getAuthToken() ? '/push/register-user' : '/push/subscribe'
   await api.post(endpoint, { token, platform })
+  localStorage.setItem('push_registration_token', token)
   return true
 }
 
