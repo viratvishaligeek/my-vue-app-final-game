@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "132057309212",
+    "project_id": "pokappvue",
+    "storage_bucket": "pokappvue.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132057309212:android:14c6a6f8fc209632547fd9",
+        "android_client_info": {
+          "package_name": "com.galidisawar.playgame"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1OF6dMdUyodFp9cwZy8yaW7Vsr6RxwWE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
