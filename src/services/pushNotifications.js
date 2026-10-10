@@ -49,8 +49,9 @@ async function initNativePush() {
   if (receive !== 'granted') {
     return {
       ok: false,
-      message:
-        'Notifications are blocked. Enable permission in your device or browser settings, then try again.',
+      message: Capacitor.getPlatform() === 'android'
+        ? 'Notifications are blocked. Open Android Settings → Apps → Play Online Khaiwal → Notifications and enable them, then reopen the app.'
+        : 'Notifications are blocked. Enable them in your device notification settings, then try again.',
     }
   }
 
