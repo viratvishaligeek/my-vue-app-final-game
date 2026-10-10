@@ -1080,17 +1080,14 @@ const refreshGatewayPaymentStatus = async () => {
   try {
     await authStore.verifyAuthToken()
 
+    // Query all recent credit requests here: filtering to pending/processing would
+    // hide the approved/failed row we need to display after returning from checkout.
     const response = await api.get(PENDING_PAYMENT_ENDPOINT, {
-      params: {
-        type: 'credit',
-        per_page: 50,
-      },
+      params: { type: 'credit', per_page: 50 },
     })
 
     let list = response.data?.data
-    if (list && !Array.isArray(list) && Array.isArray(list.data)) {
-      list = list.data
-    }
+    if (list && !Array.isArray(list) && Array.isArray(list.data)) list = list.data
 
     const request = Array.isArray(list)
       ? list.find((item) => String(item.id) === String(requestId))
@@ -1103,6 +1100,9 @@ const refreshGatewayPaymentStatus = async () => {
     } else if (status === 'failed' || status === 'rejected') {
       apiMessage.type = 'error'
       apiMessage.text = 'Payment failed. If money was deducted, please contact support.'
+    } else if (!request) {
+      apiMessage.type = 'error'
+      apiMessage.text = 'Payment status is not available yet. Please refresh pending payments shortly.'
     } else {
       apiMessage.type = 'error'
       apiMessage.text = 'Payment is still being verified. Please refresh pending payments shortly.'
