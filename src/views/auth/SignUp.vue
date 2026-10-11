@@ -88,19 +88,6 @@
           {{ errors.referralCode }}
         </div>
       </div>
-
-      <div class="mb-3 form-check">
-        <input type="checkbox" class="form-check-input" :class="{ 'is-invalid': errors.termsAgree }" id="termsAgree"
-          v-model="form.termsAgree" @change="clearFieldError('termsAgree')" />
-        <label class="form-check-label small" for="termsAgree">
-          I agree to the <a href="#" class="text-primary-color">Terms</a> &
-          <a href="#" class="text-primary-color">Privacy Policy</a>
-        </label>
-        <div v-if="errors.termsAgree" class="invalid-feedback d-block small mt-1">
-          {{ errors.termsAgree }}
-        </div>
-      </div>
-
       <div class="d-grid gap-2 mb-4">
         <button type="submit" class="btn btn-app btn-primary" :disabled="isLoading">
           <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
@@ -135,7 +122,6 @@ const form = reactive({
   phone: '',
   password: '',
   referralCode: typeof route.query.ref === 'string' ? route.query.ref.toUpperCase() : '',
-  termsAgree: false,
 })
 
 const showPassword = ref(false)
@@ -146,7 +132,6 @@ const errors = reactive({
   phone: '',
   password: '',
   referralCode: '',
-  termsAgree: '',
   api: '',
 })
 
@@ -185,12 +170,6 @@ const validateForm = () => {
     errors.password = 'Password must be at least 8 characters.'
     isValid = false
   }
-
-  if (!form.termsAgree) {
-    errors.termsAgree = 'You must agree to the Terms and Privacy Policy.'
-    isValid = false
-  }
-
   return isValid
 }
 

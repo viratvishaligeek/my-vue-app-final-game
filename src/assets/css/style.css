@@ -73,9 +73,11 @@ body {
   margin: 0 auto;
   position: relative;
   overflow-x: hidden;
-  padding-bottom: 70px; /* Space for bottom nav */
+  padding-bottom: 70px;
+  /* Space for bottom nav */
   color: var(--text-primary);
 }
+
 a {
   text-decoration: none;
   color: #222222;
@@ -87,9 +89,11 @@ a {
   height: 0;
   display: none;
 }
+
 ::-webkit-scrollbar-corner {
   background-color: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   height: 6px;
   border: 4px solid transparent;
@@ -104,11 +108,13 @@ a {
     inset -1px -1px 0 rgba(0, 0, 0, 0.05),
     inset 1px 1px 0 rgba(0, 0, 0, 0.05);
 }
+
 ::-webkit-scrollbar {
   width: 0px;
   height: 2px;
   background-color: #ffffff;
 }
+
 ::-webkit-scrollbar-thumb {
   height: 50px;
   background: hsla(0, 0%, 53.3%, 0.4);
@@ -170,15 +176,21 @@ a {
   background-color: var(--surface);
   z-index: 1091;
   transform: translate3d(-102%, 0, 0);
-  transition: transform 240ms cubic-bezier(.22,.61,.36,1);
-  box-shadow: 2px 0 24px rgba(0,0,0,.16);
+  transition: transform 240ms cubic-bezier(.22, .61, .36, 1);
+  box-shadow: 2px 0 24px rgba(0, 0, 0, .16);
   overflow: hidden;
   overscroll-behavior: contain;
   will-change: transform;
   backface-visibility: hidden;
 }
-.sidebar.active { transform: translate3d(0,0,0); }
-body.sidebar-open { overflow: hidden; }
+
+.sidebar.active {
+  transform: translate3d(0, 0, 0);
+}
+
+body.sidebar-open {
+  overflow: hidden;
+}
 
 .sidebar-header {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
@@ -229,7 +241,7 @@ body.sidebar-open { overflow: hidden; }
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(12,18,30,.48);
+  background: rgba(12, 18, 30, .48);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   z-index: 1090;
@@ -238,9 +250,19 @@ body.sidebar-open { overflow: hidden; }
   pointer-events: none;
   transition: opacity 220ms ease, visibility 220ms ease;
 }
-.overlay.active { visibility: visible; opacity: 1; pointer-events: auto; }
+
+.overlay.active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .sidebar,.overlay { transition-duration: .01ms !important; }
+
+  .sidebar,
+  .overlay {
+    transition-duration: .01ms !important;
+  }
 }
 
 /* User profile */
@@ -421,12 +443,15 @@ body.sidebar-open { overflow: hidden; }
 .form-select {
   border-radius: 9px;
   border: 1px solid #e0e0e0;
-  font-size: 14px;
+  font-size: 17px;
+  letter-spacing: 0.5px;
+  font-weight: bold;
   background-color: #f9f9f9;
   transition:
     border-color 0.2s,
     box-shadow 0.2s;
 }
+
 .input-group-text {
   border-radius: 9px;
 }
@@ -455,10 +480,12 @@ body.sidebar-open { overflow: hidden; }
     transform 0.2s,
     box-shadow 0.2s;
 }
+
 .btn-app:hover,
 .btn-app:focus {
   color: white !important;
 }
+
 .btn-app:active {
   transform: translateY(2px);
   box-shadow: 0 2px 4px rgba(98, 0, 238, 0.2);
@@ -470,13 +497,16 @@ body.sidebar-open { overflow: hidden; }
   display: flex;
   overflow-x: auto;
   padding: 5px 15px 20px 15px;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
   scroll-snap-type: x mandatory;
 }
 
 .scroll-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 .scroll-item {
@@ -625,6 +655,7 @@ body.sidebar-open { overflow: hidden; }
 .text-primary {
   color: rgb(98 0 239) !important;
 }
+
 .action-btn {
   border-radius: 9px;
   font-size: 14px;
@@ -634,6 +665,7 @@ body.sidebar-open { overflow: hidden; }
   background-color: var(--primary-color);
   color: white;
 }
+
 .primary-action-btn:hover,
 .primary-action-btn:active {
   background-color: var(--primary-color);
@@ -644,6 +676,7 @@ body.sidebar-open { overflow: hidden; }
   background-color: rgba(98, 0, 238, 0.1);
   color: var(--primary-color);
 }
+
 .secondary-action-btn:hover,
 .secondary-action-btn:focus {
   background-color: var(--primary-color) !important;
@@ -987,6 +1020,7 @@ body.sidebar-open { overflow: hidden; }
 .input-group .btn {
   border-radius: 9px;
 }
+
 .reward-card {
   background-color: var(--surface);
   border-radius: 9px;
@@ -1084,9 +1118,11 @@ body.sidebar-open { overflow: hidden; }
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
+
   100% {
     transform: scale(1);
   }
@@ -1107,22 +1143,26 @@ body.sidebar-open { overflow: hidden; }
   color: var(--primary-color);
   font-size: 14px;
 }
+
 .btn-light-2:hover,
 .btn-light-2:focus {
   background-color: rgba(98, 0, 238, 0.1) !important;
   color: var(--primary-color);
 }
+
 .btn-light-3 {
   background-color: rgba(3, 218, 198, 0.1);
   border-radius: 9px;
   color: var(--secondary-color);
   font-size: 14px;
 }
+
 .btn-light-3:hover,
 .btn-light-3:focus {
   background-color: rgba(3, 218, 198, 0.1) !important;
   color: var(--secondary-color);
 }
+
 .position-rt {
   top: 10px;
   right: 10px;
@@ -1133,6 +1173,7 @@ body.sidebar-open { overflow: hidden; }
   width: 32px;
   height: 32px;
 }
+
 .icon-50 {
   width: 50px;
   height: 50px;
@@ -1140,31 +1181,40 @@ body.sidebar-open { overflow: hidden; }
   justify-content: center;
   align-items: center;
 }
+
 .gradient-1 {
   background: linear-gradient(135deg, #bb86fc, #250f42);
 }
+
 .gradient-2 {
   background: linear-gradient(135deg, #03dac6, #018786);
 }
+
 .gradient-3 {
   background: linear-gradient(135deg, #ff4081, #c51162);
 }
+
 .gradient-4 {
   background: linear-gradient(135deg, #ffab40, #ff6d00);
 }
+
 .gradient-5 {
   background: linear-gradient(135deg, #250f42, #bb86fc);
 }
+
 .gradient-6 {
   background: linear-gradient(135deg, #03dac6, #018786);
 }
+
 .fs-120 {
   font-size: 120px;
 }
+
 .scrollbar-osahan {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
 .user-avatar-100 {
   width: 100px;
   height: 100px;
@@ -1175,6 +1225,7 @@ body.sidebar-open { overflow: hidden; }
 .bg-primary-color {
   background-color: var(--primary-color);
 }
+
 .text-primary-color {
   color: var(--primary-color);
 }
@@ -1204,15 +1255,19 @@ body.sidebar-open { overflow: hidden; }
 .fs-11 {
   font-size: 11px;
 }
+
 .fs-12 {
   font-size: 12px;
 }
+
 .fs-14 {
   font-size: 14px;
 }
+
 .fs-24 {
   font-size: 24px;
 }
+
 .icon-sm {
   font-size: 14px;
 }
