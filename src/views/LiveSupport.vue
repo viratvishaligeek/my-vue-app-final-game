@@ -110,6 +110,9 @@ const syncMessages = async () => {
       messages.value = incoming
       lastMessageId = incoming[incoming.length - 1].id
       await scrollToBottom()
+    } else if (incoming.length) {
+      // Refresh read_at flags even when no new message was added.
+      messages.value = incoming
     }
     connected.value = true
     errorMessage.value = ''
