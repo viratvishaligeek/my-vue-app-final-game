@@ -1,14 +1,29 @@
-const soundAssets = {
-  add_money: '/chalo.wav',
-  withdraw: '/ahh.wav',
-  debit: '/notification-tune.wav',
-  credit: '/wow.wav',
-  winning: '/chalo.wav',
-  result: '/faaah.wav',
-}
+import api from '@/plugins/axios'
+
+const defaultSound = '/notification-tune.wav'
+const eventKeys = ['add_money', 'withdraw', 'debit', 'credit', 'winning', 'result']
 const playedKeys = new Set()
 const pendingKeys = new Set()
 let lastPlaybackAt = 0
+let soundSettingsPromise = null
+let soundSettings = Object.fromEntries(eventKeys.map(key => [key, 'default']))
+
+async function loadSoundSettings() {
+  if (!soundSettingsPromise) {
+    soundSettingsPromise = api.get('/settings', {
+      params: { keys: eventKeys.map(key => 'notification_sound_' + key).join(',') },
+      showGlobalLoader: false,
+    }).then(({ data }) => {
+      const values = data?.data || {}
+      soundSettings = Object.fromEntries(eventKeys.map(key => [
+        key,
+        values['notification_sound_' + key] === 'mute' ? 'mute' : 'default',
+      ]))
+      return soundSettings
+    }).catch(() => soundSettings)
+  }
+  return soundSettingsPromise
+}
 
 export function notificationEventFromText(value = '') {
   const text = String(value).toLowerCase()
@@ -16,38 +31,35 @@ export function notificationEventFromText(value = '') {
   if (/result|market result/.test(text)) return 'result'
   if (/withdraw|withdrawal/.test(text)) return 'withdraw'
   if (/debit|debited|bet placed/.test(text)) return 'debit'
-  if (/add money|deposit request|deposit added|money added|wallet added/.test(text))
-    return 'add_money'
+  if (/add money|deposit request|deposit added|money added|wallet added/.test(text)) return 'add_money'
   if (/credit|credited|wallet credit/.test(text)) return 'credit'
   return 'credit'
 }
 
-/**
- * Play an existing bundled sound once per notification/event key.
- * Specific MP3s are not present in the repository, so all categories safely
- * fall back to the existing public/notification-tune.wav until supplied.
- */
+/** Plays the existing bundled WAV once per event key; admin settings can mute categories. */
 export async function playNotificationSound(event, dedupeKey = '') {
-  const category = Object.hasOwn(soundAssets, event) ? event : 'credit'
+  const category = Object.hasOwn(soundSettings, event) ? event : 'credit'
   const key = dedupeKey ? category + ':' + dedupeKey : ''
-  if (key && (playedKeys.has(key) || pendingKeys.has(key))) return false
-  if (key) pendingKeys.add(key)
 
-  // Avoid overlapping audio when a burst of repeated push events arrives.
-  const now = Date.now()
-  if (now - lastPlaybackAt < 700) return false
+  if (key && (playedKeys.has(key) || pendingKeys.has(key))) return false
+  if (Date.now() - lastPlaybackAt < 700) return false
+
+  if (key) pendingKeys.add(key)
   try {
-    const audio = new Audio(soundAssets[category])
+    const settings = await loadSoundSettings()
+    if (settings[category] === 'mute') return false
+
+    const audio = new Audio(defaultSound)
     audio.preload = 'auto'
     await audio.play()
-    lastPlaybackAt = now
+    lastPlaybackAt = Date.now()
     if (key) {
       playedKeys.add(key)
       if (playedKeys.size > 500) playedKeys.delete(playedKeys.values().next().value)
     }
     return true
   } catch {
-    // Browser autoplay policies can block playback until the user interacts.
+    // Autoplay may be blocked until a user gesture; do not mark it as played.
     return false
   } finally {
     if (key) pendingKeys.delete(key)
