@@ -358,6 +358,7 @@ import { reactive, ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/utils/auth'
 import api from '@/plugins/axios'
+import { playNotificationSound } from '@/services/notificationAudio'
 import { useSettings } from '@/composables/useSettings'
 
 
@@ -864,6 +865,7 @@ const handleWithdraw = async () => {
     if (
       response.data?.success
     ) {
+      void playNotificationSound('withdraw', `withdraw-${response.data?.data?.id || Date.now()}`)
       apiMessage.type =
         'success'
       apiMessage.text =
