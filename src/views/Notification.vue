@@ -79,9 +79,12 @@
 import api from '@/plugins/axios'
 import { Capacitor } from '@capacitor/core'
 import { subscribeToPush } from '@/services/pushNotifications'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { notificationEventFromText, playNotificationSound } from '@/services/notificationAudio'
 
 const notifications = ref([])
+const hasLoadedOnce = ref(false)
+let notificationRefreshTimer = null
 const isNativeApp = Capacitor.isNativePlatform()
 const pushLoading = ref(false)
 const pushStatus = ref('')
@@ -234,6 +237,12 @@ const fetchNotifications = async (page = 1) => {
       ? data.data
       : []
 
+    if (hasLoadedOnce.value && page === 1) {
+      const previousIds = new Set(notifications.value.map(item => item.id))
+      newNotifications.filter(item => !previousIds.has(item.id)).forEach(item => {
+        void playNotificationSound(notificationEventFromText(item.subject), item.id)
+      })
+    }
     notifications.value = page === 1
       ? newNotifications
       : [
@@ -247,6 +256,7 @@ const fetchNotifications = async (page = 1) => {
     hasMore.value =
       data.meta?.has_more === true ||
       currentPage.value < lastPage.value
+    hasLoadedOnce.value = true
 
   } catch (error) {
     console.error('Notification API Error:', error)
@@ -346,6 +356,11 @@ const formatNotificationTime = (dateTime) => {
 
 onMounted(() => {
   fetchNotifications()
+  notificationRefreshTimer = setInterval(() => fetchNotifications(1), 20000)
+})
+
+onUnmounted(() => {
+  if (notificationRefreshTimer) clearInterval(notificationRefreshTimer)
 })
 </script>
 
