@@ -7,6 +7,7 @@ const soundAssets = {
   result: '/notification-tune.wav',
 }
 const playedKeys = new Set()
+const pendingKeys = new Set()
 let lastPlaybackAt = 0
 
 export function notificationEventFromText(value = '') {
@@ -28,7 +29,8 @@ export function notificationEventFromText(value = '') {
 export async function playNotificationSound(event, dedupeKey = '') {
   const category = Object.hasOwn(soundAssets, event) ? event : 'credit'
   const key = dedupeKey ? category + ':' + dedupeKey : ''
-  if (key && playedKeys.has(key)) return false
+  if (key && (playedKeys.has(key) || pendingKeys.has(key))) return false
+  if (key) pendingKeys.add(key)
 
   // Avoid overlapping audio when a burst of repeated push events arrives.
   const now = Date.now()
@@ -46,5 +48,7 @@ export async function playNotificationSound(event, dedupeKey = '') {
   } catch {
     // Browser autoplay policies can block playback until the user interacts.
     return false
+  } finally {
+    if (key) pendingKeys.delete(key)
   }
 }
