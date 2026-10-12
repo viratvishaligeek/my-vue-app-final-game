@@ -1,0 +1,49 @@
+const soundAssets = {
+  add_money: '/notification-tune.wav',
+  withdraw: '/notification-tune.wav',
+  debit: '/notification-tune.wav',
+  credit: '/notification-tune.wav',
+  winning: '/notification-tune.wav',
+  result: '/notification-tune.wav',
+}
+const playedKeys = new Set()
+let lastPlaybackAt = 0
+
+export function notificationEventFromText(value = '') {
+  const text = String(value).toLowerCase()
+  if (/winning|winner|you win|prize/.test(text)) return 'winning'
+  if (/result|market result/.test(text)) return 'result'
+  if (/withdraw|withdrawal/.test(text)) return 'withdraw'
+  if (/debit|debited|bet placed/.test(text)) return 'debit'
+  if (/credit|credited|deposit|add money|wallet added/.test(text)) return 'add_money'
+  return 'credit'
+}
+
+/**
+ * Play an existing bundled sound once per notification/event key.
+ * Specific MP3s are not present in the repository, so all categories safely
+ * fall back to the existing public/notification-tune.wav until supplied.
+ */
+export async function playNotificationSound(event, dedupeKey = '') {
+  const category = Object.hasOwn(soundAssets, event) ? event : 'credit'
+  const key = dedupeKey ? category + ':' + dedupeKey : ''
+  if (key && playedKeys.has(key)) return false
+
+  // Avoid overlapping audio when a burst of repeated push events arrives.
+  const now = Date.now()
+  if (now - lastPlaybackAt < 700) return false
+  try {
+    const audio = new Audio(soundAssets[category])
+    audio.preload = 'auto'
+    await audio.play()
+    lastPlaybackAt = now
+    if (key) {
+      playedKeys.add(key)
+      if (playedKeys.size > 500) playedKeys.delete(playedKeys.values().next().value)
+    }
+    return true
+  } catch {
+    // Browser autoplay policies can block playback until the user interacts.
+    return false
+  }
+}
