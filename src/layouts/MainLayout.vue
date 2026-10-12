@@ -72,6 +72,11 @@
           <span>Game Rates</span>
         </router-link>
 
+        <router-link to="/live-support" class="sidebar-menu-item" @click="closeSidebar">
+          <span class="icon-3d">🎧</span>
+          <span>Live Support</span>
+        </router-link>
+
         <router-link to="/notifications" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">🔔</span>
           <span>Notification</span>

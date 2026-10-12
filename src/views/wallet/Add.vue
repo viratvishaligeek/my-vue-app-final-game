@@ -385,6 +385,7 @@ import { Capacitor } from '@capacitor/core'
 import { Browser } from '@capacitor/browser'
 import { useAuthStore } from '@/utils/auth'
 import api from '@/plugins/axios'
+import { playNotificationSound } from '@/services/notificationAudio'
 
 const router = useRouter()
 const route = useRoute()
@@ -771,6 +772,8 @@ const createGatewayOrder = async () => {
     }
 
 
+    void playNotificationSound('add_money', `gateway-${response.data?.data?.request_id || Date.now()}`)
+
     const paymentUrl =
       response.data?.data?.payment_url
 
@@ -956,6 +959,8 @@ const submitManualRequest = async () => {
       )
     }
 
+
+    void playNotificationSound('add_money', `manual-${response.data?.data?.id || Date.now()}`)
 
     showManualModal.value =
       false

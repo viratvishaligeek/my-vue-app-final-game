@@ -120,12 +120,12 @@
                 {{ formatTime(featuredGame.result_time) }}
               </small>
             </div>
-            <span class="live-tag text-white">
+            <span v-if="featuredGame.today_result" class="live-tag text-white">
               <span class="live-dot"></span>
-              {{ featuredGame.is_playable ? 'Live Market' : 'Latest Result' }}
+              Latest Result Today
             </span>
-            <h3 class="result-number mb-0">
-              {{ featuredGame.last_result ?? '--' }}
+            <h3 v-if="featuredGame.today_result" class="result-number mb-0">
+              {{ featuredGame.today_result.number }}
             </h3>
           </div>
         </div>
