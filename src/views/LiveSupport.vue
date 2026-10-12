@@ -23,7 +23,7 @@
               <div v-if="msg.sender !== 'user'" class="small fw-bold text-danger mb-1"><i class="bi bi-patch-check-fill"></i> Support Desk</div>
               <p v-if="msg.body" class="mb-1" style="white-space:pre-line">{{ msg.body }}</p>
               <template v-if="msg.media_url">
-                <img v-if="(msg.media_mime||'').startsWith('image/')" :src="msg.media_url" :alt="msg.media_name || 'Chat attachment'" class="chat-media">
+                <img v-if="(msg.media_mime||'').startsWith('image/')" :src="msg.display_media_url" :alt="msg.media_name || 'Chat attachment'" class="chat-media">
                 <video v-else-if="(msg.media_mime||'').startsWith('video/')" :src="msg.media_url" controls class="chat-media"></video>
                 <audio v-else-if="(msg.media_mime||'').startsWith('audio/')" :src="msg.media_url" controls></audio>
                 <a v-else :href="msg.media_url" target="_blank" rel="noopener">Open attachment</a>
@@ -71,6 +71,7 @@ let recordedChunks = []
 let lastMessageId = 0
 
 const quickQuestions = ['Deposit not added to wallet?', 'How to withdraw winnings?', 'Game result timing query', 'What is Crossing Bet?']
+const mediaUrlCache = new Map()
 const formatTime = value => {
   if (!value) return ''
   const date = new Date(value)
@@ -84,6 +85,20 @@ const syncMessages = async () => {
   try {
     const { data } = await api.get('/support-chat', { showGlobalLoader: false })
     const incoming = Array.isArray(data?.data) ? data.data : []
+    await Promise.all(incoming.filter(message => message.media_url).map(async message => {
+      if (mediaUrlCache.has(message.id)) {
+        message.display_media_url = mediaUrlCache.get(message.id)
+        return
+      }
+      try {
+        const media = await api.get('/support-chat/media/' + message.id, { responseType: 'blob', showGlobalLoader: false })
+        const objectUrl = URL.createObjectURL(media.data)
+        mediaUrlCache.set(message.id, objectUrl)
+        message.display_media_url = objectUrl
+      } catch {
+        message.display_media_url = ''
+      }
+    }))
     if (incoming.length && incoming[incoming.length - 1].id !== lastMessageId) {
       messages.value = incoming
       lastMessageId = incoming[incoming.length - 1].id
@@ -166,6 +181,8 @@ onUnmounted(() => {
   if (pollTimer) clearInterval(pollTimer)
   if (recorder && recorder.state !== 'inactive') recorder.stop()
   recordingStream?.getTracks().forEach(track => track.stop())
+  mediaUrlCache.forEach(url => URL.revokeObjectURL(url))
+  mediaUrlCache.clear()
 })
 </script>
 
