@@ -1,7 +1,7 @@
 import api from '@/plugins/axios'
 
 const defaultSound = '/notification-tune.wav'
-const eventKeys = ['add_money', 'withdraw', 'debit', 'credit', 'winning', 'result']
+const eventKeys = ['add_money', 'withdraw', 'debit', 'credit', 'winning', 'result', 'chat']
 const playedKeys = new Set()
 const pendingKeys = new Set()
 let lastPlaybackAt = 0
@@ -27,6 +27,7 @@ async function loadSoundSettings() {
 
 export function notificationEventFromText(value = '') {
   const text = String(value).toLowerCase()
+  if (/support|chat|message from support/.test(text)) return 'chat'
   if (/winning|winner|you win|prize/.test(text)) return 'winning'
   if (/result|market result/.test(text)) return 'result'
   if (/withdraw|withdrawal/.test(text)) return 'withdraw'
