@@ -6,7 +6,13 @@ import { beginGlobalRequest, endGlobalRequest } from '../utils/requestLoader'
 
 const api = axios.create({
   // Set VITE_API_BASE_URL for local/staging environments; use the live API by default.
-  baseURL: import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? ((window.location.protocol === 'capacitor:' || window.location.hostname === 'localhost') ? 'https://playonlinekhaiwal.com/api/v1' : `${window.location.origin}/api/v1`) : 'http://127.0.0.1:8000/api/v1'),
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL ||
+    (import.meta.env.PROD
+      ? window.location.protocol === 'capacitor:' || window.location.hostname === 'localhost'
+        ? 'https://playonlinekhaiwal.com/api/v1'
+        : `${window.location.origin}/api/v1`
+      : 'http://127.0.0.1:8000/api/v1'),
   headers: {
     Accept: 'application/json',
   },
