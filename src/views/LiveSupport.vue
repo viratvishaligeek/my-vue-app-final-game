@@ -10,12 +10,32 @@
           <span class="badge" :class="connected ? 'bg-success' : 'bg-secondary'">{{ connected ? 'Online' : 'Reconnecting' }}</span>
         </div>
       </div>
-      <div class="mb-2 overflow-auto text-nowrap py-1 d-flex gap-2 no-scrollbar">
-        <button v-for="(faq, idx) in quickQuestions" :key="idx" @click="newMessage = faq" class="btn btn-sm bg-white border rounded-pill text-dark fw-bold">
-          <i class="bi bi-question-circle text-warning me-1"></i>{{ faq }}
-        </button>
+      <section v-if="!humanSupportRequested" class="card border-0 shadow-sm rounded-4 bg-white mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+            <div><h6 class="fw-bold mb-1">Find an instant answer</h6><p class="small text-muted mb-0">Check these FAQs before joining the support queue.</p></div>
+            <span class="badge bg-warning text-dark">{{ faqs.length }} FAQs</span>
+          </div>
+          <div v-if="faqLoading" class="small text-muted py-3">Loading helpful answers…</div>
+          <div v-else-if="faqs.length" class="d-grid gap-2">
+            <div v-for="faq in faqs" :key="faq.id" class="border rounded-3 overflow-hidden">
+              <button type="button" class="btn w-100 text-start fw-semibold d-flex justify-content-between align-items-center" @click="activeFaqId = activeFaqId === faq.id ? null : faq.id">
+                <span>{{ faq.question }}</span><i :class="activeFaqId === faq.id ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+              </button>
+              <div v-if="activeFaqId === faq.id" class="px-3 pb-3 text-muted" style="white-space:pre-line">{{ faq.answer }}</div>
+            </div>
+          </div>
+          <p v-else class="small text-muted py-2 mb-0">No FAQs are published for this platform yet.</p>
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 pt-3 border-top">
+            <span class="small text-muted">Still need help from a person?</span>
+            <button class="btn btn-warning text-dark fw-bold" type="button" @click="openHumanSupport"><i class="bi bi-headset me-1"></i>Contact human support</button>
+          </div>
+        </div>
+      </section>
+      <div v-if="humanSupportRequested" class="d-flex justify-content-between align-items-center gap-2 mb-2">
+        <span class="small text-muted">Human support conversation</span><button type="button" class="btn btn-sm btn-outline-secondary" @click="humanSupportRequested = false">Back to FAQs</button>
       </div>
-      <div class="card border-0 shadow-sm rounded-4 bg-white flex-grow-1 d-flex flex-column overflow-hidden mb-2" style="max-height:65vh;min-height:380px">
+      <div v-if="humanSupportRequested" class="card border-0 shadow-sm rounded-4 bg-white flex-grow-1 d-flex flex-column overflow-hidden mb-2" style="max-height:65vh;min-height:380px">
         <div ref="chatFeed" class="card-body p-3 overflow-auto d-flex flex-column gap-3 bg-light-subtle">
           <div v-if="loading && messages.length===0" class="text-center text-muted py-5"><span class="spinner-border spinner-border-sm me-2"></span>Loading conversation…</div>
           <div v-for="msg in messages" :key="msg.id" class="d-flex flex-column" :class="msg.sender === 'user' ? 'align-items-end' : 'align-items-start'">
@@ -24,9 +44,9 @@
               <p v-if="msg.body" class="mb-1" style="white-space:pre-line">{{ msg.body }}</p>
               <template v-if="msg.media_url">
                 <img v-if="(msg.media_mime||'').startsWith('image/')" :src="msg.display_media_url" :alt="msg.media_name || 'Chat attachment'" class="chat-media">
-                <video v-else-if="(msg.media_mime||'').startsWith('video/')" :src="msg.media_url" controls class="chat-media"></video>
-                <audio v-else-if="(msg.media_mime||'').startsWith('audio/')" :src="msg.media_url" controls></audio>
-                <a v-else :href="msg.media_url" target="_blank" rel="noopener">Open attachment</a>
+                <video v-else-if="(msg.media_mime||'').startsWith('video/')" :src="msg.display_media_url" controls playsinline class="chat-media"></video>
+                <audio v-else-if="(msg.media_mime||'').startsWith('audio/')" :src="msg.display_media_url" controls preload="metadata"></audio>
+                <a v-else :href="msg.display_media_url" target="_blank" rel="noopener">Open attachment</a>
               </template>
             </div>
             <span class="small text-muted mt-1 px-1">{{ formatTime(msg.created_at) }} <span v-if="msg.sender==='user' && msg.read_at">· Seen</span></span>
@@ -51,6 +71,7 @@
 
 <script setup>
 import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { Capacitor } from '@capacitor/core'
 import api from '@/plugins/axios'
 
 const chatFeed = ref(null)
@@ -62,6 +83,10 @@ const sending = ref(false)
 const connected = ref(false)
 const errorMessage = ref('')
 const selectedFile = ref(null)
+const faqs = ref([])
+const faqLoading = ref(true)
+const activeFaqId = ref(null)
+const humanSupportRequested = ref(false)
 const recording = ref(false)
 const canRecord = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== 'undefined'
 let pollTimer = null
@@ -70,7 +95,23 @@ let recordingStream = null
 let recordedChunks = []
 let lastMessageId = 0
 
-const quickQuestions = ['Deposit not added to wallet?', 'How to withdraw winnings?', 'Game result timing query', 'What is Crossing Bet?']
+const loadFaqs = async () => {
+  faqLoading.value = true
+  try {
+    const platform = Capacitor.isNativePlatform() ? 'app' : 'web'
+    const { data } = await api.get('/faqs', { params: { platform }, showGlobalLoader: false })
+    faqs.value = Array.isArray(data?.data) ? data.data : []
+  } catch {
+    faqs.value = []
+  } finally {
+    faqLoading.value = false
+  }
+}
+const openHumanSupport = async () => {
+  humanSupportRequested.value = true
+  await syncMessages()
+  if (!pollTimer) pollTimer = setInterval(syncMessages, 3000)
+}
 const mediaUrlCache = new Map()
 const formatTime = value => {
   if (!value) return ''
@@ -176,9 +217,8 @@ const sendMessage = async () => {
     sending.value = false
   }
 }
-onMounted(async () => {
-  await syncMessages()
-  pollTimer = setInterval(syncMessages, 3000)
+onMounted(() => {
+  void loadFaqs()
 })
 onUnmounted(() => {
   if (pollTimer) clearInterval(pollTimer)
