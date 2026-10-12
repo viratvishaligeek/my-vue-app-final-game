@@ -42,16 +42,20 @@ export async function syncPushSubscription() {
 async function initNativePush() {
   const permission = await PushNotifications.checkPermissions()
   let receive = permission.receive
-  console.info('Native push permission state checked.', { platform: Capacitor.getPlatform(), receive })
+  console.info('Native push permission state checked.', {
+    platform: Capacitor.getPlatform(),
+    receive,
+  })
   if (receive === 'prompt' || receive === 'prompt-with-rationale') {
     receive = (await PushNotifications.requestPermissions()).receive
   }
   if (receive !== 'granted') {
     return {
       ok: false,
-      message: Capacitor.getPlatform() === 'android'
-        ? 'Notifications are blocked. Open Android Settings → Apps → Play Online Khaiwal → Notifications and enable them, then reopen the app.'
-        : 'Notifications are blocked. Enable them in your device notification settings, then try again.',
+      message:
+        Capacitor.getPlatform() === 'android'
+          ? 'Notifications are blocked. Open Android Settings → Apps → Play Online Khaiwal → Notifications and enable them, then reopen the app.'
+          : 'Notifications are blocked. Enable them in your device notification settings, then try again.',
     }
   }
 
@@ -71,7 +75,9 @@ async function initNativePush() {
   if (!nativeListenersRegistered) {
     nativeListenersRegistered = true
     await PushNotifications.addListener('registration', async ({ value }) => {
-      console.info('Native FCM token received; registering token with backend.', { platform: Capacitor.getPlatform() })
+      console.info('Native FCM token received; registering token with backend.', {
+        platform: Capacitor.getPlatform(),
+      })
       try {
         await registerToken(value, Capacitor.getPlatform())
       } catch (error) {
@@ -92,7 +98,11 @@ async function initNativePush() {
     await PushNotifications.addListener('pushNotificationReceived', async (notification) => {
       // Remote notifications received in the foreground need a local notification to
       // remain visible and audible. Android channel sound follows the device settings.
-      console.info('Native push received in foreground.', { platform: Capacitor.getPlatform(), hasTitle: Boolean(notification.title), hasBody: Boolean(notification.body) })
+      console.info('Native push received in foreground.', {
+        platform: Capacitor.getPlatform(),
+        hasTitle: Boolean(notification.title),
+        hasBody: Boolean(notification.body),
+      })
       try {
         const scheduled = await LocalNotifications.schedule({
           notifications: [
@@ -107,7 +117,9 @@ async function initNativePush() {
             },
           ],
         })
-        console.info('Foreground notification scheduled.', { count: scheduled?.notifications?.length ?? 1 })
+        console.info('Foreground notification scheduled.', {
+          count: scheduled?.notifications?.length ?? 1,
+        })
       } catch (error) {
         console.warn('Unable to display foreground notification:', error?.message || error)
       }
@@ -179,7 +191,7 @@ async function initWebPush(allowPermissionPrompt = true) {
         badge: '/favicon.ico',
         silent: false,
       })
-      void new Audio('/notification-tune.wav').play().catch(() => {})
+      void new Audio('/chalo.wav').play().catch(() => {})
       notification.onclick = () => {
         window.focus()
         window.location.assign(payload.data?.url || '/notifications')
