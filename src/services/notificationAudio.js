@@ -15,7 +15,8 @@ export function notificationEventFromText(value = '') {
   if (/result|market result/.test(text)) return 'result'
   if (/withdraw|withdrawal/.test(text)) return 'withdraw'
   if (/debit|debited|bet placed/.test(text)) return 'debit'
-  if (/credit|credited|deposit|add money|wallet added/.test(text)) return 'add_money'
+  if (/add money|deposit request|deposit added|money added|wallet added/.test(text)) return 'add_money'
+  if (/credit|credited|wallet credit/.test(text)) return 'credit'
   return 'credit'
 }
 
