@@ -37,8 +37,8 @@
       </div>
 
       <div v-if="gameHeaders.length" class="row g-2 mb-3">
-        <div v-for="game in gameHeaders" :key="game.id" class="col-4">
-          <div class="card border-0 shadow-xs rounded-3 p-2 bg-white text-center border-top border-3"
+        <div v-for="game in gameHeaders" :key="game.id" class="col-3">
+          <div class="card border-0 shadow-xs rounded-3 py-2 bg-white text-center border-top border-3"
             :style="{ borderColor: game.color }">
             <span class="fs-8 text-muted fw-bold text-uppercase d-block mb-1">
               {{ game.name }}
@@ -79,13 +79,13 @@
 
         <div v-else class="table-responsive">
           <table class="table table-bordered table-hover align-middle mb-0 text-center font-monospace fs-8">
-            <thead class="table-dark text-uppercase fs-8">
+            <thead class=" text-uppercase fs-8">
               <tr>
                 <th style="width: 70px" class="bg-black text-warning py-3">
                   Date
                 </th>
 
-                <th v-for="game in gameHeaders" :key="game.id" class="py-3">
+                <th v-for="game in gameHeaders" :key="game.id" class="py-3 bg-success">
                   <div class="d-flex align-items-center justify-content-center gap-1">
                     <i class="bi bi-controller text-warning"></i>
                     <span>{{ game.name }}</span>

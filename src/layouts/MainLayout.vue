@@ -4,8 +4,8 @@
     <div ref="sidebarElement" class="sidebar" :class="{ active: isSidebarOpen }" id="sidebar">
       <div class="sidebar-header">
         <div class="d-flex align-items-center mb-3">
-          <div class="bg-white rounded me-2">
-            <img src="../assets/img/logo.png" style="height: 50px; width: auto;" alt="">
+          <div class="user-avatar me-3">
+            <i class="bi bi-person"></i>
           </div>
           <div>
             <h6 class="mb-1">{{ authStore.name }}</h6>
@@ -13,7 +13,9 @@
         </div>
         <div class="sidebar-header-actions">
           <div class="sidebar-wallet-card" aria-label="Wallet balance">
-            <span class="sidebar-wallet-symbol">₹</span>
+            <span class="sidebar-wallet-symbol bg-success">
+              <i class="bi bi-wallet2"></i>
+            </span>
             <div class="sidebar-wallet-copy">
               <small>Wallet balance</small>
               <strong class="sidebar-wallet-amount">₹ {{ formatWalletAmount }}</strong>
@@ -981,6 +983,7 @@ const handleLogout = async () => {
   align-items: stretch;
   gap: 8px;
   min-width: 0;
+  justify-content: space-between;
 }
 
 .sidebar-wallet-card {
@@ -989,11 +992,11 @@ const handleLogout = async () => {
   gap: 8px;
   flex: 0 1 auto;
   min-width: 0;
-  padding: 8px 8px;
+  padding: 4px 4px;
   border: 1px solid rgba(25, 135, 84, .16);
-  border-radius: 12px;
-  color: #145c3a;
-  background: linear-gradient(135deg, #fff, #eafaf1);
+  border-radius: 9px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
   box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
 }
 
@@ -1005,7 +1008,7 @@ const handleLogout = async () => {
   flex: 0 0 20px;
   border-radius: 6px;
   color: #fff;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  /* background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); */
   font-size: 14px;
   font-weight: 900;
 }
@@ -1019,7 +1022,7 @@ const handleLogout = async () => {
 }
 
 .sidebar-wallet-copy small {
-  color: #6c757d;
+  color: #fff;
   font-size: 8px;
   font-weight: 700;
   white-space: nowrap;
@@ -1029,7 +1032,7 @@ const handleLogout = async () => {
   display: block;
   max-width: 100%;
   overflow: hidden;
-  color: #145c3a;
+  color: #fff;
   font-size: 12px;
   font-weight: 900;
   text-overflow: ellipsis;

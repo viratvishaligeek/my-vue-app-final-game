@@ -82,21 +82,23 @@
     </div>
     <div class="row g-2 mb-4 ms-2 me-2">
       <div class="col-4">
-        <router-link to="/wallet/add" class="btn bg-success w-100 text-light">
-          <span class="icon-3d">💰</span>
+        <router-link to="/wallet/add" class="btn  w-100 text-light">
+          <span class="icon-3d">✚</span>
           <span>Add Money</span>
         </router-link>
       </div>
       <div class="col-4">
-        <router-link to="/wallet/withdraw" class="btn bg-danger w-100 text-light">
-          <span class="icon-3d">💸</span>
+        <router-link to="/wallet/withdraw" class="btn  w-100 text-light">
+          <span class="icon-3d">🏛️</span>
           Withdraw
         </router-link>
       </div>
       <div class="col-4">
-        <router-link to="/live-support" class="btn bg-primary w-100 text-light">
-          <span class="icon-3d">💬</span>
-          Support
+        <router-link to="/live-support" class="btn w-100 text-light">
+          <img src="../assets/img/live-chat.png" style="height: 25px; width: auto;" alt="">
+          <!-- <span class="icon-3d">🎧</span> -->
+          Live Chat
+
         </router-link>
       </div>
     </div>
@@ -174,11 +176,12 @@
               </div>
             </div>
             <div class="d-flex align-items-center">
-              <router-link :to="`/monthly-chart?game=${game.id}`"
-                class="btn btn-light border btn-sm small rounded-3 text-secondary">
-                <i class="bi bi-bar-chart-line me-1"></i>
+              <!-- <router-link :to="`/monthly-chart?game=${game.id}`"
+                class="btn btn-light border  me-1 btn-sm small rounded-3 text-secondary" style="  font-size: 10px;
+">
+                <i class="bi bi-bar-chart-line small"></i>
                 Chart
-              </router-link>
+              </router-link> -->
               <router-link v-if="isGamePlayable(game)" :to="{
                 name: 'play-game',
                 params: {
@@ -1248,7 +1251,7 @@ onUnmounted(() => {
 
 .row.g-2.mb-4.ms-2.me-2 .col-4:nth-child(3) .btn {
   background:
-    linear-gradient(135deg, var(--primary-color), var(--primary-light)) !important;
+    linear-gradient(135deg, var(--primary-light), var(--primary-light)) !important;
   animation:
     actionFloat 4s ease-in-out .6s infinite,
     blueGlow 3s ease-in-out infinite;
@@ -1585,7 +1588,7 @@ onUnmounted(() => {
   color: #172033 !important;
   /* font-size: 1.4rem !important; */
   font-weight: 950 !important;
-  letter-spacing: .5px;
+  /* letter-spacing: .5px; */
   animation: marketNumber 3s ease-in-out infinite;
 }
 
@@ -1636,6 +1639,7 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
   border: 0 !important;
+  padding: 5px 20px;
   background:
     linear-gradient(135deg,
       #008b64,

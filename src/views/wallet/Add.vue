@@ -318,8 +318,7 @@
             <div class="manual-instruction">
               <i class="bi bi-info-circle-fill"></i>
               <span>
-                Complete the payment first, then enter your UTR
-                and upload the payment screenshot below.
+                दिए गए QR कोड पर पेमेंट करने के बाद UTR नंबर दर्ज करें और पेमेंट का स्क्रीनशॉट अपलोड करें।
               </span>
             </div>
             <div class="form-field">
@@ -2422,11 +2421,11 @@ onBeforeUnmount(async () => {
 .manual-instruction {
   padding: 9px;
   border-radius: 11px;
-  color: #53616d;
+  color: #5F6B73;
   background: #f4f8f7;
   display: flex;
   gap: 7px;
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.4;
 }
 

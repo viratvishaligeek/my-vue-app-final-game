@@ -36,8 +36,8 @@
           <span class="input-group-text bg-transparent border-end-0">
             <i class="bi bi-telephone text-muted"></i>
           </span>
-          <input type="tel" class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }" id="phone"
-            v-model.trim="form.phone" placeholder="Enter phone number" @input="clearFieldError('phone')" />
+          <input type="tel" class="form-control border-start-0" maxlength="10" :class="{ 'is-invalid': errors.phone }"
+            id="phone" v-model.trim="form.phone" placeholder="Enter phone number" @input="clearFieldError('phone')" />
         </div>
         <div v-if="errors.phone" class="invalid-feedback d-block small mt-1">
           {{ errors.phone }}

@@ -24,10 +24,7 @@
           {{ errorMessage }}
         </p>
 
-        <router-link
-          to="/dashboard"
-          class="btn btn-warning rounded-pill px-4 fw-bold"
-        >
+        <router-link to="/dashboard" class="btn btn-warning rounded-pill px-4 fw-bold">
           <i class="bi bi-house-fill me-1"></i>
           Back Home
         </router-link>
@@ -44,10 +41,6 @@
             </div>
 
             <div class="flex-grow-1">
-              <div class="page-kicker">
-                Information
-              </div>
-
               <h1 class="page-title">
                 {{ page.name }}
               </h1>
@@ -55,10 +48,7 @@
           </div>
 
           <!-- CMS Content -->
-          <div
-            class="cms-content"
-            v-html="page.content"
-          ></div>
+          <div class="cms-content" v-html="responsiveContent"></div>
 
         </div>
       </template>
@@ -67,7 +57,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '@/plugins/axios'
 
@@ -76,6 +66,44 @@ const route = useRoute()
 const page = ref(null)
 const isLoading = ref(false)
 const errorMessage = ref('')
+const responsiveContent = computed(() => {
+  const html = page.value?.content || ''
+
+  if (!html) return ''
+
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+
+  doc.querySelectorAll('iframe').forEach((iframe) => {
+    const src = iframe.getAttribute('src') || ''
+
+    // Sirf YouTube embeds process karo
+    if (!/^https?:\/\/(www\.)?(youtube\.com|youtube-nocookie\.com)\/embed\//i.test(src)) {
+      return
+    }
+
+    // Agar pehle se wrapper hai, dobara wrap mat karo
+    if (iframe.parentElement?.classList.contains('youtube-responsive')) {
+      return
+    }
+
+    const wrapper = doc.createElement('div')
+    wrapper.className = 'youtube-responsive'
+
+    iframe.setAttribute('title', 'YouTube video')
+    iframe.setAttribute(
+      'allow',
+      'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+    )
+    iframe.setAttribute('allowfullscreen', '')
+
+    wrapper.appendChild(iframe.cloneNode(true))
+    iframe.replaceWith(wrapper)
+  })
+
+  return doc.body.innerHTML
+})
+
 
 const fetchPage = async () => {
   const slug = String(route.params.slug || '').trim()
@@ -93,9 +121,7 @@ const fetchPage = async () => {
     const response = await api.get(`/pages/${encodeURIComponent(slug)}`)
 
     if (!response.data?.success) {
-      throw new Error(
-        response.data?.message || 'Unable to load page.'
-      )
+      throw new Error(response.data?.message || 'Unable to load page.')
     }
 
     page.value = response.data.data
@@ -113,23 +139,49 @@ const fetchPage = async () => {
 
 onMounted(fetchPage)
 
-watch(
-  () => route.params.slug,
-  () => {
-    fetchPage()
-  }
-)
+watch(() => route.params.slug, fetchPage)
 </script>
 
+
 <style scoped>
+/* Responsive YouTube video inside CMS content */
+.cms-content :deep(.youtube-responsive) {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 16px 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #000;
+}
+
+.cms-content :deep(.youtube-responsive iframe) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  border: 0;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.cms-content :deep(iframe) {
+  max-width: 100%;
+}
+
+.cms-content :deep(video) {
+  max-width: 100%;
+  height: auto;
+}
+
 .dynamic-page-bg {
   min-height: 100vh;
   background:
-    radial-gradient(
-      circle at top right,
+    radial-gradient(circle at top right,
       rgba(255, 193, 7, 0.08),
-      transparent 30%
-    ),
+      transparent 30%),
     #f5f6f8;
 }
 
@@ -149,11 +201,9 @@ watch(
   padding: 20px;
   color: #ffffff;
   overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--primary-light)
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color),
+      var(--primary-light));
 }
 
 .page-header::after {
@@ -321,7 +371,7 @@ watch(
   }
 
   .page-header {
-    padding: 16px;
+    padding: 10px;
   }
 
   .page-header-icon {
@@ -340,5 +390,25 @@ watch(
     font-size: 0.9rem;
     line-height: 1.7;
   }
+}
+
+.cms-content :deep(.youtube-responsive) {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 16px 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #000;
+}
+
+.cms-content :deep(.youtube-responsive iframe) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  pointer-events: auto;
 }
 </style>

@@ -443,9 +443,9 @@ body.sidebar-open {
 .form-select {
   border-radius: 9px;
   border: 1px solid #e0e0e0;
-  font-size: 17px;
+  font-size: 15px;
   letter-spacing: 0.5px;
-  font-weight: bold;
+  font-weight: 500;
   background-color: #f9f9f9;
   transition:
     border-color 0.2s,
