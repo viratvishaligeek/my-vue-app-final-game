@@ -160,7 +160,7 @@ const syncMessages = async ({ initial = false } = {}) => {
       }
     }))
 
-    if (!hasLoadedHistory || initial) {
+    if (!hasLoadedHistory) {
       messages.value = incoming
       hasLoadedHistory = true
       lastMessageId = incoming.reduce((max, message) => Math.max(max, Number(message.id) || 0), 0)
