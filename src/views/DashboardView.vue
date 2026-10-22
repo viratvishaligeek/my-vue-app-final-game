@@ -448,7 +448,11 @@ const formatTime = (time) => {
 const normalizeGame = (game) => {
   return {
     ...game,
-    latest_result: game.latest_result ?? game.today_result ?? null,
+    // Ignore legacy/stale latest_result values unless the date proves they
+    // belong to the server's current calendar day.
+    latest_result: game.today_result ?? (
+      game.latest_result?.date === todayDate.value ? game.latest_result : null
+    ),
     previous_result: game.previous_result ?? null,
     is_playable: Boolean(
       game.is_playable
@@ -476,7 +480,7 @@ const fetchGames = async () => {
   }
   errorMessage.value = ''
   try {
-    const response = await api.get('/games/list')
+    const response = await api.get('/games/list', { params: { _ts: Date.now() }, headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' } })
     const data = response.data
     if (!data?.status) {
       throw new Error(
