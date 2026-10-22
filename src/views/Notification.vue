@@ -339,7 +339,7 @@ const fetchNotifications = async (page = 1) => {
     if (hasLoadedOnce.value && page === 1) {
       const previousIds = new Set(notifications.value.map(item => item.id))
       newNotifications.filter(item => !previousIds.has(item.id)).forEach(item => {
-        void playNotificationSound(notificationEventFromText(item.subject), item.id)
+        void playNotificationSound(notificationEventFromText([item.subject, item.message].filter(Boolean).join(' ')), item.id)
       })
     }
     notifications.value = page === 1
