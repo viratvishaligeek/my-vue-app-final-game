@@ -12,6 +12,13 @@
           {{ pushLoading ? 'Enabling…' : (isNativeApp ? 'Enable app alerts' : 'Enable browser alerts') }}
         </button>
       </div>
+      <div v-if="isNativeApp && appUpdate.latest_url" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
+        <div>
+          <div class="fw-bold text-dark"><i class="bi bi-arrow-down-circle me-2"></i>Latest Android app package</div>
+          <div class="small text-muted">Published {{ formatAppUpdateDate(appUpdate.update_date) }}. Downloading the APK opens the normal Android installation flow; it will not install silently.</div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary flex-shrink-0" @click="openLatestApp">Download APK</button>
+      </div>
       <div v-if="isInitialLoading" class="text-center py-5">
         <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
         <div class="text-muted mt-2">
@@ -78,6 +85,7 @@
 <script setup>
 import api from '@/plugins/axios'
 import { Capacitor } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
 import { subscribeToPush } from '@/services/pushNotifications'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { notificationEventFromText, playNotificationSound } from '@/services/notificationAudio'
@@ -88,6 +96,40 @@ let notificationRefreshTimer = null
 const isNativeApp = Capacitor.isNativePlatform()
 const pushLoading = ref(false)
 const pushStatus = ref('')
+const appUpdate = ref({ latest_url: '', update_date: '2026-08-12' })
+
+const fetchAppUpdate = async () => {
+  try {
+    const { data } = await api.get('/app-update', { showGlobalLoader: false })
+    let latestUrl = ''
+    try {
+      const parsedUrl = new URL(String(data?.latest_url || ''))
+      if (parsedUrl.protocol === 'https:') latestUrl = parsedUrl.href
+    } catch {
+      latestUrl = ''
+    }
+    const updateDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(String(data?.update_date || ''))
+      ? data.update_date
+      : '2026-08-12'
+    appUpdate.value = { latest_url: latestUrl, update_date: updateDate }
+  } catch {
+    // App updates remain optional when the API or URL has not been configured.
+  }
+}
+
+const formatAppUpdateDate = (value) => {
+  const date = new Date(`${value}T00:00:00`)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+const openLatestApp = async () => {
+  if (!appUpdate.value.latest_url) return
+  try {
+    await Browser.open({ url: appUpdate.value.latest_url })
+  } catch (error) {
+    console.warn('Unable to open the latest APK URL:', error?.message || error)
+  }
+}
 
 const enablePush = async () => {
   pushLoading.value = true
@@ -355,6 +397,7 @@ const formatNotificationTime = (dateTime) => {
 }
 
 onMounted(() => {
+  void fetchAppUpdate()
   fetchNotifications()
   notificationRefreshTimer = setInterval(() => fetchNotifications(1), 20000)
 })
