@@ -153,7 +153,7 @@ const refreshPushPermission = async () => {
         permissionMessage.value = 'Device notification permission is enabled.'
       } else if (receive === 'denied') {
         pushPermissionState.value = 'denied'
-        permissionMessage.value = 'Notifications are blocked. Open Android Settings → Apps → Play Online Khaiwal → Notifications to enable them.'
+        permissionMessage.value = isAndroidApp ? 'Notifications are blocked. Open Android Settings → Apps → Play Online Khaiwal → Notifications to enable them.' : 'Notifications are blocked by device settings. Open this app’s notification settings and allow notifications.'
       } else {
         pushPermissionState.value = 'prompt'
         permissionMessage.value = 'Permission will be requested only after you tap Enable.'
@@ -339,7 +339,7 @@ const fetchNotifications = async (page = 1) => {
     if (hasLoadedOnce.value && page === 1) {
       const previousIds = new Set(notifications.value.map(item => item.id))
       newNotifications.filter(item => !previousIds.has(item.id)).forEach(item => {
-        void playNotificationSound(notificationEventFromText(item.subject), item.id)
+        void playNotificationSound(notificationEventFromText([item.subject, item.message].filter(Boolean).join(' ')), item.id)
       })
     }
     notifications.value = page === 1
@@ -453,7 +453,12 @@ const formatNotificationTime = (dateTime) => {
   })
 }
 
+const handlePermissionVisibilityChange = () => {
+  if (document.visibilityState === 'visible') void refreshPushPermission()
+}
+
 onMounted(() => {
+  document.addEventListener('visibilitychange', handlePermissionVisibilityChange)
   void refreshPushPermission()
   void fetchAppUpdate()
   fetchNotifications()
@@ -463,6 +468,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handlePermissionVisibilityChange)
   if (notificationRefreshTimer) clearInterval(notificationRefreshTimer)
 })
 </script>
