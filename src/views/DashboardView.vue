@@ -242,6 +242,7 @@ const noticeEnabled = ref(false)
 
 const currentTime = ref(Date.now())
 const serverOffset = ref(0)
+const serverTimezone = ref('Asia/Kolkata')
 
 let clockTimer = null
 let refreshTimer = null
@@ -255,7 +256,7 @@ const serverNow = computed(() => {
 const todayDate = computed(() => {
   const now = serverNow.value
   const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Kolkata',
+    timeZone: serverTimezone.value,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -293,7 +294,8 @@ const noticeLines = computed(() => {
 
 
 
-const syncServerTime = (serverTime) => {
+const syncServerTime = (serverTime, timezone) => {
+  if (typeof timezone === 'string' && timezone.trim()) serverTimezone.value = timezone
   if (!serverTime) {
     return
   }
@@ -486,7 +488,7 @@ const fetchGames = async () => {
     | Server Clock
     |--------------------------------------------------------------------------
     */
-    syncServerTime(data.server_time)
+    syncServerTime(data.server_time, data.timezone)
     /*
     |--------------------------------------------------------------------------
     | Banners
