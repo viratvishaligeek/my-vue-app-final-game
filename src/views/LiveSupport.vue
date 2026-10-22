@@ -90,6 +90,9 @@ const humanSupportRequested = ref(false)
 const recording = ref(false)
 const canRecord = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== 'undefined'
 let pollTimer = null
+let syncInFlight = false
+let consecutiveFailures = 0
+let hasLoadedHistory = false
 let recorder = null
 let recordingStream = null
 let recordedChunks = []
@@ -107,14 +110,21 @@ const loadFaqs = async () => {
     faqLoading.value = false
   }
 }
+const scheduleNextSync = () => {
+  if (!humanSupportRequested.value || pollTimer) return
+  const delay = connected.value ? 5000 : Math.min(30000, 5000 * (2 ** Math.min(consecutiveFailures, 3)))
+  pollTimer = setTimeout(() => {
+    pollTimer = null
+    void syncMessages()
+  }, delay)
+}
 const openHumanSupport = async () => {
   humanSupportRequested.value = true
-  await syncMessages()
-  if (!pollTimer) pollTimer = setInterval(syncMessages, 3000)
+  await syncMessages({ initial: true })
 }
 const closeHumanSupport = () => {
   humanSupportRequested.value = false
-  if (pollTimer) clearInterval(pollTimer)
+  if (pollTimer) clearTimeout(pollTimer)
   pollTimer = null
 }
 const mediaUrlCache = new Map()
@@ -127,9 +137,13 @@ const scrollToBottom = async () => {
   await nextTick()
   if (chatFeed.value) chatFeed.value.scrollTop = chatFeed.value.scrollHeight
 }
-const syncMessages = async () => {
+const syncMessages = async ({ initial = false } = {}) => {
+  if (syncInFlight) return
+  syncInFlight = true
+  const wasNearBottom = !chatFeed.value || (chatFeed.value.scrollHeight - chatFeed.value.scrollTop - chatFeed.value.clientHeight < 100)
   try {
-    const { data } = await api.get('/support-chat', { showGlobalLoader: false })
+    const params = hasLoadedHistory ? { after_id: lastMessageId } : {}
+    const { data } = await api.get('/support-chat', { params, showGlobalLoader: false })
     const incoming = Array.isArray(data?.data) ? data.data : []
     await Promise.all(incoming.filter(message => message.media_url).map(async message => {
       if (mediaUrlCache.has(message.id)) {
@@ -145,28 +159,32 @@ const syncMessages = async () => {
         message.display_media_url = ''
       }
     }))
-    if (incoming.length && incoming[incoming.length - 1].id !== lastMessageId) {
+
+    if (!hasLoadedHistory || initial) {
       messages.value = incoming
-      lastMessageId = incoming[incoming.length - 1].id
-      await scrollToBottom()
-    } else if (!incoming.length && messages.value.length) {
-      messages.value = []
-      lastMessageId = 0
-    } else if (incoming.length && messages.value.length === 0) {
-      messages.value = incoming
-      lastMessageId = incoming[incoming.length - 1].id
+      hasLoadedHistory = true
+      lastMessageId = incoming.reduce((max, message) => Math.max(max, Number(message.id) || 0), 0)
       await scrollToBottom()
     } else if (incoming.length) {
-      // Refresh read_at flags even when no new message was added.
-      messages.value = incoming
+      const existingIds = new Set(messages.value.map(message => message.id))
+      const additions = incoming.filter(message => !existingIds.has(message.id))
+      if (additions.length) {
+        messages.value = [...messages.value, ...additions]
+        lastMessageId = Math.max(lastMessageId, ...additions.map(message => Number(message.id) || 0))
+        if (wasNearBottom) await scrollToBottom()
+      }
     }
     connected.value = true
+    consecutiveFailures = 0
     errorMessage.value = ''
   } catch (error) {
     connected.value = false
+    consecutiveFailures += 1
     errorMessage.value = error?.response?.status === 401 ? 'Please sign in again to continue chat.' : 'Connection interrupted. Retrying automatically…'
   } finally {
     loading.value = false
+    syncInFlight = false
+    scheduleNextSync()
   }
 }
 const onFileSelected = event => {
@@ -226,7 +244,7 @@ onMounted(() => {
   void loadFaqs()
 })
 onUnmounted(() => {
-  if (pollTimer) clearInterval(pollTimer)
+  if (pollTimer) clearTimeout(pollTimer)
   if (recorder && recorder.state !== 'inactive') recorder.stop()
   recordingStream?.getTracks().forEach(track => track.stop())
   mediaUrlCache.forEach(url => URL.revokeObjectURL(url))
