@@ -192,7 +192,9 @@ async function initWebPush(allowPermissionPrompt = true) {
         body,
         icon: '/icons/icon-192.webp',
         badge: '/favicon.ico',
-        silent: false,
+        // The notifications screen plays its own category-aware sound from the API feed.
+        // Keep the browser notification silent there to avoid double playback.
+        silent: window.location.pathname === '/notifications',
       })
       notification.onclick = () => {
         window.focus()
