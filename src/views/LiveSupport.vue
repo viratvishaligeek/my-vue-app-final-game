@@ -120,7 +120,7 @@ const scheduleNextSync = () => {
 }
 const openHumanSupport = async () => {
   humanSupportRequested.value = true
-  await syncMessages({ initial: true })
+  await syncMessages()
 }
 const closeHumanSupport = () => {
   humanSupportRequested.value = false
@@ -137,7 +137,7 @@ const scrollToBottom = async () => {
   await nextTick()
   if (chatFeed.value) chatFeed.value.scrollTop = chatFeed.value.scrollHeight
 }
-const syncMessages = async ({ initial = false } = {}) => {
+const syncMessages = async () => {
   if (syncInFlight) return
   syncInFlight = true
   const wasNearBottom = !chatFeed.value || (chatFeed.value.scrollHeight - chatFeed.value.scrollTop - chatFeed.value.clientHeight < 100)
