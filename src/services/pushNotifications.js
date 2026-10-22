@@ -39,7 +39,7 @@ export async function syncPushSubscription() {
   }
 }
 
-async function initNativePush() {
+async function initNativePush(requestPermission = true) {
   const permission = await PushNotifications.checkPermissions()
   let receive = permission.receive
   console.info('Native push permission state checked.', {
@@ -47,6 +47,9 @@ async function initNativePush() {
     receive,
   })
   if (receive === 'prompt' || receive === 'prompt-with-rationale') {
+    if (!requestPermission) {
+      return { ok: false, message: 'Notifications are not enabled yet. Enable them from the app notification control.' }
+    }
     receive = (await PushNotifications.requestPermissions()).receive
   }
   if (receive !== 'granted') {
@@ -191,7 +194,6 @@ async function initWebPush(allowPermissionPrompt = true) {
         badge: '/favicon.ico',
         silent: false,
       })
-      void new Audio('/chalo.wav').play().catch(() => {})
       notification.onclick = () => {
         window.focus()
         window.location.assign(payload.data?.url || '/notifications')
@@ -227,5 +229,5 @@ export async function restorePushSubscription() {
 
 export async function initNativePushNotifications() {
   if (!Capacitor.isNativePlatform()) return { ok: false, message: 'Not running as a native app.' }
-  return subscribeToPush()
+  return initNativePush(false)
 }
