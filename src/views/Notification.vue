@@ -18,8 +18,10 @@
       </div>
       <div v-if="isAndroidApp" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
         <div>
-          <div class="fw-bold text-dark"><i class="bi bi-arrow-down-circle me-2"></i>Latest Android app package</div>
-          <div v-if="appUpdate.latest_url" class="small text-muted">Published {{ formatAppUpdateDate(appUpdate.update_date) }}. Downloading the APK opens the normal Android installation flow; it will not install silently.</div>
+          <div class="fw-bold text-dark"><i class="bi bi-arrow-down-circle me-2"></i>Update App</div>
+          <div v-if="appUpdate.latest_url" class="small text-muted">
+            <span v-if="appUpdate.latest_version">Version {{ appUpdate.latest_version }} · </span>Published {{ formatAppUpdateDate(appUpdate.update_date) }}. Downloading the APK opens the normal Android installation flow; it will not install silently.
+          </div>
           <div v-else class="small text-muted">No app update package is configured yet. Please check again later.</div>
         </div>
         <button v-if="appUpdate.latest_url" type="button" class="btn btn-sm btn-outline-primary flex-shrink-0" @click="openLatestApp">Download APK</button>
@@ -105,7 +107,7 @@ const pushLoading = ref(false)
 const pushStatus = ref('')
 const pushPermissionState = ref('checking')
 const permissionMessage = ref('')
-const appUpdate = ref({ latest_url: '', update_date: '2026-08-12' })
+const appUpdate = ref({ latest_url: '', latest_version: '', update_date: '2026-08-12' })
 
 const fetchAppUpdate = async () => {
   try {
@@ -120,7 +122,7 @@ const fetchAppUpdate = async () => {
     const updateDate = /^\d{4}-\d{2}-\d{2}$/.test(String(data?.update_date || ''))
       ? data.update_date
       : '2026-08-12'
-    appUpdate.value = { latest_url: latestUrl, update_date: updateDate }
+    appUpdate.value = { latest_url: latestUrl, latest_version: String(data?.latest_version || '').trim().slice(0, 50), update_date: updateDate }
   } catch {
     // App updates remain optional when the API or URL has not been configured.
   }
