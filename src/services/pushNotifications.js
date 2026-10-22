@@ -106,6 +106,9 @@ async function initNativePush(requestPermission = true) {
         hasTitle: Boolean(notification.title),
         hasBody: Boolean(notification.body),
       })
+      // The Notifications screen plays one category-aware sound from the API feed.
+      // Do not also schedule an audible native notification on that screen.
+      if (router.currentRoute.value.path === '/notifications') return
       try {
         const scheduled = await LocalNotifications.schedule({
           notifications: [
