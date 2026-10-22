@@ -124,8 +124,8 @@
               <span class="live-dot"></span>
               Latest Result Today
             </span>
-            <h3 v-if="featuredGame.today_result" class="result-number mb-0">
-              {{ featuredGame.today_result.number }}
+            <h3 class="result-number mb-0" aria-label="Today's result">
+              {{ featuredGame.today_result?.date === todayDate ? (featuredGame.today_result?.number ?? '--') : '--' }}
             </h3>
           </div>
         </div>
@@ -248,6 +248,20 @@ let refreshTimer = null
 
 const serverNow = computed(() => {
   return new Date(currentTime.value + serverOffset.value)
+})
+
+// Derive the calendar date from the server-synchronized clock. The API's
+// result date must match this date before the featured card can show a number.
+const todayDate = computed(() => {
+  const now = serverNow.value
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now)
+  const value = (type) => parts.find(part => part.type === type)?.value || ''
+  return `${value('year')}-${value('month')}-${value('day')}`
 })
 
 /*
@@ -564,10 +578,11 @@ const initializeBannerCarousel = () => {
     heroCarouselElement.value.removeEventListener('slid.bs.carousel', handleBannerSlid)
     heroCarouselInstance.dispose()
   }
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
   heroCarouselInstance = new Carousel(heroCarouselElement.value, {
-    interval: 2500,
-    ride: 'carousel',
-    pause: false,
+    interval: reduceMotion ? false : 4000,
+    ride: reduceMotion ? false : 'carousel',
+    pause: 'hover',
     wrap: true,
     touch: true,
   })
@@ -592,11 +607,10 @@ const goToBanner = (index) => {
 */
 
 const startRefreshTimer = () => {
-  if (refreshTimer) {
-    clearInterval(refreshTimer)
-  }
+  if (refreshTimer) clearInterval(refreshTimer)
   refreshTimer = setInterval(() => {
-    fetchGames()
+    // Avoid network work and reactive updates while the page is backgrounded.
+    if (document.visibilityState === 'visible') fetchGames()
   }, 30000)
 }
 
