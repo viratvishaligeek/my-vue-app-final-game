@@ -453,7 +453,12 @@ const formatNotificationTime = (dateTime) => {
   })
 }
 
+const handlePermissionVisibilityChange = () => {
+  if (document.visibilityState === 'visible') void refreshPushPermission()
+}
+
 onMounted(() => {
+  document.addEventListener('visibilitychange', handlePermissionVisibilityChange)
   void refreshPushPermission()
   void fetchAppUpdate()
   fetchNotifications()
@@ -463,6 +468,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handlePermissionVisibilityChange)
   if (notificationRefreshTimer) clearInterval(notificationRefreshTimer)
 })
 </script>
