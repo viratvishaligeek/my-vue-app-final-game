@@ -120,12 +120,12 @@
                 {{ formatTime(featuredGame.result_time) }}
               </small>
             </div>
-            <span v-if="featuredGame.today_result" class="live-tag text-white">
+            <span v-if="featuredGame.today_result?.date === todayDate" class="live-tag text-white">
               <span class="live-dot"></span>
               Latest Result Today
             </span>
-            <h3 v-if="featuredGame.today_result" class="result-number mb-0">
-              {{ featuredGame.today_result.number }}
+            <h3 class="result-number mb-0" aria-label="Today's result">
+              {{ featuredGame.today_result?.date === todayDate ? (featuredGame.today_result?.number ?? '--') : '--' }}
             </h3>
           </div>
         </div>
@@ -169,7 +169,7 @@
             </div>
             <div class="text-center">
               <div class="fw-bold fs-3 text-dark">
-                {{ game.latest_result?.number ?? '--' }}
+                {{ game.latest_result?.date === todayDate ? (game.latest_result?.number ?? '--') : '--' }}
               </div>
               <div v-if="isGamePlayable(game)" class="text-danger small">
                 {{ getRemainingTime(game) }}
@@ -242,12 +242,27 @@ const noticeEnabled = ref(false)
 
 const currentTime = ref(Date.now())
 const serverOffset = ref(0)
+const serverTimezone = ref('Asia/Kolkata')
 
 let clockTimer = null
 let refreshTimer = null
 
 const serverNow = computed(() => {
   return new Date(currentTime.value + serverOffset.value)
+})
+
+// Derive the calendar date from the server-synchronized clock. The API's
+// result date must match this date before the featured card can show a number.
+const todayDate = computed(() => {
+  const now = serverNow.value
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: serverTimezone.value,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now)
+  const value = (type) => parts.find(part => part.type === type)?.value || ''
+  return `${value('year')}-${value('month')}-${value('day')}`
 })
 
 /*
@@ -279,7 +294,8 @@ const noticeLines = computed(() => {
 
 
 
-const syncServerTime = (serverTime) => {
+const syncServerTime = (serverTime, timezone) => {
+  if (typeof timezone === 'string' && timezone.trim()) serverTimezone.value = timezone
   if (!serverTime) {
     return
   }
@@ -432,7 +448,11 @@ const formatTime = (time) => {
 const normalizeGame = (game) => {
   return {
     ...game,
-    latest_result: game.latest_result ?? game.today_result ?? null,
+    // Ignore legacy/stale latest_result values unless the date proves they
+    // belong to the server's current calendar day.
+    latest_result: game.today_result ?? (
+      game.latest_result?.date === todayDate.value ? game.latest_result : null
+    ),
     previous_result: game.previous_result ?? null,
     is_playable: Boolean(
       game.is_playable
@@ -460,7 +480,7 @@ const fetchGames = async () => {
   }
   errorMessage.value = ''
   try {
-    const response = await api.get('/games/list')
+    const response = await api.get('/games/list', { params: { _ts: Date.now() }, headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' } })
     const data = response.data
     if (!data?.status) {
       throw new Error(
@@ -472,7 +492,7 @@ const fetchGames = async () => {
     | Server Clock
     |--------------------------------------------------------------------------
     */
-    syncServerTime(data.server_time)
+    syncServerTime(data.server_time, data.timezone)
     /*
     |--------------------------------------------------------------------------
     | Banners
@@ -564,10 +584,11 @@ const initializeBannerCarousel = () => {
     heroCarouselElement.value.removeEventListener('slid.bs.carousel', handleBannerSlid)
     heroCarouselInstance.dispose()
   }
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
   heroCarouselInstance = new Carousel(heroCarouselElement.value, {
-    interval: 2500,
-    ride: 'carousel',
-    pause: false,
+    interval: reduceMotion ? false : 4000,
+    ride: reduceMotion ? false : 'carousel',
+    pause: 'hover',
     wrap: true,
     touch: true,
   })
@@ -592,11 +613,10 @@ const goToBanner = (index) => {
 */
 
 const startRefreshTimer = () => {
-  if (refreshTimer) {
-    clearInterval(refreshTimer)
-  }
+  if (refreshTimer) clearInterval(refreshTimer)
   refreshTimer = setInterval(() => {
-    fetchGames()
+    // Avoid network work and reactive updates while the page is backgrounded.
+    if (document.visibilityState === 'visible') fetchGames()
   }, 30000)
 }
 

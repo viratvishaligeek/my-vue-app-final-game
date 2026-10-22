@@ -39,7 +39,7 @@ export async function syncPushSubscription() {
   }
 }
 
-async function initNativePush() {
+async function initNativePush(requestPermission = true) {
   const permission = await PushNotifications.checkPermissions()
   let receive = permission.receive
   console.info('Native push permission state checked.', {
@@ -47,6 +47,9 @@ async function initNativePush() {
     receive,
   })
   if (receive === 'prompt' || receive === 'prompt-with-rationale') {
+    if (!requestPermission) {
+      return { ok: false, message: 'Notifications are not enabled yet. Enable them from the app notification control.' }
+    }
     receive = (await PushNotifications.requestPermissions()).receive
   }
   if (receive !== 'granted') {
@@ -103,6 +106,9 @@ async function initNativePush() {
         hasTitle: Boolean(notification.title),
         hasBody: Boolean(notification.body),
       })
+      // The Notifications screen plays one category-aware sound from the API feed.
+      // Do not also schedule an audible native notification on that screen.
+      if (router.currentRoute.value.path === '/notifications') return
       try {
         const scheduled = await LocalNotifications.schedule({
           notifications: [
@@ -189,9 +195,10 @@ async function initWebPush(allowPermissionPrompt = true) {
         body,
         icon: '/icons/icon-192.webp',
         badge: '/favicon.ico',
-        silent: false,
+        // The notifications screen plays its own category-aware sound from the API feed.
+        // Keep the browser notification silent there to avoid double playback.
+        silent: window.location.pathname === '/notifications',
       })
-      void new Audio('/chalo.wav').play().catch(() => {})
       notification.onclick = () => {
         window.focus()
         window.location.assign(payload.data?.url || '/notifications')
@@ -227,5 +234,5 @@ export async function restorePushSubscription() {
 
 export async function initNativePushNotifications() {
   if (!Capacitor.isNativePlatform()) return { ok: false, message: 'Not running as a native app.' }
-  return subscribeToPush()
+  return initNativePush(false)
 }

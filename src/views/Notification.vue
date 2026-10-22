@@ -6,11 +6,25 @@
           <div class="fw-bold text-dark"><i class="bi bi-bell-fill me-2"></i>Stay up to date</div>
           <div class="small text-muted">{{ isNativeApp ? 'Enable app notifications for public announcements and account updates.' : 'Enable browser notifications for public announcements.' }}</div>
           <div v-if="pushStatus" class="small mt-1" role="status">{{ pushStatus }}</div>
+          <div v-if="permissionMessage" class="small mt-1 text-muted" role="status">{{ permissionMessage }}</div>
         </div>
-        <button type="button" class="btn btn-sm btn-primary flex-shrink-0" :disabled="pushLoading" @click="enablePush">
+        <button v-if="pushPermissionState === 'prompt' || pushPermissionState === 'checking'" type="button" class="btn btn-sm btn-primary flex-shrink-0" :disabled="pushLoading || pushPermissionState === 'checking'" @click="enablePush">
           <span v-if="pushLoading" class="spinner-border spinner-border-sm me-1"></span>
           {{ pushLoading ? 'Enabling…' : (isNativeApp ? 'Enable app alerts' : 'Enable browser alerts') }}
         </button>
+        <span v-else-if="pushPermissionState === 'granted'" class="badge bg-success flex-shrink-0"><i class="bi bi-check-circle me-1"></i>Enabled</span>
+        <span v-else-if="pushPermissionState === 'denied'" class="badge bg-warning text-dark flex-shrink-0">Blocked</span>
+        <span v-else class="badge bg-secondary flex-shrink-0">Unavailable</span>
+      </div>
+      <div v-if="isAndroidApp" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
+        <div>
+          <div class="fw-bold text-dark"><i class="bi bi-arrow-down-circle me-2"></i>Update App</div>
+          <div v-if="appUpdate.latest_url" class="small text-muted">
+            <span v-if="appUpdate.latest_version">Version {{ appUpdate.latest_version }} · </span>Published {{ formatAppUpdateDate(appUpdate.update_date) }}. Downloading the APK opens the normal Android installation flow; it will not install silently.
+          </div>
+          <div v-else class="small text-muted">No app update package is configured yet. Please check again later.</div>
+        </div>
+        <button v-if="appUpdate.latest_url" type="button" class="btn btn-sm btn-outline-primary flex-shrink-0" @click="openLatestApp">Download APK</button>
       </div>
       <div v-if="isInitialLoading" class="text-center py-5">
         <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
@@ -78,6 +92,8 @@
 <script setup>
 import api from '@/plugins/axios'
 import { Capacitor } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
+import { PushNotifications } from '@capacitor/push-notifications'
 import { subscribeToPush } from '@/services/pushNotifications'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { notificationEventFromText, playNotificationSound } from '@/services/notificationAudio'
@@ -86,8 +102,90 @@ const notifications = ref([])
 const hasLoadedOnce = ref(false)
 let notificationRefreshTimer = null
 const isNativeApp = Capacitor.isNativePlatform()
+const isAndroidApp = Capacitor.getPlatform() === 'android'
 const pushLoading = ref(false)
 const pushStatus = ref('')
+const pushPermissionState = ref('checking')
+const permissionMessage = ref('')
+const appUpdate = ref({ latest_url: '', latest_version: '', update_date: '2026-08-12' })
+
+const fetchAppUpdate = async () => {
+  try {
+    const { data } = await api.get('/app-update', { showGlobalLoader: false })
+    let latestUrl = ''
+    try {
+      const parsedUrl = new URL(String(data?.latest_url || ''))
+      if (parsedUrl.protocol === 'https:') latestUrl = parsedUrl.href
+    } catch {
+      latestUrl = ''
+    }
+    const updateDate = /^\d{4}-\d{2}-\d{2}$/.test(String(data?.update_date || ''))
+      ? data.update_date
+      : '2026-08-12'
+    appUpdate.value = { latest_url: latestUrl, latest_version: String(data?.latest_version || '').trim().slice(0, 50), update_date: updateDate }
+  } catch {
+    // App updates remain optional when the API or URL has not been configured.
+  }
+}
+
+const formatAppUpdateDate = (value) => {
+  const date = new Date(`${value}T00:00:00`)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+const openLatestApp = async () => {
+  if (!appUpdate.value.latest_url) return
+  try {
+    await Browser.open({ url: appUpdate.value.latest_url })
+  } catch (error) {
+    console.warn('Unable to open the latest APK URL:', error?.message || error)
+  }
+}
+
+const refreshPushPermission = async () => {
+  permissionMessage.value = ''
+  try {
+    if (isNativeApp) {
+      const permission = await PushNotifications.checkPermissions()
+      const receive = permission?.receive
+      if (receive === 'granted') {
+        pushPermissionState.value = 'granted'
+        permissionMessage.value = 'Device notification permission is enabled.'
+      } else if (receive === 'denied') {
+        pushPermissionState.value = 'denied'
+        permissionMessage.value = 'Notifications are blocked. Open Android Settings → Apps → Play Online Khaiwal → Notifications to enable them.'
+      } else {
+        pushPermissionState.value = 'prompt'
+        permissionMessage.value = 'Permission will be requested only after you tap Enable.'
+      }
+      return
+    }
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      pushPermissionState.value = 'unsupported'
+      permissionMessage.value = 'This browser does not support push notifications.'
+      return
+    }
+    if (!window.isSecureContext) {
+      pushPermissionState.value = 'unsupported'
+      permissionMessage.value = 'Browser notifications require a secure HTTPS connection.'
+      return
+    }
+    const permission = Notification.permission
+    if (permission === 'granted') {
+      pushPermissionState.value = 'granted'
+      permissionMessage.value = 'Browser notification permission is enabled.'
+    } else if (permission === 'denied') {
+      pushPermissionState.value = 'denied'
+      permissionMessage.value = 'Notifications are blocked by the browser. Open this site’s browser permissions/settings and allow notifications; this page cannot re-prompt while permission is denied.'
+    } else {
+      pushPermissionState.value = 'prompt'
+      permissionMessage.value = 'Permission will be requested only after you tap Enable.'
+    }
+  } catch {
+    pushPermissionState.value = 'unsupported'
+    permissionMessage.value = 'Unable to check notification permission on this platform.'
+  }
+}
 
 const enablePush = async () => {
   pushLoading.value = true
@@ -95,6 +193,7 @@ const enablePush = async () => {
   try {
     const result = await subscribeToPush()
     pushStatus.value = result.message
+    await refreshPushPermission()
   } finally {
     pushLoading.value = false
   }
@@ -355,8 +454,12 @@ const formatNotificationTime = (dateTime) => {
 }
 
 onMounted(() => {
+  void refreshPushPermission()
+  void fetchAppUpdate()
   fetchNotifications()
-  notificationRefreshTimer = setInterval(() => fetchNotifications(1), 20000)
+  notificationRefreshTimer = setInterval(() => {
+    if (document.visibilityState === 'visible') fetchNotifications(1)
+  }, 20000)
 })
 
 onUnmounted(() => {

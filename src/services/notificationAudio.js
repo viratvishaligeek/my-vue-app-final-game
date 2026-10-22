@@ -4,24 +4,29 @@ const defaultSound = '/notification-tune.wav'
 const eventKeys = ['add_money', 'withdraw', 'debit', 'credit', 'winning', 'result', 'chat']
 const playedKeys = new Set()
 const pendingKeys = new Set()
-let lastPlaybackAt = 0
 let soundSettingsPromise = null
+let soundSettingsLoadedAt = 0
+let playbackQueue = Promise.resolve()
 let soundSettings = Object.fromEntries(eventKeys.map(key => [key, 'default']))
 
 async function loadSoundSettings() {
-  if (!soundSettingsPromise) {
-    soundSettingsPromise = api.get('/settings', {
-      params: { keys: eventKeys.map(key => 'notification_sound_' + key).join(',') },
-      showGlobalLoader: false,
-    }).then(({ data }) => {
-      const values = data?.data || {}
-      soundSettings = Object.fromEntries(eventKeys.map(key => [
-        key,
-        values['notification_sound_' + key] === 'mute' ? 'mute' : 'default',
-      ]))
-      return soundSettings
-    }).catch(() => soundSettings)
-  }
+  if (soundSettingsPromise) return soundSettingsPromise
+  if (Date.now() - soundSettingsLoadedAt < 60000) return soundSettings
+
+  soundSettingsPromise = api.get('/settings', {
+    params: { keys: eventKeys.map(key => 'notification_sound_' + key).join(',') },
+    showGlobalLoader: false,
+  }).then(({ data }) => {
+    const values = data?.data || {}
+    soundSettings = Object.fromEntries(eventKeys.map(key => {
+      const value = values['notification_sound_' + key]
+      return [key, value === 'mute' ? 'mute' : (typeof value === 'string' && value && value !== 'default' ? value : 'default')]
+    }))
+    soundSettingsLoadedAt = Date.now()
+    return soundSettings
+  }).catch(() => soundSettings).finally(() => {
+    soundSettingsPromise = null
+  })
   return soundSettingsPromise
 }
 
@@ -43,17 +48,26 @@ export async function playNotificationSound(event, dedupeKey = '') {
   const key = dedupeKey ? category + ':' + dedupeKey : ''
 
   if (key && (playedKeys.has(key) || pendingKeys.has(key))) return false
-  if (Date.now() - lastPlaybackAt < 700) return false
-
   if (key) pendingKeys.add(key)
+
   try {
     const settings = await loadSoundSettings()
     if (settings[category] === 'mute') return false
+    const source = settings[category] === 'default' ? defaultSound : settings[category]
 
-    const audio = new Audio(defaultSound)
-    audio.preload = 'auto'
-    await audio.play()
-    lastPlaybackAt = Date.now()
+    // Serialize playback instead of dropping legitimate events that arrive
+    // close together. A failed/blocked sound does not mark the event as played.
+    const task = playbackQueue.then(async () => {
+      const audio = new Audio(source)
+      audio.preload = 'auto'
+      await new Promise((resolve, reject) => {
+        audio.addEventListener('ended', resolve, { once: true })
+        audio.addEventListener('error', () => reject(new Error('Notification sound failed to load.')), { once: true })
+        audio.play().catch(reject)
+      })
+    })
+    playbackQueue = task.catch(() => undefined)
+    await task
     if (key) {
       playedKeys.add(key)
       if (playedKeys.size > 500) playedKeys.delete(playedKeys.values().next().value)
