@@ -112,13 +112,19 @@
         <div class="live-result-box">
           <div class="horizontal-result-content">
             <div>
-              <h4 class="city-name text-white mb-0">
+              <h2 class="city-name text-white mb-0">
                 {{ featuredGame.name }}
-              </h4>
+              </h2>
               <small class="opacity-75  text-white">
                 Result Time:
                 {{ formatTime(featuredGame.result_time) }}
               </small>
+            </div>
+            <div>
+              <p class="text-white">
+                Live Result
+                <span class="live-dot"></span>
+              </p>
             </div>
             <span v-if="featuredGame.today_result?.date === todayDate" class="live-tag text-white">
               <span class="live-dot"></span>
@@ -176,12 +182,6 @@
               </div>
             </div>
             <div class="d-flex align-items-center">
-              <!-- <router-link :to="`/monthly-chart?game=${game.id}`"
-                class="btn btn-light border  me-1 btn-sm small rounded-3 text-secondary" style="  font-size: 10px;
-">
-                <i class="bi bi-bar-chart-line small"></i>
-                Chart
-              </router-link> -->
               <router-link v-if="isGamePlayable(game)" :to="{
                 name: 'play-game',
                 params: {
@@ -1249,9 +1249,6 @@ onUnmounted(() => {
 .row.g-2.mb-4.ms-2.me-2 .col-4:nth-child(1) .btn {
   background:
     linear-gradient(135deg, var(--primary-color), var(--primary-light)) !important;
-  animation:
-    actionFloat 4s ease-in-out infinite,
-    greenGlow 3s ease-in-out infinite;
 }
 
 /* withdraw */
@@ -1262,9 +1259,6 @@ onUnmounted(() => {
       #d9273d,
       #f13d50,
       #ff5968) !important;
-  animation:
-    actionFloat 4s ease-in-out .3s infinite,
-    redGlow 3s ease-in-out infinite;
 }
 
 /* support */
@@ -1272,9 +1266,6 @@ onUnmounted(() => {
 .row.g-2.mb-4.ms-2.me-2 .col-4:nth-child(3) .btn {
   background:
     linear-gradient(135deg, var(--primary-light), var(--primary-light)) !important;
-  animation:
-    actionFloat 4s ease-in-out .6s infinite,
-    blueGlow 3s ease-in-out infinite;
 }
 
 .row.g-2.mb-4.ms-2.me-2 .btn:active {
@@ -1290,8 +1281,6 @@ onUnmounted(() => {
   display: inline-block;
   filter:
     drop-shadow(0 4px 3px rgba(0, 0, 0, .22));
-  animation:
-    icon3DFloat 2.4s ease-in-out infinite;
 }
 
 
@@ -1375,9 +1364,6 @@ onUnmounted(() => {
     0 14px 30px rgba(0, 144, 104, .23),
     0 4px 8px rgba(0, 100, 80, .08),
     inset 0 1px 0 rgba(255, 255, 255, .4);
-  animation:
-    featuredLevitate 4s ease-in-out infinite,
-    featuredShadow 3s ease-in-out infinite;
 }
 
 /* glass moving streak */
@@ -1426,10 +1412,11 @@ onUnmounted(() => {
   justify-content: space-between;
   width: 100%;
   gap: 6px;
+  padding: 0px 30px;
 }
 
 .city-name {
-  font-size: .9rem;
+  font-size: 1.5rem;
   font-weight: 900;
   letter-spacing: .7px;
   text-shadow:
@@ -1577,7 +1564,6 @@ onUnmounted(() => {
   color: #009d73;
   filter:
     drop-shadow(0 3px 5px rgba(0, 157, 115, .22));
-  animation: mapIcon 3s ease-in-out infinite;
 }
 
 .custom-card h6 {
@@ -1725,7 +1711,6 @@ onUnmounted(() => {
   font-size: 9px !important;
   font-weight: 800;
   letter-spacing: .25px;
-  animation: resultBarGradient 5s linear infinite;
 }
 
 .custom-card>.bg-success::before {
@@ -2017,34 +2002,6 @@ onUnmounted(() => {
   }
 }
 
-@keyframes featuredLevitate {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
-@keyframes featuredShadow {
-
-  0%,
-  100% {
-    box-shadow:
-      0 14px 30px rgba(0, 144, 104, .23),
-      0 4px 8px rgba(0, 100, 80, .08);
-  }
-
-  50% {
-    box-shadow:
-      0 18px 38px rgba(0, 144, 104, .31),
-      0 0 18px rgba(0, 200, 149, .13);
-  }
-}
-
 @keyframes resultSweep {
   0% {
     left: -60%;
@@ -2149,18 +2106,6 @@ onUnmounted(() => {
   }
 }
 
-@keyframes mapIcon {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-3px) scale(1.04);
-  }
-}
-
 @keyframes statusPulse {
   0% {
     box-shadow:
@@ -2221,16 +2166,6 @@ onUnmounted(() => {
 
   50% {
     transform: scale(1.18);
-  }
-}
-
-@keyframes resultBarGradient {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  100% {
-    background-position: 300% 50%;
   }
 }
 
