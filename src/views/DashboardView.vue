@@ -120,7 +120,7 @@
                 {{ formatTime(featuredGame.result_time) }}
               </small>
             </div>
-            <span v-if="featuredGame.today_result" class="live-tag text-white">
+            <span v-if="featuredGame.today_result?.date === todayDate" class="live-tag text-white">
               <span class="live-dot"></span>
               Latest Result Today
             </span>
