@@ -5,7 +5,7 @@
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
           <div class="d-flex align-items-center gap-3">
             <div class="icon-circle bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center"><i class="bi bi-headset fs-5"></i></div>
-            <div><h6 class="fw-bold text-white mb-1">VIP Live Support Desk</h6><span class="small text-white-50">{{ connected ? 'Connected · messages sync automatically' : 'Reconnecting to support…' }}</span></div>
+            <div><h6 class="fw-bold text-white mb-1">VIP Live Support Desk</h6><span class="small text-white-50">{{ connected ? 'Connected · messages sync automatically' : humanSupportRequested ? 'Reconnecting to support…' : 'Browse FAQs before starting a chat' }}</span></div>
           </div>
           <span class="badge" :class="connected ? 'bg-success' : 'bg-secondary'">{{ connected ? 'Online' : 'Reconnecting' }}</span>
         </div>
@@ -33,7 +33,7 @@
         </div>
       </section>
       <div v-if="humanSupportRequested" class="d-flex justify-content-between align-items-center gap-2 mb-2">
-        <span class="small text-muted">Human support conversation</span><button type="button" class="btn btn-sm btn-outline-secondary" @click="humanSupportRequested = false">Back to FAQs</button>
+        <span class="small text-muted">Human support conversation</span><button type="button" class="btn btn-sm btn-outline-secondary" @click="closeHumanSupport">Back to FAQs</button>
       </div>
       <div v-if="humanSupportRequested" class="card border-0 shadow-sm rounded-4 bg-white flex-grow-1 d-flex flex-column overflow-hidden mb-2" style="max-height:65vh;min-height:380px">
         <div ref="chatFeed" class="card-body p-3 overflow-auto d-flex flex-column gap-3 bg-light-subtle">
@@ -111,6 +111,11 @@ const openHumanSupport = async () => {
   humanSupportRequested.value = true
   await syncMessages()
   if (!pollTimer) pollTimer = setInterval(syncMessages, 3000)
+}
+const closeHumanSupport = () => {
+  humanSupportRequested.value = false
+  if (pollTimer) clearInterval(pollTimer)
+  pollTimer = null
 }
 const mediaUrlCache = new Map()
 const formatTime = value => {
