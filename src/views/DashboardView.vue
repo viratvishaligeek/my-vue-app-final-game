@@ -169,7 +169,7 @@
             </div>
             <div class="text-center">
               <div class="fw-bold fs-3 text-dark">
-                {{ game.latest_result?.number ?? '--' }}
+                {{ game.latest_result?.date === todayDate ? (game.latest_result?.number ?? '--') : '--' }}
               </div>
               <div v-if="isGamePlayable(game)" class="text-danger small">
                 {{ getRemainingTime(game) }}
