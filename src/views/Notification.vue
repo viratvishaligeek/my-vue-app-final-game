@@ -12,7 +12,7 @@
           {{ pushLoading ? 'Enabling…' : (isNativeApp ? 'Enable app alerts' : 'Enable browser alerts') }}
         </button>
       </div>
-      <div v-if="isNativeApp && appUpdate.latest_url" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
+      <div v-if="isAndroidApp && appUpdate.latest_url" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
         <div>
           <div class="fw-bold text-dark"><i class="bi bi-arrow-down-circle me-2"></i>Latest Android app package</div>
           <div class="small text-muted">Published {{ formatAppUpdateDate(appUpdate.update_date) }}. Downloading the APK opens the normal Android installation flow; it will not install silently.</div>
@@ -94,6 +94,7 @@ const notifications = ref([])
 const hasLoadedOnce = ref(false)
 let notificationRefreshTimer = null
 const isNativeApp = Capacitor.isNativePlatform()
+const isAndroidApp = Capacitor.getPlatform() === 'android'
 const pushLoading = ref(false)
 const pushStatus = ref('')
 const appUpdate = ref({ latest_url: '', update_date: '2026-08-12' })
@@ -108,7 +109,7 @@ const fetchAppUpdate = async () => {
     } catch {
       latestUrl = ''
     }
-    const updateDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(String(data?.update_date || ''))
+    const updateDate = /^\d{4}-\d{2}-\d{2}$/.test(String(data?.update_date || ''))
       ? data.update_date
       : '2026-08-12'
     appUpdate.value = { latest_url: latestUrl, update_date: updateDate }
