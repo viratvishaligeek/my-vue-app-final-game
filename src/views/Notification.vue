@@ -153,7 +153,7 @@ const refreshPushPermission = async () => {
         permissionMessage.value = 'Device notification permission is enabled.'
       } else if (receive === 'denied') {
         pushPermissionState.value = 'denied'
-        permissionMessage.value = 'Notifications are blocked. Open Android Settings → Apps → Play Online Khaiwal → Notifications to enable them.'
+        permissionMessage.value = isAndroidApp ? 'Notifications are blocked. Open Android Settings → Apps → Play Online Khaiwal → Notifications to enable them.' : 'Notifications are blocked by device settings. Open this app’s notification settings and allow notifications.'
       } else {
         pushPermissionState.value = 'prompt'
         permissionMessage.value = 'Permission will be requested only after you tap Enable.'
