@@ -834,7 +834,7 @@ const createGatewayOrder = async () => {
 
     const host = parsedUrl.hostname.toLowerCase()
     const trustedProviderHost = ['ekqr.in', 'upigateway.com'].some(
-      (domain) => host === domain || host.endsWith(`.\u0024{domain}`),
+      (domain) => host === domain || host.endsWith('.' + domain),
     )
     if (parsedUrl.protocol !== 'https:' || !trustedProviderHost || !requestId) {
       throw new Error('The provider returned an unsupported payment URL. Please contact support; no wallet credit was made.')
