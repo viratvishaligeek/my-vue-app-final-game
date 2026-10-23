@@ -592,6 +592,7 @@ let activityTimer = null
 let pendingTimer = null
 let gatewayStatusTimer = null
 let appStateListener = null
+let appBackButtonListener = null
 let gatewayStatusInFlight = false
 
 
@@ -1350,6 +1351,13 @@ onMounted(async () => {
     appStateListener = await App.addListener('appStateChange', ({ isActive }) => {
       if (isActive && showGatewayModal.value) void refreshGatewayPaymentStatus()
     })
+    appBackButtonListener = await App.addListener('backButton', ({ canGoBack }) => {
+      if (showGatewayModal.value) {
+        closeGatewayPayment()
+      } else if (canGoBack) {
+        router.back()
+      }
+    })
   } catch (error) {
     console.warn('Unable to register app resume listener:', error)
   }
@@ -1389,6 +1397,10 @@ onBeforeUnmount(async () => {
   if (appStateListener) {
     await appStateListener.remove()
     appStateListener = null
+  }
+  if (appBackButtonListener) {
+    await appBackButtonListener.remove()
+    appBackButtonListener = null
   }
 
   if (activityTimer) {
