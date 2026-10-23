@@ -108,10 +108,14 @@
                 </td>
 
                 <td v-for="game in gameHeaders" :key="game.id" class="py-2">
-                  <span v-if="row.results[game.id]" class="result-badge fw-black" :class="row.is_today
-                    ? 'text-danger fs-6'
-                    : 'text-dark fs-7'
-                    ">
+                  <span
+                    v-if="row.results[game.id] !== null && row.results[game.id] !== undefined && row.results[game.id] !== ''"
+                    class="result-badge fw-black"
+                    :class="[
+                      row.is_today ? 'text-danger fs-6' : 'text-dark fs-7',
+                      isJodaResult(row.results[game.id]) ? 'joda-highlight' : '',
+                    ]"
+                  >
                     {{ row.results[game.id] }}
                   </span>
 
@@ -210,6 +214,13 @@ const gameHeaders = computed(() =>
 )
 
 const getMonthName = (month) => months[month - 1]
+
+// Exactly two identical digits; numeric 0 must remain the valid result 00.
+const isJodaResult = (value) => {
+  if (value === null || value === undefined || value === '') return false
+  const normalized = typeof value === 'number' && value === 0 ? '00' : String(value).trim()
+  return /^(00|11|22|33|44|55|66|77|88|99)$/.test(normalized)
+}
 
 const selectedGameId = computed(() => {
   const gameId = route.query.game
@@ -319,5 +330,14 @@ onMounted(() => {
 
 .result-badge {
   letter-spacing: 0.5px;
+}
+
+.result-badge.joda-highlight {
+  display: inline-block;
+  padding: 0.12rem 0.35rem;
+  border: 1px solid #a3cfbb;
+  border-radius: 0.35rem;
+  background-color: #d1e7dd;
+  color: #0f5132 !important;
 }
 </style>
