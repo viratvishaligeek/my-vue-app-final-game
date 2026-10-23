@@ -10,6 +10,7 @@ const CACHE_POLICIES = [
   { match: (path) => path === '/games/list', ttl: 2 * 60 * 1000 },
   { match: (path) => path === '/result-chart/index', ttl: 60 * 1000 },
   { match: (path) => path === '/wallet/payment-methods', ttl: 30 * 1000 },
+  { match: (path) => path === '/notifications', ttl: 5 * 1000 },
   { match: (path) => path === '/faqs', ttl: 5 * 60 * 1000, public: true, persistent: true },
   { match: (path) => path === '/app-update', ttl: 5 * 60 * 1000, public: true, persistent: true },
 ]
