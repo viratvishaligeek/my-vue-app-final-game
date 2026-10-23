@@ -4,25 +4,32 @@
       <div class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
         <div>
           <div class="fw-bold text-dark"><i class="bi bi-bell-fill me-2"></i>Stay up to date</div>
-          <div class="small text-muted">{{ isNativeApp ? 'Enable app notifications for public announcements and account updates.' : 'Enable browser notifications for public announcements.' }}</div>
           <div v-if="pushStatus" class="small mt-1" role="status">{{ pushStatus }}</div>
           <div v-if="permissionMessage" class="small mt-1 text-muted" role="status">{{ permissionMessage }}</div>
           <div v-if="preferenceMessage" class="small mt-1" role="status">{{ preferenceMessage }}</div>
         </div>
-        <button type="button" class="btn btn-sm flex-shrink-0" :class="notificationsEnabled && pushPermissionState === 'granted' ? 'btn-outline-danger' : 'btn-primary'" :disabled="pushLoading || preferenceLoading || pushPermissionState === 'checking'" @click="togglePushNotifications">
+        <button type="button" class="btn btn-sm flex-shrink-0"
+          :class="notificationsEnabled && pushPermissionState === 'granted' ? 'btn-outline-danger' : 'btn-primary'"
+          :disabled="pushLoading || preferenceLoading || pushPermissionState === 'checking'"
+          @click="togglePushNotifications">
           <span v-if="pushLoading || preferenceLoading" class="spinner-border spinner-border-sm me-1"></span>
-          {{ pushLoading || preferenceLoading ? 'Please wait…' : (notificationsEnabled && pushPermissionState === 'granted' ? 'Disable Notifications' : 'Enable Notifications') }}
+          {{ pushLoading || preferenceLoading ? 'Please wait…' : (notificationsEnabled && pushPermissionState ===
+            'granted' ? 'Disable Notifications' : 'Enable Notifications') }}
         </button>
       </div>
-      <div v-if="isAndroidApp" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
+      <div v-if="isAndroidApp"
+        class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
         <div>
           <div class="fw-bold text-dark"><i class="bi bi-arrow-down-circle me-2"></i>Update App</div>
           <div v-if="appUpdate.latest_url" class="small text-muted">
-            <span v-if="appUpdate.latest_version">Version {{ appUpdate.latest_version }} · </span>Published {{ formatAppUpdateDate(appUpdate.update_date) }}. Downloading the APK opens the normal Android installation flow; it will not install silently.
+            <span v-if="appUpdate.latest_version">Version {{ appUpdate.latest_version }} · </span>Published {{
+              formatAppUpdateDate(appUpdate.update_date) }}. Downloading the APK opens the normal Android installation
+            flow; it will not install silently.
           </div>
           <div v-else class="small text-muted">No app update package is configured yet. Please check again later.</div>
         </div>
-        <button v-if="appUpdate.latest_url" type="button" class="btn btn-sm btn-outline-primary flex-shrink-0" @click="openLatestApp">Download APK</button>
+        <button v-if="appUpdate.latest_url" type="button" class="btn btn-sm btn-outline-primary flex-shrink-0"
+          @click="openLatestApp">Download APK</button>
       </div>
       <div v-if="isInitialLoading" class="text-center py-5">
         <div class="spinner-border spinner-border-sm text-warning" role="status"></div>

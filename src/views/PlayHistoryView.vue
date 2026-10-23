@@ -39,7 +39,7 @@
         <div class="col-4">
           <div class="card border-0 shadow-xs rounded-3 p-2 text-center bg-white border-start border-3 border-danger">
             <span class="fs-8 text-muted fw-bold text-uppercase d-block">
-              Staked
+              Amount
             </span>
 
             <strong class="text-dark fs-7 font-monospace">
@@ -228,7 +228,6 @@
 
                 <div v-else-if="slip.mode === 'harup'" class="row g-2">
 
-                  <!-- RESULT -->
                   <div v-if="slip.harup_result?.ander !== null || slip.harup_result?.bahar !== null" class="col-12">
                     <div class="p-2 rounded-3 bg-dark text-white">
                       <div class="d-flex align-items-center justify-content-between">
@@ -260,7 +259,6 @@
                     </div>
                   </div>
 
-                  <!-- ANDER BETS -->
                   <div v-if="Object.keys(slip.harup_bets?.ander || {}).length" class="col-12 col-sm-6">
                     <div class="p-2 border rounded-3 bg-primary-subtle border-primary-subtle">
 
@@ -288,7 +286,6 @@
                     </div>
                   </div>
 
-                  <!-- BAHAR BETS -->
                   <div v-if="Object.keys(slip.harup_bets?.bahar || {}).length" class="col-12 col-sm-6">
                     <div class="p-2 border rounded-3 bg-info-subtle border-info-subtle">
 
@@ -563,7 +560,7 @@ const resetToToday = () => {
 const getModeLabel = (mode) => {
   switch (mode) {
     case 'single':
-      return '🎯 Single Jodi'
+      return '🎯 Jodi'
 
     case 'harup':
       return '🎲 Harup'

@@ -347,7 +347,8 @@
               </label>
               <div class="field-with-icon">
                 <i class="bi bi-receipt"></i>
-                <input v-model="manualForm.utr" type="text" autocomplete="off" placeholder="Enter 12 digit UTR" />
+                <input v-model="manualForm.utr" type="text" autocomplete="off" style="font-size: 16px;"
+                  placeholder="Enter 12 digit UTR" />
               </div>
             </div>
             <div class="form-field">

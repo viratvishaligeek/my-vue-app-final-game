@@ -105,7 +105,7 @@
           </button>
           <router-link to="/dashboard" class="d-flex align-items-center ms-2 min-width-0">
             <div class=" me-2">
-              <img src="../assets/img/logo.png" style="height: 50px; width: auto;" alt="">
+              <img src="../assets/img/logo.png" style="height: 35px; width: auto;" alt="">
             </div>
             <div class="lh-sm min-width-0">
               <div class="fw-bold text-dark text-truncate brand-title">
@@ -113,7 +113,7 @@
               </div>
               <small class="text-muted d-flex align-items-center gap-1">
                 <span class="brand-live-dot"></span>
-                Live Market
+                Official App
               </small>
             </div>
           </router-link>

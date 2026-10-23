@@ -1223,7 +1223,7 @@ onUnmounted(() => {
       rgba(255, 255, 255, .65),
       rgba(255, 255, 255, .12),
       transparent);
-  animation: actionShine 3s linear infinite;
+  animation: actionShine 5s linear infinite;
 }
 
 /* glow layer */
@@ -1332,19 +1332,6 @@ onUnmounted(() => {
   padding: 6px 9px;
   box-shadow:
     0 5px 12px rgba(0, 150, 110, .08);
-  animation: marketBadge 2.5s ease-in-out infinite;
-}
-
-.badge.bg-primary-soft::before {
-  content: "";
-  position: absolute;
-  left: -70%;
-  top: 0;
-  width: 50%;
-  height: 100%;
-  transform: skewX(-20deg);
-  background: rgba(255, 255, 255, .7);
-  animation: badgeShine 3.5s linear infinite;
 }
 
 .live-result-box {
@@ -1359,8 +1346,6 @@ onUnmounted(() => {
     0 4px 8px rgba(0, 100, 80, .08),
     inset 0 1px 0 rgba(255, 255, 255, .4);
 }
-
-/* glass moving streak */
 
 .live-result-box::before {
   content: "";
@@ -1383,20 +1368,7 @@ onUnmounted(() => {
 
 /* floating orb */
 
-.live-result-box::after {
-  content: "";
-  position: absolute;
-  width: 90px;
-  height: 90px;
-  right: -30px;
-  top: -35px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, .18);
-  background: rgba(255, 255, 255, .06);
-  box-shadow:
-    0 0 30px rgba(255, 255, 255, .06);
-  animation: orbFloat 5s ease-in-out infinite;
-}
+
 
 .horizontal-result-content {
   position: relative;
@@ -1435,7 +1407,6 @@ onUnmounted(() => {
   letter-spacing: .35px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .14);
-  animation: liveTagFloat 2.5s ease-in-out infinite;
 }
 
 .live-dot {
@@ -1459,8 +1430,6 @@ onUnmounted(() => {
   text-shadow:
     0 3px 7px rgba(0, 0, 0, .3),
     0 0 12px rgba(255, 255, 255, .14);
-  animation:
-    resultNumberGlow 2s ease-in-out infinite;
 }
 
 .custom-card {
@@ -1518,7 +1487,6 @@ onUnmounted(() => {
       #00a878,
       transparent);
   background-size: 250% 100%;
-  animation: cardEdge 2.8s linear infinite;
 }
 
 /* subtle moving reflection */
@@ -1720,7 +1688,7 @@ onUnmounted(() => {
       rgba(255, 255, 255, .25),
       transparent);
   transform: skewX(-20deg);
-  animation: bottomBarShine 3.5s linear infinite;
+  animation: bottomBarShine 8s linear infinite;
 }
 
 .spinner-border {
@@ -1973,17 +1941,6 @@ onUnmounted(() => {
   }
 }
 
-@keyframes marketBadge {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.045);
-  }
-}
 
 @keyframes badgeShine {
   0% {
@@ -2007,29 +1964,6 @@ onUnmounted(() => {
   }
 }
 
-@keyframes orbFloat {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  50% {
-    transform: translate(-12px, 12px) scale(1.08);
-  }
-}
-
-@keyframes liveTagFloat {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-2px);
-  }
-}
 
 @keyframes livePulse {
   0% {
@@ -2048,22 +1982,6 @@ onUnmounted(() => {
   }
 }
 
-@keyframes resultNumberGlow {
-
-  0%,
-  100% {
-    transform: scale(1);
-    text-shadow:
-      0 3px 7px rgba(0, 0, 0, .3);
-  }
-
-  50% {
-    transform: scale(1.09);
-    text-shadow:
-      0 3px 7px rgba(0, 0, 0, .3),
-      0 0 15px rgba(255, 255, 255, .25);
-  }
-}
 
 @keyframes marketCardEnter {
   from {
@@ -2074,16 +1992,6 @@ onUnmounted(() => {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes cardEdge {
-  from {
-    background-position: 200% 0;
-  }
-
-  to {
-    background-position: -200% 0;
   }
 }
 
@@ -2168,7 +2076,7 @@ onUnmounted(() => {
     left: -40%;
   }
 
-  45%,
+  35%,
   100% {
     left: 140%;
   }

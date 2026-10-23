@@ -82,11 +82,11 @@
           <table class="table table-bordered table-hover align-middle mb-0 text-center font-monospace fs-8">
             <thead class=" text-uppercase fs-8">
               <tr>
-                <th style="width: 70px" class="">
+                <th class="p-0 py-2 text-danger">
                   Date
                 </th>
 
-                <th v-for="game in gameHeaders" :key="game.id" class="">
+                <th v-for="game in gameHeaders" :key="game.id" class="p-2 text-success">
                   <div class="d-flex align-items-center justify-content-center gap-1">
                     <span>{{ game.name }}</span>
                   </div>
@@ -98,7 +98,7 @@
               <tr v-for="row in monthlyData" :key="row.date" :class="{
                 'table-warning fw-bold border-2 border-warning': row.is_today,
               }">
-                <td class="fw-black bg-light text-dark font-monospace py-0">
+                <td class="fw-black bg-light font-monospace p-0 text-danger">
                   {{ row.formatted_day }}
 
                   <span v-if="row.is_today" class="badge bg-danger text-white rounded-pill ms-1 d-block"

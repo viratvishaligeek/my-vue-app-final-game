@@ -12,7 +12,6 @@
       <div
         class="d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 shadow-sm border play-game-header">
         <h5 class="m-0 text-dark fw-bold d-flex align-items-center gap-2">
-          <i class="bi bi-controller text-warning fs-4"></i>
           {{ game.name }}
         </h5>
 
@@ -41,7 +40,7 @@
               <button class="nav-link fw-bold rounded-3 py-2" :class="{
                 'active bg-warning text-dark shadow-sm': activeTab === 'single',
               }" @click="changeMode('single')">
-                🎯 Single (Jodi)
+                🎯 Jodi
               </button>
             </li>
             <li class="nav-item">
@@ -76,11 +75,11 @@
               </button>
             </div>
             <div class="input-group input-group-sm mt-2">
-              <span class="input-group-text bg-light fw-bold">
+              <span class="input-group-text bg-light fw-bold text-danger">
                 ₹
               </span>
               <input v-model.number="selectedChip" type="number" min="1" step="1"
-                class="form-control text-center fw-bold" placeholder="Enter custom amount" />
+                class="form-control text-center fw-bold text-danger" placeholder="Enter custom amount" />
             </div>
           </div>
           <div class="row g-2">
@@ -117,9 +116,9 @@
               </button>
             </div>
             <div class="input-group input-group-sm">
-              <span class="input-group-text bg-light fw-bold"> ₹ </span>
+              <span class="input-group-text bg-light fw-bold text-danger"> ₹ </span>
               <input v-model.number="harupAmount" type="number" min="1" step="1"
-                class="form-control text-center fw-bold" placeholder="Custom amount" />
+                class="form-control text-center fw-bold text-danger" placeholder="Custom amount" />
             </div>
           </div>
           <div class="card p-2 mb-3 shadow-xs border-0 bg-white rounded-3">
@@ -189,9 +188,9 @@
               </button>
             </div>
             <div class="input-group input-group-sm">
-              <span class="input-group-text bg-light fw-bold"> ₹ </span>
+              <span class="input-group-text bg-light fw-bold text-danger"> ₹ </span>
               <input v-model.number="crossingAmount" type="number" min="1" step="1"
-                class="form-control text-center fw-bold" placeholder="Custom amount" />
+                class="form-control text-center fw-bold text-danger" placeholder="Custom amount" />
             </div>
           </div>
           <div class="card p-2 mb-3 shadow-xs border-0 bg-white rounded-3">
@@ -756,8 +755,8 @@ onMounted(() => {
 }
 
 .play-game-page {
-  min-height: calc(100vh - 58px);
-  padding: 10px 8px 150px !important;
+  min-height: min-content;
+  padding: 10px 8px 30px !important;
   background: radial-gradient(circle at 100% 0%, rgba(187, 134, 252, .12), transparent 28%), linear-gradient(180deg, #f6f7fb 0%, #eef2f8 100%);
   color: #20263a;
 }
