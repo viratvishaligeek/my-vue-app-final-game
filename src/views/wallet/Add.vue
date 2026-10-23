@@ -1146,7 +1146,9 @@ const refreshGatewayPaymentStatus = async () => {
       showGatewayModal.value = false
       apiMessage.type = 'success'
       apiMessage.text = 'Payment verified successfully. Your wallet has been refreshed.'
-      await authStore.verifyAuthToken()
+      if (Number.isFinite(Number(payment.wallet_balance))) {
+        authStore.updateUserData({ balance: Number(payment.wallet_balance) })
+      }
       await loadPendingPayments()
       gatewayPaymentUrl.value = ''
     } else if (status === 'failed' || status === 'rejected') {
