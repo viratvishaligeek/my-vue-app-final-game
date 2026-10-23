@@ -686,10 +686,10 @@ const handleQrUpload = (
 
   if (
     file.size >
-    2 * 1024 * 1024
+    15 * 1024 * 1024
   ) {
     errors.qrImage =
-      'File size should not exceed 2MB.'
+      'File size must not exceed 15 MB.'
     return
   }
 
