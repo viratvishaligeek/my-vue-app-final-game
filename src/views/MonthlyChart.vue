@@ -154,7 +154,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
 import api from '@/plugins/axios'
 import { isJodaResult } from '@/utils/jodaResults'
 
