@@ -151,7 +151,7 @@
       <router-view />
     </main>
 
-    <div class="bottom-nav">
+    <div v-if="!hideBottomNav" class="bottom-nav">
 
       <router-link to="/dashboard" class="nav-item" active-class="active">
         <span class="nav-icon">
@@ -192,10 +192,18 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/utils/auth'
 
 const router = useRouter()
+const route = useRoute()
+const hideBottomNav = computed(() => {
+  const path = route.path
+  return path === '/wallet/add'
+    || path === '/wallet/withdraw'
+    || path === '/monthly-chart'
+    || path.startsWith('/play-game/')
+})
 const authStore = useAuthStore()
 
 const isSidebarOpen = ref(false)
