@@ -254,6 +254,7 @@
               <i class="bi bi-x-lg"></i>
             </button>
           </div>
+          <p v-if="getSetting('add_money_notice')" class="add-money-hindi-notice" lang="hi">{{ getSetting('add_money_notice') }}</p>
           <transition name="slide-fade">
             <div v-if="apiMessage.text" class="api-message"
               :class="apiMessage.type === 'error' ? 'message-error' : 'message-success'">
