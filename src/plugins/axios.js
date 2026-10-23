@@ -16,7 +16,7 @@ const CACHE_POLICIES = [
 
 const resolveCachePolicy = (url, config = {}) => {
   if (config.cache === false) return null
-  const path = String(url || '').split('?')[0].replace(/\\/+$/, '') || '/'
+  const path = String(url || '').split('?')[0] || '/'
   return CACHE_POLICIES.find((policy) => policy.match(path)) || null
 }
 
@@ -59,8 +59,9 @@ api.get = (url, config = {}) => {
   const userScope = policy.public ? 'public' : currentUserScope()
   if (!userScope) return axiosGet(url, config)
 
-  const basePath = String(url || '').split('?')[0]
-  const query = stableQueryString(config.params || {})
+  const [basePath, inlineQuery = ''] = String(url || '').split('?')
+  const inlineParams = Object.fromEntries(new URLSearchParams(inlineQuery).entries())
+  const query = stableQueryString({ ...inlineParams, ...(config.params || {}) })
   const scope = policy.public ? 'public' : `user:${userScope}`
   const cacheKey = policy.public
     ? `app-api-cache:public:${basePath}?${query}`
@@ -90,8 +91,16 @@ api.get = (url, config = {}) => {
 
 export const getApiCacheDiagnostics = () => apiResponseCache.diagnostics()
 
+let actualHttpRequests = 0
+export const getApiCacheDiagnostics = () => ({ ...apiResponseCache.diagnostics(), actualHttpRequests })
+
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  window.__APP_API_CACHE_DIAGNOSTICS__ = getApiCacheDiagnostics
+}
+
 // Request Interceptor: Attach Token
 api.interceptors.request.use((config) => {
+  actualHttpRequests += 1
   const token = getAuthToken()
   if (token) config.headers.Authorization = `Bearer ${token}`
   if (config.showGlobalLoader !== false) {
