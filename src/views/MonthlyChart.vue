@@ -104,11 +104,15 @@
                   </span>
                 </td>
 
-                <td v-for="game in gameHeaders" :key="game.id" class="">
-                  <span v-if="row.results[game.id]" class="result-badge fw-black" :class="row.is_today
-                    ? 'text-danger fs-6'
-                    : 'text-dark fs-7'
-                    ">
+                <td v-for="game in gameHeaders" :key="game.id" class="py-2">
+                  <span
+                    v-if="row.results[game.id] !== null && row.results[game.id] !== undefined && row.results[game.id] !== ''"
+                    class="result-badge fw-black"
+                    :class="[
+                      row.is_today ? 'text-danger fs-6' : 'text-dark fs-7',
+                      isJodaResult(row.results[game.id]) ? 'joda-highlight' : '',
+                    ]"
+                  >
                     {{ row.results[game.id] }}
                   </span>
 
@@ -145,10 +149,11 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { App } from '@capacitor/app'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
 import api from '@/plugins/axios'
+import { isJodaResult } from '@/utils/jodaResults'
 
 const route = useRoute()
 
@@ -162,6 +167,8 @@ const selectedYear = ref(currentYear)
 const isLoading = ref(false)
 const monthlyData = ref([])
 const games = ref([])
+let lastFetchedAt = 0
+let appStateListener = null
 
 const months = [
   'January',
@@ -208,6 +215,7 @@ const gameHeaders = computed(() =>
 
 const getMonthName = (month) => months[month - 1]
 
+
 const selectedGameId = computed(() => {
   const gameId = route.query.game
 
@@ -240,6 +248,7 @@ const fetchMonthlyResults = async () => {
 
     games.value = payload.games || []
     monthlyData.value = payload.data || []
+    lastFetchedAt = Date.now()
   } catch (error) {
     games.value = []
     monthlyData.value = []
@@ -277,8 +286,24 @@ const hasTodayResult = (gameId) => {
   return Boolean(todayRow?.results?.[gameId])
 }
 
-onMounted(() => {
-  fetchMonthlyResults()
+onMounted(async () => {
+  try {
+    appStateListener = await App.addListener('appStateChange', ({ isActive }) => {
+      if (isActive && Date.now() - lastFetchedAt >= 60 * 1000) {
+        void fetchMonthlyResults()
+      }
+    })
+  } catch (error) {
+    console.warn('Unable to register chart foreground refresh:', error)
+  }
+  await fetchMonthlyResults()
+})
+
+onBeforeUnmount(async () => {
+  if (appStateListener) {
+    await appStateListener.remove()
+    appStateListener = null
+  }
 })
 </script>
 
@@ -316,5 +341,14 @@ onMounted(() => {
 
 .result-badge {
   letter-spacing: 0.5px;
+}
+
+.result-badge.joda-highlight {
+  display: inline-block;
+  padding: 0.12rem 0.35rem;
+  border: 1px solid #a3cfbb;
+  border-radius: 0.35rem;
+  background-color: #d1e7dd;
+  color: #0f5132 !important;
 }
 </style>

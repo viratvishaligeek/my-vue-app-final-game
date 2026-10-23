@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import api from '@/plugins/axios'
+import { apiResponseCache } from '@/utils/apiCache'
 
 const AUTH_TOKEN_KEY = 'auth_token'
 const USER_KEY = 'auth_user'
@@ -72,6 +73,7 @@ export function setStoredUser(user, remember = false) {
  * Clear all authentication-related storage.
  */
 export function clearAuthStorage() {
+  apiResponseCache.clearPrivate()
   localStorage.removeItem(AUTH_TOKEN_KEY)
   sessionStorage.removeItem(AUTH_TOKEN_KEY)
 
@@ -109,6 +111,7 @@ export const useAuthStore = defineStore('auth', {
      * This should be used after login/register.
      */
     setAuth(token, user = null, remember = false) {
+      apiResponseCache.clearPrivate()
       this.token = token
       this.user = user
       this.isAuthVerified = true
@@ -141,6 +144,9 @@ export const useAuthStore = defineStore('auth', {
     setUser(userData) {
       if (!userData) {
         return
+      }
+      if (this.user?.id !== undefined && this.user?.id !== userData.id) {
+        apiResponseCache.clearPrivate()
       }
       this.user = userData
       const remember = Boolean(localStorage.getItem(AUTH_TOKEN_KEY))

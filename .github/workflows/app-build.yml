@@ -37,6 +37,7 @@ jobs:
           if (missing.length) throw new Error('Missing Firebase settings: ' + missing.join(', '))
           appendFileSync(process.env.GITHUB_ENV, Object.entries(values).map(([key, value]) => key + '=' + value).join('\n') + '\n')
           NODE
+      - run: npm run test:unit
       - run: npm run build
       - run: npx oxlint src
 

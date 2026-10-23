@@ -16,6 +16,17 @@
         <span v-else-if="pushPermissionState === 'denied'" class="badge bg-warning text-dark flex-shrink-0">Blocked</span>
         <span v-else class="badge bg-secondary flex-shrink-0">Unavailable</span>
       </div>
+      <div class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
+        <div>
+          <div class="fw-bold text-dark">Account notifications</div>
+          <div class="small text-muted">Control push alerts for this account. Essential in-app records remain available.</div>
+          <div v-if="preferenceMessage" class="small mt-1" role="status">{{ preferenceMessage }}</div>
+        </div>
+        <button type="button" class="btn btn-sm flex-shrink-0" :class="notificationsEnabled ? 'btn-outline-danger' : 'btn-success'" :disabled="preferenceLoading" @click="toggleNotificationPreference">
+          <span v-if="preferenceLoading" class="spinner-border spinner-border-sm me-1"></span>
+          {{ notificationsEnabled ? 'Disable Notifications' : 'Enable Notifications' }}
+        </button>
+      </div>
       <div v-if="isAndroidApp" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
         <div>
           <div class="fw-bold text-dark"><i class="bi bi-arrow-down-circle me-2"></i>Update App</div>
@@ -107,7 +118,36 @@ const pushLoading = ref(false)
 const pushStatus = ref('')
 const pushPermissionState = ref('checking')
 const permissionMessage = ref('')
+const notificationsEnabled = ref(true)
+const preferenceLoading = ref(false)
+const preferenceMessage = ref('')
 const appUpdate = ref({ latest_url: '', latest_version: '', update_date: '2026-08-12' })
+
+const loadNotificationPreference = async () => {
+  try {
+    const { data } = await api.get('/notifications/preference', { showGlobalLoader: false })
+    notificationsEnabled.value = data?.notifications_enabled !== false
+  } catch (error) {
+    preferenceMessage.value = 'Unable to load your notification preference.'
+    console.warn('Unable to load notification preference:', error?.message || error)
+  }
+}
+
+const toggleNotificationPreference = async () => {
+  if (preferenceLoading.value) return
+  preferenceLoading.value = true
+  preferenceMessage.value = ''
+  const nextEnabled = !notificationsEnabled.value
+  try {
+    const { data } = await api.put('/notifications/preference', { enabled: nextEnabled }, { showGlobalLoader: false })
+    notificationsEnabled.value = data?.notifications_enabled === true
+    preferenceMessage.value = data?.message || 'Notification preference saved.'
+  } catch (error) {
+    preferenceMessage.value = error?.response?.data?.message || 'Unable to save your notification preference.'
+  } finally {
+    preferenceLoading.value = false
+  }
+}
 
 const fetchAppUpdate = async () => {
   try {
@@ -460,6 +500,7 @@ const handlePermissionVisibilityChange = () => {
 onMounted(() => {
   document.addEventListener('visibilitychange', handlePermissionVisibilityChange)
   void refreshPushPermission()
+  void loadNotificationPreference()
   void fetchAppUpdate()
   fetchNotifications()
   notificationRefreshTimer = setInterval(() => {

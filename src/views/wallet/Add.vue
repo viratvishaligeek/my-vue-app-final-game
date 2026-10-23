@@ -228,12 +228,63 @@
               <small v-if="payment.utr">
                 UTR: {{ payment.utr }}
               </small>
+              <button
+                v-if="payment.payment_method === 'gateway' && payment.gateway_payment_url && ['pending', 'processing'].includes(String(payment.status).toLowerCase())"
+                type="button"
+                class="resume-payment-btn"
+                @click="resumeGatewayPayment(payment)"
+              >
+                Resume payment
+              </button>
             </div>
           </div>
         </div>
       </section>
     </main>
 
+
+    <transition name="modal">
+      <div v-if="showGatewayModal" class="modal-backdrop-custom gateway-payment-backdrop" @click.self="closeGatewayPayment">
+        <div class="manual-modal gateway-payment-modal">
+          <div class="modal-header-custom">
+            <div class="modal-title-wrap">
+              <div class="modal-upi-icon"><i class="bi bi-qr-code-scan"></i></div>
+              <div>
+                <h5>Complete UPI payment</h5>
+                <small>₹{{ formatCurrency(gatewayPaymentAmount) }}</small>
+              </div>
+            </div>
+            <button type="button" class="modal-close" aria-label="Close payment screen" @click="closeGatewayPayment">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          <div class="modal-body-custom">
+            <div class="gateway-payment-status" :class="getStatusClass(gatewayPaymentStatus)">
+              <span class="status-dot"></span>
+              <strong>{{ formatStatus(gatewayPaymentStatus) }}</strong>
+            </div>
+            <p class="gateway-payment-help">
+              Complete the payment in the secure UPIGateway screen below. Keep this screen open while the server verifies your payment.
+              Closing this screen does not cancel the transaction.
+            </p>
+            <iframe
+              v-if="gatewayPaymentUrl"
+              :src="gatewayPaymentUrl"
+              title="UPIGateway UPI payment"
+              class="gateway-payment-frame"
+              referrerpolicy="no-referrer"
+              allow="payment *"
+            ></iframe>
+            <p class="gateway-payment-status-message" role="status">{{ gatewayStatusMessage }}</p>
+            <button type="button" class="manual-submit-btn" :disabled="gatewayStatusChecking" @click="refreshGatewayPaymentStatus">
+              <span v-if="gatewayStatusChecking" class="spinner-border spinner-border-sm me-2"></span>
+              Check payment status
+            </button>
+            <button type="button" class="gateway-back-btn" @click="closeGatewayPayment">Back to Add Money</button>
+          </div>
+        </div>
+      </div>
+    </transition>
 
     <transition name="modal">
       <div v-if="showManualModal" class="modal-backdrop-custom" @click.self="closeManualModal">
@@ -254,6 +305,7 @@
               <i class="bi bi-x-lg"></i>
             </button>
           </div>
+          <p v-if="getSetting('add_money_notice')" class="add-money-hindi-notice" lang="hi">{{ getSetting('add_money_notice') }}</p>
           <transition name="slide-fade">
             <div v-if="apiMessage.text" class="api-message"
               :class="apiMessage.type === 'error' ? 'message-error' : 'message-success'">
@@ -316,7 +368,7 @@
                   </div>
                   <strong>Upload screenshot</strong>
                   <small>
-                    JPG, PNG or WEBP • Max 5MB
+                    JPG, PNG or WEBP • Max 15 MB
                   </small>
                 </template>
                 <template v-else>
@@ -355,11 +407,11 @@ import {
 
 import { useSettings } from '@/composables/useSettings'
 import { useRouter, useRoute } from 'vue-router'
-import { Capacitor } from '@capacitor/core'
-import { Browser } from '@capacitor/browser'
+import { App } from '@capacitor/app'
 import { useAuthStore } from '@/utils/auth'
 import api from '@/plugins/axios'
 import { playNotificationSound } from '@/services/notificationAudio'
+import { isTrustedGatewayPaymentUrl } from '@/utils/paymentUrl'
 
 const router = useRouter()
 const route = useRoute()
@@ -396,6 +448,12 @@ const showManualModal = ref(false)
 
 const pendingLoading = ref(false)
 const pendingGatewayRequestId = ref(null)
+const showGatewayModal = ref(false)
+const gatewayPaymentUrl = ref('')
+const gatewayPaymentAmount = ref(0)
+const gatewayPaymentStatus = ref('processing')
+const gatewayStatusMessage = ref('Payment is waiting for provider confirmation.')
+const gatewayStatusChecking = ref(false)
 
 const quickAmounts = [
   100,
@@ -507,7 +565,10 @@ const currentActivity = computed(() => {
 
 let activityTimer = null
 let pendingTimer = null
-let browserFinishedListener = null
+let gatewayStatusTimer = null
+let appStateListener = null
+let appBackButtonListener = null
+let gatewayStatusInFlight = false
 
 
 /*
@@ -724,73 +785,41 @@ const handleAddMoney = async () => {
 */
 
 const createGatewayOrder = async () => {
-
+  if (isLoading.value) return
   isLoading.value = true
 
   try {
-
-    const response =
-      await api.post(
-        '/wallet/gateway/create-order',
-        {
-          amount: Number(form.amount),
-        }
-      )
-
+    const response = await api.post('/wallet/gateway/create-order', {
+      amount: Number(form.amount),
+    })
 
     if (!response.data?.success) {
-      throw new Error(
-        response.data?.message ||
-        'Unable to start payment.'
-      )
+      throw new Error(response.data?.message || 'Unable to start payment.')
     }
 
-
-    void playNotificationSound('add_money', `gateway-${response.data?.data?.request_id || Date.now()}`)
-
-    const paymentUrl =
-      response.data?.data?.payment_url
-
-
-    if (!paymentUrl) {
-      throw new Error(
-        'Payment URL missing.'
-      )
+    const paymentData = response.data?.data || {}
+    const paymentUrl = String(paymentData.payment_url || '')
+    const requestId = paymentData.request_id
+    if (!isTrustedGatewayPaymentUrl(paymentUrl) || !requestId) {
+      throw new Error('The provider returned an unsupported payment URL. Please contact support; no wallet credit was made.')
     }
 
-
-    pendingGatewayRequestId.value =
-      response.data?.data?.request_id
-        ? String(response.data.data.request_id)
-        : null
-
-    if (Capacitor.isNativePlatform()) {
-      // Keep the app's WebView and auth storage alive while payment runs externally.
-      await Browser.open({ url: paymentUrl })
-    } else {
-      window.location.href = paymentUrl
-    }
-
+    pendingGatewayRequestId.value = String(requestId)
+    gatewayPaymentAmount.value = Number(form.amount)
+    gatewayPaymentUrl.value = paymentUrl
+    gatewayPaymentStatus.value = 'processing'
+    gatewayStatusMessage.value = 'Waiting for UPIGateway to confirm payment.'
+    showGatewayModal.value = true
+    startGatewayStatusPolling()
+    await refreshGatewayPaymentStatus()
   } catch (error) {
-
-    console.error(
-      'Gateway payment error:',
-      error
-    )
-
+    console.error('Gateway payment error:', error)
     apiMessage.type = 'error'
-
-    apiMessage.text =
-      error.response?.data?.message ||
-      error.message ||
-      'Unable to start payment.'
-
+    apiMessage.text = error.response?.data?.message || error.message || 'Unable to start payment.'
   } finally {
-
     isLoading.value = false
   }
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -828,13 +857,13 @@ const handleScreenshot = (event) => {
 
   if (
     file.size >
-    5 * 1024 * 1024
+    15 * 1024 * 1024
   ) {
 
     apiMessage.type = 'error'
 
     apiMessage.text =
-      'Screenshot must be less than 5MB.'
+      'Screenshot must not exceed 15 MB.'
 
     return
   }
@@ -1070,47 +1099,84 @@ const loadPendingPayments = async () => {
 
 const refreshGatewayPaymentStatus = async () => {
   const requestId = pendingGatewayRequestId.value
-  if (!requestId) return
+  if (!requestId || gatewayStatusInFlight) return
 
+  gatewayStatusInFlight = true
+  gatewayStatusChecking.value = true
   try {
-    await authStore.verifyAuthToken()
-
-    // Query all recent credit requests here: filtering to pending/processing would
-    // hide the approved/failed row we need to display after returning from checkout.
-    const response = await api.get(PENDING_PAYMENT_ENDPOINT, {
-      params: { type: 'credit', per_page: 50 },
+    const response = await api.get(`/wallet/gateway/${encodeURIComponent(requestId)}/status`, {
+      cache: false,
+      showGlobalLoader: false,
     })
+    const payment = response.data?.data
+    const status = String(payment?.status || '').toLowerCase()
+    if (!payment) throw new Error('Payment status response was empty.')
 
-    let list = response.data?.data
-    if (list && !Array.isArray(list) && Array.isArray(list.data)) list = list.data
-
-    const request = Array.isArray(list)
-      ? list.find((item) => String(item.id) === String(requestId))
-      : null
-    const status = String(request?.status || '').toLowerCase()
+    gatewayPaymentStatus.value = status || 'processing'
+    gatewayStatusMessage.value = payment.message || 'Payment is still pending verification.'
 
     if (status === 'approved') {
+      stopGatewayStatusPolling()
+      showGatewayModal.value = false
       apiMessage.type = 'success'
-      apiMessage.text = 'Payment successful. Wallet balance has been refreshed.'
+      apiMessage.text = 'Payment verified successfully. Your wallet has been refreshed.'
+      if (Number.isFinite(Number(payment.wallet_balance))) {
+        authStore.updateUserData({ balance: Number(payment.wallet_balance) })
+      }
+      await loadPendingPayments()
+      gatewayPaymentUrl.value = ''
     } else if (status === 'failed' || status === 'rejected') {
+      stopGatewayStatusPolling()
       apiMessage.type = 'error'
-      apiMessage.text = 'Payment failed. If money was deducted, please contact support.'
-    } else if (!request) {
-      apiMessage.type = 'error'
-      apiMessage.text = 'Payment status is not available yet. Please refresh pending payments shortly.'
-    } else {
-      apiMessage.type = 'error'
-      apiMessage.text = 'Payment is still being verified. Please refresh pending payments shortly.'
+      apiMessage.text = 'The provider confirmed that this payment failed. You can safely start a new payment.'
+      await loadPendingPayments()
     }
-
-    await loadPendingPayments()
   } catch (error) {
+    // A timeout or unreachable API is not evidence of payment failure.
+    gatewayStatusMessage.value = 'Status could not be refreshed. Your payment remains unconfirmed; try again shortly.'
     console.warn('Unable to refresh gateway payment status:', error)
-    apiMessage.type = 'error'
-    apiMessage.text = 'Payment status could not be refreshed. Please check your wallet again shortly.'
+  } finally {
+    gatewayStatusChecking.value = false
+    gatewayStatusInFlight = false
   }
 }
 
+const startGatewayStatusPolling = () => {
+  stopGatewayStatusPolling()
+  gatewayStatusTimer = setInterval(() => {
+    if (showGatewayModal.value && !['approved', 'failed', 'rejected'].includes(gatewayPaymentStatus.value)) {
+      void refreshGatewayPaymentStatus()
+    }
+  }, 5000)
+}
+
+const stopGatewayStatusPolling = () => {
+  if (gatewayStatusTimer) {
+    clearInterval(gatewayStatusTimer)
+    gatewayStatusTimer = null
+  }
+}
+
+const closeGatewayPayment = () => {
+  showGatewayModal.value = false
+  stopGatewayStatusPolling()
+  if (pendingGatewayRequestId.value && !['approved', 'failed', 'rejected'].includes(gatewayPaymentStatus.value)) {
+    apiMessage.type = 'error'
+    apiMessage.text = 'Payment is still pending. You can resume it from Pending payments; closing this screen does not cancel it.'
+  }
+}
+
+const resumeGatewayPayment = (payment) => {
+  if (!payment?.id || !payment?.gateway_payment_url) return
+  pendingGatewayRequestId.value = String(payment.id)
+  gatewayPaymentUrl.value = String(payment.gateway_payment_url)
+  gatewayPaymentAmount.value = Number(payment.amount || 0)
+  gatewayPaymentStatus.value = String(payment.status || 'processing').toLowerCase()
+  gatewayStatusMessage.value = 'Reopened pending payment. Checking the provider status now.'
+  showGatewayModal.value = true
+  startGatewayStatusPolling()
+  void refreshGatewayPaymentStatus()
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -1246,17 +1312,19 @@ const startPendingRefresh = () => {
 */
 
 onMounted(async () => {
-  if (Capacitor.isNativePlatform()) {
-    try {
-      browserFinishedListener = await Browser.addListener(
-        'browserFinished',
-        () => {
-          void refreshGatewayPaymentStatus()
-        },
-      )
-    } catch (error) {
-      console.warn('Unable to register payment browser listener:', error)
-    }
+  try {
+    appStateListener = await App.addListener('appStateChange', ({ isActive }) => {
+      if (isActive && showGatewayModal.value) void refreshGatewayPaymentStatus()
+    })
+    appBackButtonListener = await App.addListener('backButton', ({ canGoBack }) => {
+      if (showGatewayModal.value) {
+        closeGatewayPayment()
+      } else if (canGoBack) {
+        router.back()
+      }
+    })
+  } catch (error) {
+    console.warn('Unable to register app resume listener:', error)
   }
 
   await Promise.all([
@@ -1267,19 +1335,12 @@ onMounted(async () => {
 
   if (String(route.query.gateway_return || '') === '1') {
     pendingGatewayRequestId.value = String(route.query.request_id || '')
-
     if (pendingGatewayRequestId.value) {
       await refreshGatewayPaymentStatus()
     } else {
-      const status = String(route.query.status || '').toLowerCase()
-      apiMessage.type = status === 'approved' ? 'success' : 'error'
-      apiMessage.text = status === 'approved'
-        ? 'Payment successful. Wallet balance has been refreshed.'
-        : status === 'pending' || status === 'processing'
-          ? 'Payment is still being verified. Please refresh pending payments shortly.'
-          : 'Payment could not be completed. If money was deducted, please contact support.'
-
-      await authStore.verifyAuthToken()
+      // A return URL is only a navigation signal, never proof of payment.
+      apiMessage.type = 'error'
+      apiMessage.text = 'Payment returned to the app, but the transaction could not be identified. Check Pending payments for its verified status.'
       await loadPendingPayments()
     }
 
@@ -1297,10 +1358,14 @@ onMounted(async () => {
 
 
 onBeforeUnmount(async () => {
-
-  if (browserFinishedListener) {
-    await browserFinishedListener.remove()
-    browserFinishedListener = null
+  stopGatewayStatusPolling()
+  if (appStateListener) {
+    await appStateListener.remove()
+    appStateListener = null
+  }
+  if (appBackButtonListener) {
+    await appBackButtonListener.remove()
+    appBackButtonListener = null
   }
 
   if (activityTimer) {
@@ -2226,6 +2291,64 @@ onBeforeUnmount(async () => {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+}
+
+.gateway-payment-modal {
+  max-width: 560px;
+}
+
+.gateway-payment-help {
+  color: #66727d;
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 10px 0 12px;
+}
+
+.gateway-payment-frame {
+  width: 100%;
+  height: min(52vh, 470px);
+  min-height: 300px;
+  border: 1px solid #e5eaea;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.gateway-payment-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+}
+
+.gateway-payment-status-message {
+  margin: 10px 0 0;
+  color: #66727d;
+  font-size: 10px;
+  text-align: center;
+}
+
+.gateway-back-btn,
+.resume-payment-btn {
+  border: 1px solid #dfe5e4;
+  border-radius: 10px;
+  background: #fff;
+  color: #536071;
+  padding: 9px 12px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.gateway-back-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.resume-payment-btn {
+  margin-top: 4px;
+  color: #008b65;
+  border-color: #bce8d9;
 }
 
 .manual-modal {

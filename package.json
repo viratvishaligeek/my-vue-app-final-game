@@ -12,7 +12,8 @@
     "lint:eslint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
     "assets:android": "npx --yes @capacitor/assets generate --android",
-    "build:android": "npm run assets:android && npm run build && npx cap sync android && cd android && ./gradlew assembleDebug"
+    "build:android": "npm run assets:android && npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
+    "test:unit": "node --test src/utils/*.test.js"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",
