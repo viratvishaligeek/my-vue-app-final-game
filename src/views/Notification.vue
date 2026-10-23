@@ -8,23 +8,9 @@
           <div v-if="pushStatus" class="small mt-1" role="status">{{ pushStatus }}</div>
           <div v-if="permissionMessage" class="small mt-1 text-muted" role="status">{{ permissionMessage }}</div>
         </div>
-        <button v-if="pushPermissionState === 'prompt' || pushPermissionState === 'checking'" type="button" class="btn btn-sm btn-primary flex-shrink-0" :disabled="pushLoading || pushPermissionState === 'checking'" @click="enablePush">
-          <span v-if="pushLoading" class="spinner-border spinner-border-sm me-1"></span>
-          {{ pushLoading ? 'Enabling…' : (isNativeApp ? 'Enable app alerts' : 'Enable browser alerts') }}
-        </button>
-        <span v-else-if="pushPermissionState === 'granted'" class="badge bg-success flex-shrink-0"><i class="bi bi-check-circle me-1"></i>Enabled</span>
-        <span v-else-if="pushPermissionState === 'denied'" class="badge bg-warning text-dark flex-shrink-0">Blocked</span>
-        <span v-else class="badge bg-secondary flex-shrink-0">Unavailable</span>
-      </div>
-      <div class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
-        <div>
-          <div class="fw-bold text-dark">Account notifications</div>
-          <div class="small text-muted">Control push alerts for this account. Essential in-app records remain available.</div>
-          <div v-if="preferenceMessage" class="small mt-1" role="status">{{ preferenceMessage }}</div>
-        </div>
-        <button type="button" class="btn btn-sm flex-shrink-0" :class="notificationsEnabled ? 'btn-outline-danger' : 'btn-success'" :disabled="preferenceLoading" @click="toggleNotificationPreference">
-          <span v-if="preferenceLoading" class="spinner-border spinner-border-sm me-1"></span>
-          {{ notificationsEnabled ? 'Disable Notifications' : 'Enable Notifications' }}
+        <button type="button" class="btn btn-sm flex-shrink-0" :class="notificationsEnabled && pushPermissionState === 'granted' ? 'btn-outline-danger' : 'btn-primary'" :disabled="pushLoading || preferenceLoading || pushPermissionState === 'checking'" @click="togglePushNotifications">
+          <span v-if="pushLoading || preferenceLoading" class="spinner-border spinner-border-sm me-1"></span>
+          {{ pushLoading || preferenceLoading ? 'Please wait…' : (notificationsEnabled && pushPermissionState === 'granted' ? 'Disable Notifications' : 'Enable Notifications') }}
         </button>
       </div>
       <div v-if="isAndroidApp" class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
@@ -105,7 +91,7 @@ import api from '@/plugins/axios'
 import { Capacitor } from '@capacitor/core'
 import { Browser } from '@capacitor/browser'
 import { PushNotifications } from '@capacitor/push-notifications'
-import { subscribeToPush } from '@/services/pushNotifications'
+import { subscribeToPush, disablePush } from '@/services/pushNotifications'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { notificationEventFromText, playNotificationSound } from '@/services/notificationAudio'
 
@@ -133,19 +119,53 @@ const loadNotificationPreference = async () => {
   }
 }
 
-const toggleNotificationPreference = async () => {
-  if (preferenceLoading.value) return
-  preferenceLoading.value = true
-  preferenceMessage.value = ''
-  const nextEnabled = !notificationsEnabled.value
+const saveNotificationPreference = async (enabled) => {
+  const { data } = await api.put('/notifications/preference', { enabled }, { showGlobalLoader: false })
+  notificationsEnabled.value = data?.notifications_enabled === true
+  return data
+}
+
+const togglePushNotifications = async () => {
+  if (pushLoading.value || preferenceLoading.value) return
+  pushStatus.value = ''
+  permissionMessage.value = ''
+
+  const shouldDisable = notificationsEnabled.value && pushPermissionState.value === 'granted'
+  if (shouldDisable) {
+    preferenceLoading.value = true
+    try {
+      await saveNotificationPreference(false)
+      const result = await disablePush()
+      pushStatus.value = result.message
+      preferenceMessage.value = 'Push notifications are disabled. Your existing in-app notification history remains available.'
+      await refreshPushPermission()
+    } catch (error) {
+      preferenceMessage.value = error?.response?.data?.message || 'Unable to save your notification preference.'
+    } finally {
+      preferenceLoading.value = false
+    }
+    return
+  }
+
+  pushLoading.value = true
   try {
-    const { data } = await api.put('/notifications/preference', { enabled: nextEnabled }, { showGlobalLoader: false })
-    notificationsEnabled.value = data?.notifications_enabled === true
-    preferenceMessage.value = data?.message || 'Notification preference saved.'
-  } catch (error) {
-    preferenceMessage.value = error?.response?.data?.message || 'Unable to save your notification preference.'
+    // Ask for OS/browser permission only through this single control.
+    const result = await subscribeToPush()
+    pushStatus.value = result.message
+    if (result.ok) {
+      preferenceLoading.value = true
+      try {
+        await saveNotificationPreference(true)
+        preferenceMessage.value = 'Push notifications are enabled.'
+      } catch (error) {
+        preferenceMessage.value = error?.response?.data?.message || 'Device permission is enabled, but the account preference could not be saved.'
+      } finally {
+        preferenceLoading.value = false
+      }
+    }
+    await refreshPushPermission()
   } finally {
-    preferenceLoading.value = false
+    pushLoading.value = false
   }
 }
 
