@@ -230,10 +230,7 @@
               </small>
               <button
                 v-if="payment.payment_method === 'gateway' && payment.gateway_payment_url && ['pending', 'processing'].includes(String(payment.status).toLowerCase())"
-                type="button"
-                class="resume-payment-btn"
-                @click="resumeGatewayPayment(payment)"
-              >
+                type="button" class="resume-payment-btn" @click="resumeGatewayPayment(payment)">
                 Resume payment
               </button>
             </div>
@@ -244,7 +241,8 @@
 
 
     <transition name="modal">
-      <div v-if="showGatewayModal" class="modal-backdrop-custom gateway-payment-backdrop" @click.self="closeGatewayPayment">
+      <div v-if="showGatewayModal" class="modal-backdrop-custom gateway-payment-backdrop"
+        @click.self="closeGatewayPayment">
         <div class="manual-modal gateway-payment-modal">
           <div class="modal-header-custom">
             <div class="modal-title-wrap">
@@ -264,19 +262,16 @@
               <strong>{{ formatStatus(gatewayPaymentStatus) }}</strong>
             </div>
             <p class="gateway-payment-help">
-              Complete the payment in the secure UPIGateway screen below. Keep this screen open while the server verifies your payment.
+              Complete the payment in the secure UPIGateway screen below. Keep this screen open while the server
+              verifies
+              your payment.
               Closing this screen does not cancel the transaction.
             </p>
-            <iframe
-              v-if="gatewayPaymentUrl"
-              :src="gatewayPaymentUrl"
-              title="UPIGateway UPI payment"
-              class="gateway-payment-frame"
-              referrerpolicy="no-referrer"
-              allow="payment *"
-            ></iframe>
+            <iframe v-if="gatewayPaymentUrl" :src="gatewayPaymentUrl" title="UPIGateway UPI payment"
+              class="gateway-payment-frame" referrerpolicy="no-referrer" allow="payment *"></iframe>
             <p class="gateway-payment-status-message" role="status">{{ gatewayStatusMessage }}</p>
-            <button type="button" class="manual-submit-btn" :disabled="gatewayStatusChecking" @click="refreshGatewayPaymentStatus">
+            <button type="button" class="manual-submit-btn" :disabled="gatewayStatusChecking"
+              @click="refreshGatewayPaymentStatus">
               <span v-if="gatewayStatusChecking" class="spinner-border spinner-border-sm me-2"></span>
               Check payment status
             </button>
@@ -305,7 +300,6 @@
               <i class="bi bi-x-lg"></i>
             </button>
           </div>
-          <p v-if="getSetting('add_money_notice')" class="add-money-hindi-notice" lang="hi">{{ getSetting('add_money_notice') }}</p>
           <transition name="slide-fade">
             <div v-if="apiMessage.text" class="api-message"
               :class="apiMessage.type === 'error' ? 'message-error' : 'message-success'">
@@ -343,8 +337,8 @@
             </div>
             <div class="manual-instruction">
               <i class="bi bi-info-circle-fill"></i>
-              <span>
-                दिए गए QR कोड पर पेमेंट करने के बाद UTR नंबर दर्ज करें और पेमेंट का स्क्रीनशॉट अपलोड करें।
+              <span v-if="getSetting('add_money_notice')" class="add-money-hindi-notice" lang="hi">{{
+                getSetting('add_money_notice') }}
               </span>
             </div>
             <div class="form-field">

@@ -143,7 +143,7 @@
                   'btn',
                   'rounded-pill',
                   'text-capitalize',
-                  filterType === type ? 'btn-white shadow-sm fw-bold text-primary' : 'text-muted',
+                  filterType === type ? 'btn-white shadow-lg fw-bold text-white bg-info' : 'text-muted',
                 ]">
                   {{ type }}
                 </button>

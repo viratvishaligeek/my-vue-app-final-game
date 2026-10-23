@@ -52,7 +52,7 @@
         <section class="withdraw-card">
           <div class="section-heading">
             <div class="section-icon">
-              <i class="bi bi-arrow-up-right"></i>
+              <span class="fs-2">🪙</span>
             </div>
             <div>
               <strong>Withdraw money</strong>
@@ -62,7 +62,7 @@
             </div>
           </div>
           <div class="field-label">
-            Withdrawal destination
+            Withdrawal mode
           </div>
           <div class="destination-grid">
             <button type="button" class="destination-option" :class="{
@@ -516,8 +516,6 @@ const currentWithdrawActivity =
 
 let activityTimer = null
 let pendingTimer = null
-
-
 
 
 const PENDING_WITHDRAWAL_ENDPOINT =
@@ -1503,7 +1501,7 @@ onBeforeUnmount(() => {
   display: block;
   margin-bottom: 7px;
   color: #4b5663;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: .35px;
@@ -1806,7 +1804,7 @@ onBeforeUnmount(() => {
 
 .details-heading strong {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 900;
 }
 
@@ -1815,7 +1813,7 @@ onBeforeUnmount(() => {
   display: block;
   margin-top: 2px;
   color: #929ca6;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 

@@ -33,7 +33,11 @@ const currentUserScope = () => {
 
 const cloneData = (data) => {
   if (data === undefined || data === null) return data
-  try { return JSON.parse(JSON.stringify(data)) } catch { return data }
+  try {
+    return JSON.parse(JSON.stringify(data))
+  } catch {
+    return data
+  }
 }
 
 const api = axios.create({
@@ -68,11 +72,8 @@ api.get = (url, config = {}) => {
     ? `app-api-cache:public:${basePath}?${query}`
     : `private:${userScope}:${basePath}?${query}`
 
-  return apiResponseCache.getOrFetch(
-    cacheKey,
-    policy.ttl,
-    () => axiosGet(url, config),
-    {
+  return apiResponseCache
+    .getOrFetch(cacheKey, policy.ttl, () => axiosGet(url, config), {
       scope: policy.public ? 'public' : 'private',
       persistent: Boolean(policy.persistent),
       responseFromData: (data) => ({
@@ -83,17 +84,18 @@ api.get = (url, config = {}) => {
         config,
         request: null,
       }),
-    },
-  ).then((response) => {
-    // Return independent response data so callers cannot mutate the cache entry.
-    return { ...response, data: cloneData(response.data) }
-  })
+    })
+    .then((response) => {
+      // Return independent response data so callers cannot mutate the cache entry.
+      return { ...response, data: cloneData(response.data) }
+    })
 }
 
-export const getApiCacheDiagnostics = () => apiResponseCache.diagnostics()
-
 let actualHttpRequests = 0
-export const getApiCacheDiagnostics = () => ({ ...apiResponseCache.diagnostics(), actualHttpRequests })
+export const getApiCacheDiagnostics = () => ({
+  ...apiResponseCache.diagnostics(),
+  actualHttpRequests,
+})
 
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   window.__APP_API_CACHE_DIAGNOSTICS__ = getApiCacheDiagnostics

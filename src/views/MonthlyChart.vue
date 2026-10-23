@@ -49,7 +49,10 @@
 
               <span v-if="hasTodayResult(game.id)" class="fs-8 text-success fw-bold">
                 <i class="bi bi-lightning-charge-fill me-1"></i>
-                Today
+                आज
+              </span>
+              <span v-else class="fs-8 text-danger fw-bold">
+                कल
               </span>
             </div>
           </div>
@@ -107,12 +110,10 @@
                 <td v-for="game in gameHeaders" :key="game.id" class="py-2">
                   <span
                     v-if="row.results[game.id] !== null && row.results[game.id] !== undefined && row.results[game.id] !== ''"
-                    class="result-badge fw-black"
-                    :class="[
+                    class="result-badge fw-black" :class="[
                       row.is_today ? 'text-danger fs-6' : 'text-dark fs-7',
                       isJodaResult(row.results[game.id]) ? 'joda-highlight' : '',
-                    ]"
-                  >
+                    ]">
                     {{ row.results[game.id] }}
                   </span>
 

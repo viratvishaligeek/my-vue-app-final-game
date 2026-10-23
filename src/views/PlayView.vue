@@ -1143,13 +1143,11 @@ onMounted(() => {
 
 
 .sticky-bottom-bar {
-  bottom: 80px;
+  bottom: 0px;
   left: 0;
   right: 0;
-
   padding:
     8px 8px calc(8px + env(safe-area-inset-bottom));
-
   background: linear-gradient(to top,
       rgba(248, 249, 250, 0.98),
       rgba(248, 249, 250, 0.88),
