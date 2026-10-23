@@ -4,11 +4,9 @@
       <div class="card border-0 shadow-sm theme-bg rounded-4 p-3 mb-3 text-white position-relative overflow-hidden">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 position-relative z-1">
           <div class="d-flex align-items-center gap-2">
-            <div
-              class="icon-circle bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center fw-black">
-              <i class="bi bi-grid-3x3-gap-fill fs-5"></i>
+            <div class="icon-circle text-dark d-flex align-items-center justify-content-center fw-black">
+              <img src="../assets/img/result_icon.png" height="30px" alt="">
             </div>
-
             <div>
               <h6 class="fw-black text-white mb-0">Monthly Result Chart</h6>
               <span class="fs-8 text-white-50">
@@ -81,13 +79,12 @@
           <table class="table table-bordered table-hover align-middle mb-0 text-center font-monospace fs-8">
             <thead class=" text-uppercase fs-8">
               <tr>
-                <th style="width: 70px" class="bg-black text-warning py-3">
+                <th style="width: 70px" class="">
                   Date
                 </th>
 
-                <th v-for="game in gameHeaders" :key="game.id" class="py-3 bg-success">
+                <th v-for="game in gameHeaders" :key="game.id" class="">
                   <div class="d-flex align-items-center justify-content-center gap-1">
-                    <i class="bi bi-controller text-warning"></i>
                     <span>{{ game.name }}</span>
                   </div>
                 </th>
@@ -98,7 +95,7 @@
               <tr v-for="row in monthlyData" :key="row.date" :class="{
                 'table-warning fw-bold border-2 border-warning': row.is_today,
               }">
-                <td class="fw-black bg-light text-dark font-monospace py-2">
+                <td class="fw-black bg-light text-dark font-monospace py-0">
                   {{ row.formatted_day }}
 
                   <span v-if="row.is_today" class="badge bg-danger text-white rounded-pill ms-1 d-block"

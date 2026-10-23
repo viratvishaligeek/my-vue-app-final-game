@@ -87,26 +87,26 @@
           <!-- UPI APP STYLE -->
           <div class="upi-apps">
             <div class="upi-app">
-              <div class="upi-icon gpay">
-                <span>G</span>
+              <div class="upi-icon">
+                <img src="../../assets/img/gpay.jpg" height="20px" alt="">
               </div>
               <small>Google Pay</small>
             </div>
             <div class="upi-app">
-              <div class="upi-icon phonepe">
-                <span>पे</span>
+              <div class="upi-icon">
+                <img src="../../assets/img/phone.jpg" height="20px" alt="">
               </div>
               <small>PhonePe</small>
             </div>
             <div class="upi-app">
-              <div class="upi-icon paytm">
-                <span>₹</span>
+              <div class="upi-icon">
+                <img src="../../assets/img/paytm.jpg" height="20px" alt="">
               </div>
               <small>Paytm</small>
             </div>
             <div class="upi-app">
               <div class="upi-icon bhim">
-                <span>BH</span>
+                <img src="../../assets/img/bhim.jpg" height="20px" alt="">
               </div>
               <small>BHIM</small>
             </div>
@@ -340,32 +340,6 @@
                 {{ paymentInfo.upi_id }}
                 <i class="bi bi-copy"></i>
               </button>
-            </div>
-            <div class="manual-app-row">
-              <div>
-                <div class="mini-upi-icon gpay">
-                  G
-                </div>
-                <span>GPay</span>
-              </div>
-              <div>
-                <div class="mini-upi-icon phonepe">
-                  पे
-                </div>
-                <span>PhonePe</span>
-              </div>
-              <div>
-                <div class="mini-upi-icon paytm">
-                  ₹
-                </div>
-                <span>Paytm</span>
-              </div>
-              <div>
-                <div class="mini-upi-icon bhim">
-                  BH
-                </div>
-                <span>BHIM</span>
-              </div>
             </div>
             <div class="manual-instruction">
               <i class="bi bi-info-circle-fill"></i>
@@ -1894,22 +1868,6 @@ onBeforeUnmount(async () => {
   font-size: 7px;
   font-weight: 700;
   white-space: nowrap;
-}
-
-.gpay {
-  background: linear-gradient(135deg, #4285f4, #34a853);
-}
-
-.phonepe {
-  background: linear-gradient(135deg, #5f259f, #7e3cc7);
-}
-
-.paytm {
-  background: linear-gradient(135deg, #00baf2, #008ed6);
-}
-
-.bhim {
-  background: linear-gradient(135deg, #0084c8, #00a7df);
 }
 
 .more {

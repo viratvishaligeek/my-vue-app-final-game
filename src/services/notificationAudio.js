@@ -7,19 +7,19 @@
  * a build will not change them. Rebuild and redeploy the web app/Android app
  * after changing a path or replacing a bundled file.
  */
-const DEFAULT_SOUND = '/notification-tune.wav'
+const DEFAULT_SOUND = '/sounds/chalo.wav'
 
 export const NOTIFICATION_SOUND_PATHS = Object.freeze({
-  add_money: '/sounds/add-money.wav',
-  withdraw: '/sounds/withdrawal.wav',
-  debit: '/sounds/bet-debit.wav',
-  credit: '/sounds/wallet-credit.wav',
-  winning: '/sounds/winning.wav',
-  result: '/sounds/game-result.wav',
-  chat: '/sounds/chat-message.wav',
-  promotion: '/sounds/promotion.wav',
-  welcome: '/sounds/welcome.wav',
-  security: '/sounds/security.wav',
+  add_money: '/sounds/chalo.wav',
+  withdraw: '/sounds/ahh.wav',
+  debit: '/sounds/wow.wav',
+  credit: '/sounds/ahh.wav',
+  winning: '/sounds/wow.wav',
+  result: '/sounds/faaah.wav',
+  chat: '/sounds/ahh.wav',
+  promotion: '/sounds/ahh.wav',
+  welcome: '/sounds/ahh.wav',
+  security: '/sounds/faaah.wav',
   default: DEFAULT_SOUND,
 })
 
@@ -34,7 +34,8 @@ export function notificationEventFromText(value = '') {
   if (/result|market result|game result/.test(text)) return 'result'
   if (/withdraw|withdrawal/.test(text)) return 'withdraw'
   if (/debit|debited|bet placed|betting/.test(text)) return 'debit'
-  if (/add money|deposit request|deposit added|money added|wallet added/.test(text)) return 'add_money'
+  if (/add money|deposit request|deposit added|money added|wallet added/.test(text))
+    return 'add_money'
   if (/credit|credited|wallet credit|wallet/.test(text)) return 'credit'
   if (/offer|bonus|discount|promotion|promo/.test(text)) return 'promotion'
   if (/welcome|registered|registration/.test(text)) return 'welcome'
@@ -60,7 +61,11 @@ export async function playNotificationSound(event, dedupeKey = '') {
       audio.preload = 'auto'
       await new Promise((resolve, reject) => {
         audio.addEventListener('ended', resolve, { once: true })
-        audio.addEventListener('error', () => reject(new Error('Notification WAV failed to load: ' + source)), { once: true })
+        audio.addEventListener(
+          'error',
+          () => reject(new Error('Notification WAV failed to load: ' + source)),
+          { once: true },
+        )
         audio.play().catch(reject)
       })
     })
@@ -73,7 +78,6 @@ export async function playNotificationSound(event, dedupeKey = '') {
     }
     return true
   } catch (error) {
-    // A missing asset or autoplay restriction should not break notification loading.
     console.warn('Unable to play notification sound:', error?.message || error)
     return false
   } finally {

@@ -67,7 +67,7 @@
         <p class="mb-0">
           Don't have an account?
           <router-link to="/sign-up" class="text-primary-color text-decoration-none fw-bold">
-            Sign Up
+            Register
           </router-link>
         </p>
       </div>
