@@ -7,6 +7,7 @@
           <div class="small text-muted">{{ isNativeApp ? 'Enable app notifications for public announcements and account updates.' : 'Enable browser notifications for public announcements.' }}</div>
           <div v-if="pushStatus" class="small mt-1" role="status">{{ pushStatus }}</div>
           <div v-if="permissionMessage" class="small mt-1 text-muted" role="status">{{ permissionMessage }}</div>
+          <div v-if="preferenceMessage" class="small mt-1" role="status">{{ preferenceMessage }}</div>
         </div>
         <button type="button" class="btn btn-sm flex-shrink-0" :class="notificationsEnabled && pushPermissionState === 'granted' ? 'btn-outline-danger' : 'btn-primary'" :disabled="pushLoading || preferenceLoading || pushPermissionState === 'checking'" @click="togglePushNotifications">
           <span v-if="pushLoading || preferenceLoading" class="spinner-border spinner-border-sm me-1"></span>
@@ -137,7 +138,7 @@ const togglePushNotifications = async () => {
       await saveNotificationPreference(false)
       const result = await disablePush()
       pushStatus.value = result.message
-      preferenceMessage.value = 'Push notifications are disabled. Your existing in-app notification history remains available.'
+      preferenceMessage.value = result.ok ? 'Push alerts are disabled. Your in-app notification history remains available. To revoke the device/browser permission completely, turn it off in system or site settings.' : result.message
       await refreshPushPermission()
     } catch (error) {
       preferenceMessage.value = error?.response?.data?.message || 'Unable to save your notification preference.'
