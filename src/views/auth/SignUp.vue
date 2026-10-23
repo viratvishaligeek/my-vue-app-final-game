@@ -79,9 +79,8 @@
           <span class="input-group-text bg-transparent border-end-0">
             <i class="bi bi-gift text-muted"></i>
           </span>
-          <input type="text" class="form-control border-start-0 text-uppercase"
-            :class="{ 'is-invalid': errors.referralCode }" id="referralCode" v-model.trim="form.referralCode"
-            placeholder="Enter referral code if you have one"
+          <input type="text" class="form-control border-start-0" :class="{ 'is-invalid': errors.referralCode }"
+            id="referralCode" v-model.trim="form.referralCode" placeholder="Enter referral code"
             @input="form.referralCode = form.referralCode.toUpperCase(); clearFieldError('referralCode')" />
         </div>
         <div v-if="errors.referralCode" class="invalid-feedback d-block small mt-1">

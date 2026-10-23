@@ -1,55 +1,39 @@
 <template>
   <div class="content-area pb-5 mb-5 dynamic-page-bg">
     <div class="container-fluid px-2 px-md-3 py-3">
-      <!-- Loading -->
       <div v-if="isLoading" class="page-card loading-card">
         <div class="spinner-border text-warning"></div>
-
         <p class="text-muted mb-0 mt-3">
           Loading page...
         </p>
       </div>
 
-      <!-- Error -->
       <div v-else-if="errorMessage" class="page-card error-card">
         <div class="error-icon">
           <i class="bi bi-exclamation-triangle-fill"></i>
         </div>
-
         <h5 class="fw-bold mb-2">
           Page unavailable
         </h5>
-
         <p class="text-muted mb-3">
           {{ errorMessage }}
         </p>
-
         <router-link to="/dashboard" class="btn btn-warning rounded-pill px-4 fw-bold">
           <i class="bi bi-house-fill me-1"></i>
           Back Home
         </router-link>
       </div>
 
-      <!-- Content -->
       <template v-else-if="page">
         <div class="page-card overflow-hidden">
-
-          <!-- Header -->
           <div class="page-header">
-            <div class="page-header-icon">
-              <i class="bi bi-file-earmark-text-fill"></i>
-            </div>
-
             <div class="flex-grow-1">
               <h1 class="page-title">
                 {{ page.name }}
               </h1>
             </div>
           </div>
-
-          <!-- CMS Content -->
           <div class="cms-content" v-html="responsiveContent"></div>
-
         </div>
       </template>
     </div>

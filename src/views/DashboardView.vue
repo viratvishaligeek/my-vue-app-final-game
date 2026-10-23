@@ -120,12 +120,6 @@
                 {{ formatTime(featuredGame.result_time) }}
               </small>
             </div>
-            <div>
-              <p class="text-white">
-                Live Result
-                <span class="live-dot"></span>
-              </p>
-            </div>
             <span v-if="featuredGame.today_result?.date === todayDate" class="live-tag text-white">
               <span class="live-dot"></span>
               Latest Result Today
@@ -2309,16 +2303,8 @@ onUnmounted(() => {
     font-size: 1.2rem;
   }
 
-  .city-name {
-    font-size: .78rem;
-  }
-
   .live-tag {
     font-size: 7px;
-  }
-
-  .result-number {
-    font-size: 1.5rem;
   }
 
   .custom-card h6 {

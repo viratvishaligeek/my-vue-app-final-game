@@ -67,7 +67,7 @@
               Select Quick Coin / Point Value:
             </small>
             <div class="d-flex gap-2 flex-wrap">
-              <button v-for="chip in chipOptions" :key="chip" type="button" class="btn btn-sm rounded-pill fw-bold px-3"
+              <button v-for="chip in chipOptions" :key="chip" type="button" class="btn btn-sm rounded-pill fw-bold "
                 :class="selectedChip === chip
                   ? 'btn-warning text-dark shadow-sm'
                   : 'btn-outline-secondary'
@@ -110,13 +110,13 @@
               Select Quick Coin / Point Value:
             </small>
             <div class="d-flex gap-2 flex-wrap mb-2">
-              <button v-for="chip in chipOptions" :key="chip" type="button" class="btn btn-sm rounded-pill fw-bold px-3"
+              <button v-for="chip in chipOptions" :key="chip" type="button" class="btn btn-sm rounded-pill fw-bold"
                 :class="harupAmount === chip ? 'btn-warning text-dark shadow-sm' : 'btn-outline-secondary'
                   " @click="harupAmount = chip">
                 ₹{{ chip }}
               </button>
             </div>
-            <div class="input-group input-group-sm mt-2">
+            <div class="input-group input-group-sm">
               <span class="input-group-text bg-light fw-bold"> ₹ </span>
               <input v-model.number="harupAmount" type="number" min="1" step="1"
                 class="form-control text-center fw-bold" placeholder="Custom amount" />
@@ -124,7 +124,7 @@
           </div>
           <div class="card p-2 mb-3 shadow-xs border-0 bg-white rounded-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <small class="fw-bold text-muted"> Ander </small>
+              <small class="fw-bold"> Ander </small>
               <span class="badge bg-light text-dark border">
                 {{ Object.keys(harupBets.ander).length }} Selected
               </span>
@@ -149,7 +149,7 @@
           </div>
           <div class="card p-2 mb-3 shadow-xs border-0 bg-white rounded-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <small class="fw-bold text-muted"> Bahar </small>
+              <small class="fw-bold"> Bahar </small>
               <span class="badge bg-light text-dark border">
                 {{ Object.keys(harupBets.bahar).length }} Selected
               </span>
@@ -180,7 +180,7 @@
               Select Quick Coin / Point Value:
             </small>
             <div class="d-flex gap-2 flex-wrap mb-2">
-              <button v-for="chip in chipOptions" :key="chip" type="button" class="btn btn-sm rounded-pill fw-bold px-3"
+              <button v-for="chip in chipOptions" :key="chip" type="button" class="btn btn-sm rounded-pill fw-bold"
                 :class="crossingAmount === chip
                   ? 'btn-warning text-dark shadow-sm'
                   : 'btn-outline-secondary'
@@ -196,7 +196,7 @@
           </div>
           <div class="card p-2 mb-3 shadow-xs border-0 bg-white rounded-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <small class="fw-bold text-muted"> Select Digits </small>
+              <small class="fw-bold"> Select Digits </small>
               <span class="badge bg-light text-dark border">
                 {{ selectedCrossingDigits.length }} Selected
               </span>
@@ -251,7 +251,7 @@
               class="card bg-dark text-white rounded-4 shadow-lg border-0 p-3 mx-auto max-w-600 border-top border-warning border-3">
               <div class="d-flex align-items-center justify-content-between">
                 <div>
-                  <small class="text-uppercase text-muted fw-semibold fs-8 d-block">
+                  <small class="text-uppercase fw-semibold fs-8 d-block">
                     Selected
                   </small>
                   <div class="d-flex align-items-baseline gap-2">
@@ -774,12 +774,8 @@ onMounted(() => {
 .play-game-header h5 {
   min-width: 0;
   color: #fff !important;
-  font-size: 1rem;
+  font-size: 1.5rem;
   line-height: 1.2;
-}
-
-.play-game-header h5 i {
-  color: #ffc107 !important;
 }
 
 .play-game-header .text-end {
@@ -912,10 +908,6 @@ onMounted(() => {
     gap: 8px;
   }
 
-  .play-game-header h5 {
-    font-size: .86rem;
-  }
-
   .play-game-header .text-end {
     padding: 5px 6px;
   }
@@ -956,7 +948,7 @@ onMounted(() => {
 
 .nav-pills .nav-link {
   min-height: 42px;
-  font-size: 0.72rem;
+  font-size: 16px;
   white-space: nowrap;
   transition:
     transform 0.2s ease,
@@ -1286,9 +1278,9 @@ onMounted(() => {
 @media (max-width: 360px) {
 
   .nav-pills .nav-link {
-    font-size: 0.64rem;
-    padding-left: 4px !important;
-    padding-right: 4px !important;
+    font-size: 16px;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
   }
 
   .btn.w-100.position-relative,
