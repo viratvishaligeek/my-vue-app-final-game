@@ -1,13 +1,13 @@
 /*
  * Notification sounds are deliberately bundled with the Vue app.
  *
- * Put the WAV files in public/sounds/ and edit the paths below before building.
+ * Put the custom WAV files in public/sounds/ and edit the paths below before building.
  * Example: public/sounds/new-chat.wav is referenced as /sounds/new-chat.wav.
  * These paths are bundled with the web assets; changing a server setting after
  * a build will not change them. Rebuild and redeploy the web app/Android app
  * after changing a path or replacing a bundled file.
  */
-const DEFAULT_SOUND = '/sounds/chalo.wav'
+const DEFAULT_SOUND = '/sounds/chalo.wav' // Custom app tune; never fall back to the OS default.
 
 export const NOTIFICATION_SOUND_PATHS = Object.freeze({
   add_money: '/sounds/chalo.wav',

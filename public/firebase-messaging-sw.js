@@ -34,7 +34,7 @@ if (self.FIREBASE_CONFIG && self.FIREBASE_CONFIG.apiKey && self.FIREBASE_CONFIG.
       icon: '/icons/icon-192.webp',
       badge: '/favicon.ico',
       data: { url: payload.data?.url || '/notifications' },
-      silent: false,
+      // Browsers do not support playing arbitrary custom audio from a service worker.\n      // Keep background web pushes silent rather than using the OS default sound.\n      silent: true,
       vibrate: [180, 90, 180],
     }
     self.registration.showNotification(title, options)

@@ -118,7 +118,7 @@ async function initNativePush(requestPermission = true) {
               body: notification.body || '',
               schedule: { at: new Date(Date.now() + 250) },
               channelId: 'game-alerts-v2',
-              sound: Capacitor.getPlatform() === 'ios' ? 'default' : 'notification_tune.wav',
+              sound: 'notification_tune.wav',
               extra: notification.data || {},
             },
           ],
@@ -197,7 +197,7 @@ async function initWebPush(allowPermissionPrompt = true) {
         badge: '/favicon.ico',
         // The notifications screen plays its own category-aware sound from the API feed.
         // Keep the browser notification silent there to avoid double playback.
-        silent: window.location.pathname === '/notifications',
+        silent: true,
       })
       notification.onclick = () => {
         window.focus()
@@ -235,4 +235,43 @@ export async function restorePushSubscription() {
 export async function initNativePushNotifications() {
   if (!Capacitor.isNativePlatform()) return { ok: false, message: 'Not running as a native app.' }
   return initNativePush(false)
+}
+
+/**
+ * Stops this app's push subscription without trying to change the browser/OS
+ * permission itself (those permissions can only be revoked in system settings).
+ */
+export async function disablePush() {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      await PushNotifications.unregister()
+      currentToken = ''
+      localStorage.removeItem('push_registration_token')
+      return { ok: true, message: 'Push alerts disabled for this device.' }
+    }
+
+    if ('Notification' in window && 'serviceWorker' in navigator &&
+      firebaseConfig.apiKey && firebaseConfig.projectId &&
+      firebaseConfig.messagingSenderId && firebaseConfig.appId && vapidKey) {
+      const [appSdk, messagingSdk] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging.js'),
+      ])
+      if (await messagingSdk.isSupported()) {
+        const app = appSdk.getApps().length ? appSdk.getApp() : appSdk.initializeApp(firebaseConfig)
+        const messaging = messagingSdk.getMessaging(app)
+        await messagingSdk.deleteToken(messaging)
+      }
+    }
+
+    currentToken = ''
+    localStorage.removeItem('push_registration_token')
+    return {
+      ok: true,
+      message: 'Push alerts disabled for this account/device. Browser permission itself can only be revoked in browser settings.',
+    }
+  } catch (error) {
+    console.warn('Unable to stop push subscription:', error?.message || error)
+    return { ok: false, message: error?.message || 'Unable to disable push alerts on this device.' }
+  }
 }
