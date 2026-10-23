@@ -437,6 +437,7 @@ import { App } from '@capacitor/app'
 import { useAuthStore } from '@/utils/auth'
 import api from '@/plugins/axios'
 import { playNotificationSound } from '@/services/notificationAudio'
+import { isTrustedGatewayPaymentUrl } from '@/utils/paymentUrl'
 
 const router = useRouter()
 const route = useRoute()
@@ -825,19 +826,7 @@ const createGatewayOrder = async () => {
     const paymentData = response.data?.data || {}
     const paymentUrl = String(paymentData.payment_url || '')
     const requestId = paymentData.request_id
-    let parsedUrl
-
-    try {
-      parsedUrl = new URL(paymentUrl)
-    } catch {
-      throw new Error('UPIGateway did not return a valid payment screen.')
-    }
-
-    const host = parsedUrl.hostname.toLowerCase()
-    const trustedProviderHost = ['ekqr.in', 'upigateway.com'].some(
-      (domain) => host === domain || host.endsWith('.' + domain),
-    )
-    if (parsedUrl.protocol !== 'https:' || !trustedProviderHost || !requestId) {
+    if (!isTrustedGatewayPaymentUrl(paymentUrl) || !requestId) {
       throw new Error('The provider returned an unsupported payment URL. Please contact support; no wallet credit was made.')
     }
 
