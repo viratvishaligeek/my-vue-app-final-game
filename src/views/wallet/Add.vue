@@ -342,7 +342,7 @@
                   </div>
                   <strong>Upload screenshot</strong>
                   <small>
-                    JPG, PNG or WEBP • Max 5MB
+                    JPG, PNG or WEBP • Max 15 MB
                   </small>
                 </template>
                 <template v-else>
@@ -854,13 +854,13 @@ const handleScreenshot = (event) => {
 
   if (
     file.size >
-    5 * 1024 * 1024
+    15 * 1024 * 1024
   ) {
 
     apiMessage.type = 'error'
 
     apiMessage.text =
-      'Screenshot must be less than 5MB.'
+      'Screenshot must not exceed 15 MB.'
 
     return
   }
