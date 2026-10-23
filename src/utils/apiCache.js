@@ -150,3 +150,13 @@ export function stableQueryString(params = {}) {
   Object.keys(normalized).sort().forEach((key) => append(key, normalized[key]))
   return query.toString()
 }
+
+const safeLocalStorage = () => {
+  try {
+    return typeof localStorage === 'undefined' ? null : localStorage
+  } catch {
+    return null
+  }
+}
+
+export const apiResponseCache = createApiResponseCache({ storage: safeLocalStorage() })
