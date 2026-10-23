@@ -156,6 +156,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import api from '@/plugins/axios'
+import { isJodaResult } from '@/utils/jodaResults'
 
 const route = useRoute()
 
@@ -215,12 +216,6 @@ const gameHeaders = computed(() =>
 
 const getMonthName = (month) => months[month - 1]
 
-// Exactly two identical digits; numeric 0 must remain the valid result 00.
-const isJodaResult = (value) => {
-  if (value === null || value === undefined || value === '') return false
-  const normalized = typeof value === 'number' && value === 0 ? '00' : String(value).trim()
-  return /^(00|11|22|33|44|55|66|77|88|99)$/.test(normalized)
-}
 
 const selectedGameId = computed(() => {
   const gameId = route.query.game
