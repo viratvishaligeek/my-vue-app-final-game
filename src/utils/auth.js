@@ -145,6 +145,9 @@ export const useAuthStore = defineStore('auth', {
       if (!userData) {
         return
       }
+      if (this.user?.id !== undefined && this.user?.id !== userData.id) {
+        apiResponseCache.clearPrivate()
+      }
       this.user = userData
       const remember = Boolean(localStorage.getItem(AUTH_TOKEN_KEY))
       setStoredUser(this.user, remember)
