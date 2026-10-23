@@ -180,12 +180,12 @@
         </span>
         <span class="nav-label">Offers</span>
       </router-link>
-      <router-link to="/page/whatsapp" class="nav-item whatsapp-item" active-class="active">
+      <a v-if="whatsappUrl" :href="whatsappUrl" class="nav-item whatsapp-item" target="_blank" rel="noopener noreferrer">
         <span class="nav-icon">
           <i class="bi bi-whatsapp"></i>
         </span>
         <span class="nav-label">WhatsApp</span>
-      </router-link>
+      </a>
     </div>
   </div>
 </template>
@@ -194,9 +194,20 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/utils/auth'
+import { useSettings } from '@/composables/useSettings'
 
 const router = useRouter()
 const route = useRoute()
+const { loadSettings, getSetting } = useSettings()
+const whatsappUrl = computed(() => {
+  const value = String(getSetting('social_whatsapp', '') || '').trim()
+  try {
+    const url = new URL(value)
+    return ['https:', 'http:'].includes(url.protocol) ? url.href : ''
+  } catch {
+    return ''
+  }
+})
 const hideBottomNav = computed(() => {
   const path = route.path
   return path === '/wallet/add'
@@ -236,6 +247,7 @@ const handleEscapeKey = (event) => {
 }
 
 onMounted(() => {
+  void loadSettings()
   document.addEventListener('pointerdown', handleOutsidePointerDown)
   document.addEventListener('keydown', handleEscapeKey)
 })
