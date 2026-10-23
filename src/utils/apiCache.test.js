@@ -69,3 +69,24 @@ test('persists only data and tolerates storage failures', async () => {
 test('canonicalizes query parameters independent of insertion order', () => {
   assert.equal(stableQueryString({ year: 2026, month: 10 }), stableQueryString({ month: 10, year: 2026 }))
 })
+
+test('keeps private cache entries isolated by user scope', async () => {
+  const cache = createApiResponseCache()
+  const userOne = await cache.getOrFetch('private:1:/settings', 1000, async () => ({ data: { user: 1 } }))
+  const userTwo = await cache.getOrFetch('private:2:/settings', 1000, async () => ({ data: { user: 2 } }))
+  assert.deepEqual(userOne.data, { user: 1 })
+  assert.deepEqual(userTwo.data, { user: 2 })
+})
+
+test('does not repopulate private cache with a request started before invalidation', async () => {
+  const cache = createApiResponseCache()
+  let release
+  const pending = cache.getOrFetch('private:7:/settings', 1000, () => new Promise((resolve) => {
+    release = () => resolve({ data: { version: 'old' } })
+  }))
+  await Promise.resolve()
+  cache.clearPrivate()
+  release()
+  await pending
+  assert.equal(cache.diagnostics().entries, 0)
+})
