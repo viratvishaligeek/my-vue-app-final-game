@@ -48,7 +48,11 @@ async function initNativePush(requestPermission = true) {
   })
   if (receive === 'prompt' || receive === 'prompt-with-rationale') {
     if (!requestPermission) {
-      return { ok: false, message: 'Notifications are not enabled yet. Enable them from the app notification control.' }
+      return {
+        ok: false,
+        message:
+          'Notifications are not enabled yet. Enable them from the app notification control.',
+      }
     }
     receive = (await PushNotifications.requestPermissions()).receive
   }
@@ -250,9 +254,15 @@ export async function disablePush() {
       return { ok: true, message: 'Push alerts disabled for this device.' }
     }
 
-    if ('Notification' in window && 'serviceWorker' in navigator &&
-      firebaseConfig.apiKey && firebaseConfig.projectId &&
-      firebaseConfig.messagingSenderId && firebaseConfig.appId && vapidKey) {
+    if (
+      'Notification' in window &&
+      'serviceWorker' in navigator &&
+      firebaseConfig.apiKey &&
+      firebaseConfig.projectId &&
+      firebaseConfig.messagingSenderId &&
+      firebaseConfig.appId &&
+      vapidKey
+    ) {
       const [appSdk, messagingSdk] = await Promise.all([
         import('https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'),
         import('https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging.js'),
@@ -268,7 +278,8 @@ export async function disablePush() {
     localStorage.removeItem('push_registration_token')
     return {
       ok: true,
-      message: 'Push alerts disabled for this account/device. Browser permission itself can only be revoked in browser settings.',
+      message:
+        'Push alerts disabled for this account/device. Browser permission itself can only be revoked in browser settings.',
     }
   } catch (error) {
     console.warn('Unable to stop push subscription:', error?.message || error)

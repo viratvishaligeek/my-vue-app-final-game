@@ -54,11 +54,6 @@
           <span>Money Withdraw</span>
         </router-link>
 
-        <router-link to="/withdraw/withdraw/history" class="sidebar-menu-item" @click="closeSidebar">
-          <span class="icon-3d">📜</span>
-          <span>Withdraw History</span>
-        </router-link>
-
         <router-link to="/page/terms-conditions" class="sidebar-menu-item" @click="closeSidebar">
           <span class="icon-3d">📄</span>
           <span>Terms & Conditions</span>
@@ -180,7 +175,8 @@
         </span>
         <span class="nav-label">Offers</span>
       </router-link>
-      <a v-if="whatsappUrl" :href="whatsappUrl" class="nav-item whatsapp-item" target="_blank" rel="noopener noreferrer">
+      <a v-if="whatsappUrl" :href="whatsappUrl" class="nav-item whatsapp-item" target="_blank"
+        rel="noopener noreferrer">
         <span class="nav-icon">
           <i class="bi bi-whatsapp"></i>
         </span>
