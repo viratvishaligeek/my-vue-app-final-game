@@ -164,6 +164,12 @@ const clearFieldError = (field) => {
   apiMessage.text = ''
 }
 
+const handlePhoneInput = (event) => {
+  form.phone = normalizeIndianPhone(event.target.value)
+  event.target.value = form.phone
+  clearFieldError('phone')
+}
+
 // Send OTP Handler
 const handleSendOtp = async () => {
   apiMessage.text = ''
