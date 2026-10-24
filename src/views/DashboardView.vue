@@ -148,7 +148,7 @@
       </div>
     </div>
     <div v-else class="row g-3 ms-2 me-2">
-      <div v-for="(game, index) in games" :key="game.id" v-memo="[game, isGamePlayable(game)]" class="col-12">
+      <div v-for="(game, index) in games" :key="game.id" v-memo="[game, isGamePlayable(game), serverOffset]" class="col-12">
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card"
           :class="{ 'game-closed': !isGamePlayable(game) }">
           <div class="bg-white p-3 d-flex align-items-center justify-content-between">
@@ -348,43 +348,6 @@ const isGamePlayable = (game) => {
   }
   const now = serverNow.value.getTime()
   return now >= start && now < end
-}
-
-/*
-|--------------------------------------------------------------------------
-| Remaining Time
-|--------------------------------------------------------------------------
-*/
-
-const getRemainingTime = (game) => {
-  if (!game) {
-    return null
-  }
-  const end = getTimestamp(game.play_window_end_at)
-  if (!end) {
-    return null
-  }
-  const now = serverNow.value.getTime()
-  const diff = end - now
-  if (diff <= 0) {
-    return null
-  }
-  /*
-   * Don't show countdown outside play window.
-   */
-  if (!isGamePlayable(game)) {
-    return null
-  }
-  const totalSeconds = Math.floor(diff / 1000)
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor(
-    (totalSeconds % 3600) / 60
-  )
-  const seconds = totalSeconds % 60
-  if (hours > 0) {
-    return `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`
-  }
-  return `${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`
 }
 
 /*
