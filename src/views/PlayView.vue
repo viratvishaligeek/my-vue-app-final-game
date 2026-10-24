@@ -28,9 +28,7 @@
       <div v-if="!game.is_playable" class="alert alert-warning mx-1">
         <i class="bi bi-clock me-1"></i>
 
-        Betting time for
-        <strong>{{ game.name }}</strong>
-        is currently closed.
+        {{ game.play_status_message || ('Betting time for ' + game.name + ' is currently closed.') }}
       </div>
 
       <template v-else>
