@@ -108,12 +108,8 @@ const clearFieldError = (field) => {
   errors.api = ''
 }
 
-const normalizePhone = (value) => value.replace(/[\s-]/g, '')
-
 const validateForm = () => {
   let isValid = true
-  const phoneRegex = /^\+?[0-9]{7,15}$/
-
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
     isValid = false
