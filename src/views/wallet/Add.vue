@@ -242,7 +242,7 @@
 
     <transition name="modal">
       <div v-if="showGatewayModal" class="modal-backdrop-custom gateway-payment-backdrop"
-        @click.self="closeGatewayPayment">
+        @click.self="closeGatewayPayment" @keydown.esc.window="closeGatewayPayment">
         <div class="manual-modal gateway-payment-modal">
           <div class="modal-header-custom">
             <div class="modal-title-wrap">
@@ -564,6 +564,9 @@ let gatewayStatusTimer = null
 let appStateListener = null
 let appBackButtonListener = null
 let gatewayStatusInFlight = false
+const handledGatewayTerminalRequests = new Set()
+const gatewaySuccessStatuses = new Set(['approved', 'success', 'completed', 'paid'])
+const gatewayFailureStatuses = new Set(['failed', 'rejected', 'cancelled', 'canceled', 'expired'])
 
 
 /*
@@ -621,8 +624,12 @@ const formatStatus = (status) => {
     approved: 'Approved',
     success: 'Success',
     completed: 'Completed',
+    paid: 'Paid',
     rejected: 'Rejected',
     failed: 'Failed',
+    cancelled: 'Cancelled',
+    canceled: 'Cancelled',
+    expired: 'Expired',
   }
 
   return map[value] || 'Pending'
@@ -642,7 +649,10 @@ const getStatusClass = (status) => {
 
   if (
     value === 'rejected' ||
-    value === 'failed'
+    value === 'failed' ||
+    value === 'cancelled' ||
+    value === 'canceled' ||
+    value === 'expired'
   ) {
     return 'status-danger'
   }
@@ -1094,7 +1104,7 @@ const loadPendingPayments = async () => {
 
 const refreshGatewayPaymentStatus = async () => {
   const requestId = pendingGatewayRequestId.value
-  if (!requestId || gatewayStatusInFlight) return
+  if (!requestId || gatewayStatusInFlight || handledGatewayTerminalRequests.has(requestId)) return
 
   gatewayStatusInFlight = true
   gatewayStatusChecking.value = true
@@ -1103,6 +1113,9 @@ const refreshGatewayPaymentStatus = async () => {
       cache: false,
       showGlobalLoader: false,
     })
+    // Ignore stale responses if the user has switched to a different payment.
+    if (pendingGatewayRequestId.value !== requestId) return
+
     const payment = response.data?.data
     const status = String(payment?.status || '').toLowerCase()
     if (!payment) throw new Error('Payment status response was empty.')
@@ -1110,7 +1123,10 @@ const refreshGatewayPaymentStatus = async () => {
     gatewayPaymentStatus.value = status || 'processing'
     gatewayStatusMessage.value = payment.message || 'Payment is still pending verification.'
 
-    if (status === 'approved') {
+    // Only a server-verified terminal status can complete this flow. Unknown,
+    // pending and network-timeout states remain unconfirmed.
+    if (gatewaySuccessStatuses.has(status)) {
+      handledGatewayTerminalRequests.add(requestId)
       stopGatewayStatusPolling()
       showGatewayModal.value = false
       apiMessage.type = 'success'
@@ -1118,17 +1134,28 @@ const refreshGatewayPaymentStatus = async () => {
       if (Number.isFinite(Number(payment.wallet_balance))) {
         authStore.updateUserData({ balance: Number(payment.wallet_balance) })
       }
-      await loadPendingPayments()
       gatewayPaymentUrl.value = ''
-    } else if (status === 'failed' || status === 'rejected') {
+      pendingGatewayRequestId.value = null
+      await loadPendingPayments()
+    } else if (gatewayFailureStatuses.has(status)) {
+      handledGatewayTerminalRequests.add(requestId)
       stopGatewayStatusPolling()
+      showGatewayModal.value = false
       apiMessage.type = 'error'
-      apiMessage.text = 'The provider confirmed that this payment failed. You can safely start a new payment.'
+      apiMessage.text = status === 'cancelled' || status === 'canceled'
+        ? 'The payment provider confirmed that this payment was cancelled. No wallet credit was applied.'
+        : status === 'expired'
+          ? 'This payment session expired. You can safely start a new payment.'
+          : 'The provider confirmed that this payment failed. You can safely start a new payment.'
+      gatewayPaymentUrl.value = ''
+      pendingGatewayRequestId.value = null
       await loadPendingPayments()
     }
   } catch (error) {
     // A timeout or unreachable API is not evidence of payment failure.
-    gatewayStatusMessage.value = 'Status could not be refreshed. Your payment remains unconfirmed; try again shortly.'
+    if (pendingGatewayRequestId.value === requestId) {
+      gatewayStatusMessage.value = 'Status could not be refreshed. Your payment remains unconfirmed; try again shortly.'
+    }
     console.warn('Unable to refresh gateway payment status:', error)
   } finally {
     gatewayStatusChecking.value = false
@@ -1139,7 +1166,7 @@ const refreshGatewayPaymentStatus = async () => {
 const startGatewayStatusPolling = () => {
   stopGatewayStatusPolling()
   gatewayStatusTimer = setInterval(() => {
-    if (showGatewayModal.value && !['approved', 'failed', 'rejected'].includes(gatewayPaymentStatus.value)) {
+    if (showGatewayModal.value && !gatewaySuccessStatuses.has(gatewayPaymentStatus.value) && !gatewayFailureStatuses.has(gatewayPaymentStatus.value)) {
       void refreshGatewayPaymentStatus()
     }
   }, 5000)
@@ -1155,15 +1182,16 @@ const stopGatewayStatusPolling = () => {
 const closeGatewayPayment = () => {
   showGatewayModal.value = false
   stopGatewayStatusPolling()
-  if (pendingGatewayRequestId.value && !['approved', 'failed', 'rejected'].includes(gatewayPaymentStatus.value)) {
+  if (pendingGatewayRequestId.value && !gatewaySuccessStatuses.has(gatewayPaymentStatus.value) && !gatewayFailureStatuses.has(gatewayPaymentStatus.value)) {
     apiMessage.type = 'error'
-    apiMessage.text = 'Payment is still pending. You can resume it from Pending payments; closing this screen does not cancel it.'
+    apiMessage.text = 'Payment status is still pending verification. You can resume it from Pending payments; closing this screen does not cancel the transaction.'
   }
 }
 
 const resumeGatewayPayment = (payment) => {
-  if (!payment?.id || !payment?.gateway_payment_url) return
-  pendingGatewayRequestId.value = String(payment.id)
+  const requestId = payment?.request_id || payment?.gateway_request_id || payment?.id
+  if (!requestId || !payment?.gateway_payment_url) return
+  pendingGatewayRequestId.value = String(requestId)
   gatewayPaymentUrl.value = String(payment.gateway_payment_url)
   gatewayPaymentAmount.value = Number(payment.amount || 0)
   gatewayPaymentStatus.value = String(payment.status || 'processing').toLowerCase()
@@ -1316,6 +1344,8 @@ onMounted(async () => {
         closeGatewayPayment()
       } else if (canGoBack) {
         router.back()
+      } else {
+        router.replace({ name: 'dashboard' })
       }
     })
   } catch (error) {
@@ -2288,8 +2318,18 @@ onBeforeUnmount(async () => {
   justify-content: center;
 }
 
+.gateway-payment-backdrop {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  align-items: center;
+}
+
 .gateway-payment-modal {
   max-width: 560px;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .gateway-payment-help {
@@ -2300,12 +2340,15 @@ onBeforeUnmount(async () => {
 }
 
 .gateway-payment-frame {
+  display: block;
   width: 100%;
-  height: min(52vh, 470px);
-  min-height: 300px;
+  height: clamp(220px, 42dvh, 420px);
+  min-height: 220px;
   border: 1px solid #e5eaea;
   border-radius: 12px;
   background: #fff;
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .gateway-payment-status {
@@ -2318,6 +2361,8 @@ onBeforeUnmount(async () => {
 }
 
 .gateway-payment-status-message {
+  min-height: 2.8em;
+  overflow-wrap: anywhere;
   margin: 10px 0 0;
   color: #66727d;
   font-size: 10px;
