@@ -35,8 +35,8 @@
           </span>
           <span class="input-group-text bg-transparent border-end-0 fw-semibold">+91</span>
           <input type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10"
-            class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }" id="phone"
-            :value="form.phone" placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
+            class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }" id="phone" :value="form.phone"
+            placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
         </div>
         <div v-if="errors.phone" class="invalid-feedback d-block small mt-1">
           {{ errors.phone }}

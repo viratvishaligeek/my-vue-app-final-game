@@ -1,167 +1,205 @@
 <template>
-  <main class="profile-page container-fluid">
-    <header class="profile-heading">
-      <div class="profile-heading__icon" aria-hidden="true"><i class="bi bi-person-bounding-box"></i></div>
-      <div class="profile-heading__copy">
-        <p class="profile-eyebrow">YOUR ACCOUNT</p>
-        <h1>Profile &amp; Security</h1>
-        <p class="profile-subtitle">Keep your personal details up to date and your account secure.</p>
-      </div>
-      <div class="wallet-chip" aria-label="Wallet balance">
-        <span class="wallet-chip__icon"><i class="bi bi-wallet2"></i></span>
-        <span><small>Wallet balance</small><strong>₹ {{ authStore.walletBalance ?? 0 }}</strong></span>
-      </div>
-    </header>
-
+  <main class="profile-page">
     <div class="profile-layout">
-      <section class="profile-card profile-card--details" aria-labelledby="profile-title">
-        <div class="profile-card__header">
-          <div class="section-icon section-icon--blue"><i class="bi bi-person-lines-fill"></i></div>
-          <div><h2 id="profile-title">Personal information</h2><p>Update the details linked to your account.</p></div>
+      <!-- Personal details -->
+      <section class="profile-section" style="  background: linear-gradient(135deg, #272451, #000);">
+        <div class="section-heading">
+          <div class="section-heading__icon">
+            <i class="bi bi-person-lines-fill"></i>
+          </div>
+          <div>
+            <h2>Personal information</h2>
+            <p>Update your details below.</p>
+          </div>
         </div>
 
-        <div v-if="profileStatus.text" class="profile-alert" :class="'profile-alert--' + profileStatus.type" role="status" aria-live="polite">
-          <i :class="profileStatus.type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-exclamation-circle-fill'"></i>
-          <span>{{ profileStatus.text }}</span>
-          <button type="button" class="alert-dismiss" aria-label="Dismiss message" @click="profileStatus.text = ''"><i class="bi bi-x-lg"></i></button>
-        </div>
-
-        <form class="profile-form" novalidate @submit.prevent="handleUpdateProfile">
-          <div class="form-field">
-            <label for="profile-name">Full name <span class="required-mark">*</span></label>
-            <div class="input-wrap">
-              <i class="bi bi-person input-icon" aria-hidden="true"></i>
-              <input id="profile-name" v-model.trim="profileForm.name" type="text" class="form-control profile-input"
-                :class="{ 'is-invalid': errors.name }" placeholder="Enter your full name" autocomplete="name"
-                maxlength="255" required @input="clearProfileError('name')" />
+        <form @submit.prevent="handleUpdateProfile" novalidate>
+          <div class="edit-grid">
+            <!-- Full name -->
+            <div class="edit-field">
+              <label for="profile-name">Full name <span>*</span></label>
+              <div class="line-input">
+                <i class="bi bi-person"></i>
+                <input id="profile-name" v-model.trim="profileForm.name" type="text" placeholder="Enter your name"
+                  autocomplete="name" maxlength="255" required :class="{ 'input-error': errors.name }"
+                  @input="clearProfileError('name')" />
+              </div>
+              <small v-if="errors.name" class="field-error">{{ errors.name }}</small>
             </div>
-            <small v-if="errors.name" class="field-error">{{ errors.name }}</small>
-          </div>
 
-          <div class="form-field">
-            <label for="profile-phone">Registered phone number</label>
-            <div class="input-wrap input-wrap--readonly">
-              <i class="bi bi-phone input-icon" aria-hidden="true"></i>
-              <input id="profile-phone" :value="authStore.user?.phone || ''" type="tel" class="form-control profile-input"
-                autocomplete="tel" readonly aria-describedby="phone-help" />
-              <i class="bi bi-lock-fill readonly-lock" aria-hidden="true"></i>
+            <!-- Registered phone -->
+            <div class="edit-field">
+              <label for="profile-phone">Phone number</label>
+              <div class="line-input line-input--readonly">
+                <i class="bi bi-telephone"></i>
+                <input id="profile-phone" :value="authStore.user?.phone || ''" type="tel" readonly
+                  aria-describedby="phone-note" />
+                <i class="bi bi-lock-fill field-lock"></i>
+              </div>
             </div>
-            <small id="phone-help" class="field-hint">Your registered number cannot be changed here.</small>
-          </div>
 
-          <div class="profile-form__row">
-            <div class="form-field">
+            <!-- City -->
+            <div class="edit-field">
+              <label for="profile-city">City</label>
+              <div class="line-input">
+                <i class="bi bi-geo-alt"></i>
+                <input id="profile-city" v-model.trim="profileForm.city" type="text" placeholder="Enter your city"
+                  autocomplete="address-level2" maxlength="255" :class="{ 'input-error': errors.city }"
+                  @input="clearProfileError('city')" />
+              </div>
+              <small v-if="errors.city" class="field-error">{{ errors.city }}</small>
+            </div>
+
+            <!-- Gender -->
+            <div class="edit-field">
               <label for="profile-gender">Gender</label>
-              <div class="input-wrap">
-                <i class="bi bi-person-hearts input-icon" aria-hidden="true"></i>
-                <select id="profile-gender" v-model="profileForm.gender" class="form-select profile-input profile-select"
-                  :class="{ 'is-invalid': errors.gender }" @change="clearProfileError('gender')">
-                  <option value="">Select gender</option><option value="male">Male</option>
-                  <option value="female">Female</option><option value="other">Other</option>
+              <div class="line-input">
+                <i class="bi bi-person-hearts"></i>
+                <select id="profile-gender" v-model="profileForm.gender" :class="{ 'input-error': errors.gender }"
+                  @change="clearProfileError('gender')">
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
                 </select>
+                <i class="bi bi-chevron-down select-arrow"></i>
               </div>
               <small v-if="errors.gender" class="field-error">{{ errors.gender }}</small>
             </div>
 
-            <div class="form-field">
-              <label for="profile-city">City</label>
-              <div class="input-wrap">
-                <i class="bi bi-geo-alt input-icon" aria-hidden="true"></i>
-                <input id="profile-city" v-model.trim="profileForm.city" type="text" class="form-control profile-input"
-                  :class="{ 'is-invalid': errors.city }" placeholder="Your city" autocomplete="address-level2"
-                  maxlength="255" @input="clearProfileError('city')" />
-              </div>
-              <small v-if="errors.city" class="field-error">{{ errors.city }}</small>
-            </div>
+            <!-- Address -->
           </div>
 
-          <div class="form-field">
-            <label for="profile-address">Address <span class="optional-label">Optional</span></label>
-            <div class="input-wrap input-wrap--textarea">
-              <i class="bi bi-house input-icon" aria-hidden="true"></i>
-              <textarea id="profile-address" v-model.trim="profileForm.address" class="form-control profile-input profile-textarea"
-                :class="{ 'is-invalid': errors.address }" rows="3" placeholder="Enter your address"
-                autocomplete="street-address" maxlength="1000" @input="clearProfileError('address')"></textarea>
-            </div>
-            <small v-if="errors.address" class="field-error">{{ errors.address }}</small>
+          <div v-if="profileStatus.text" class="status-message" :class="'status-message--' + profileStatus.type"
+            role="status">
+            <i :class="profileStatus.type === 'success'
+              ? 'bi bi-check-circle-fill'
+              : 'bi bi-exclamation-circle-fill'"></i>
+            <span>{{ profileStatus.text }}</span>
           </div>
 
-          <div class="profile-form__footer">
-            <p class="save-note"><i class="bi bi-shield-check"></i> Your details are handled securely.</p>
-            <button type="submit" class="profile-button profile-button--primary" :disabled="isProfileLoading">
-              <span v-if="isProfileLoading" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-              <i v-else class="bi bi-check2-circle" aria-hidden="true"></i>
-              {{ isProfileLoading ? 'Saving changes…' : 'Save changes' }}
+          <div class="form-footer">
+            <span class="footer-note">
+              <i class="bi bi-shield-check"></i>
+              Your information is protected.
+            </span>
+
+            <button class="save-button save-button--dark" type="submit" :disabled="isProfileLoading">
+              <span v-if="isProfileLoading" class="spinner-border spinner-border-sm"></span>
+              <i v-else class="bi bi-check2"></i>
+              {{ isProfileLoading ? 'Saving...' : 'Save changes' }}
             </button>
           </div>
         </form>
       </section>
 
-      <aside class="profile-card security-card" aria-labelledby="security-title">
-        <div class="profile-card__header">
-          <div class="section-icon section-icon--violet"><i class="bi bi-shield-lock"></i></div>
-          <div><h2 id="security-title">Account security</h2><p>Change your password regularly to help protect your account.</p></div>
+      <!-- Password and security -->
+      <section class="profile-section security-section">
+        <div class="section-heading">
+          <div class="section-heading__icon section-heading__icon--purple">
+            <i class="bi bi-shield-lock"></i>
+          </div>
+          <div>
+            <h2 style="color: black;">Password & security</h2>
+            <p>Keep your account protected.</p>
+          </div>
         </div>
 
-        <div class="security-tip"><i class="bi bi-shield-check" aria-hidden="true"></i><span>Use at least 8 characters for your new password.</span></div>
+        <div class="security-banner">
+          <i class="bi bi-info-circle"></i>
+          <span>Use a strong password with at least 8 characters.</span>
+        </div>
 
-        <div v-if="passwordStatus.text" class="profile-alert" :class="'profile-alert--' + passwordStatus.type" role="status" aria-live="polite">
-          <i :class="passwordStatus.type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-exclamation-circle-fill'"></i>
+        <div v-if="passwordStatus.text" class="status-message" :class="'status-message--' + passwordStatus.type"
+          role="status" aria-live="polite">
+          <i :class="passwordStatus.type === 'success'
+            ? 'bi bi-check-circle-fill'
+            : 'bi bi-exclamation-circle-fill'"></i>
           <span>{{ passwordStatus.text }}</span>
-          <button type="button" class="alert-dismiss" aria-label="Dismiss message" @click="passwordStatus.text = ''"><i class="bi bi-x-lg"></i></button>
+          <button type="button" class="dismiss-button" aria-label="Dismiss" @click="passwordStatus.text = ''">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
 
-        <form class="profile-form security-form" novalidate @submit.prevent="handleChangePassword">
-          <div class="form-field">
-            <label for="current-password">Current password <span class="required-mark">*</span></label>
-            <div class="input-wrap">
-              <i class="bi bi-key input-icon" aria-hidden="true"></i>
-              <input id="current-password" v-model="passwordForm.current_password" :type="showCurrentPassword ? 'text' : 'password'"
-                class="form-control profile-input" :class="{ 'is-invalid': passErrors.current_password }"
-                autocomplete="current-password" placeholder="Enter current password" required @input="clearPasswordError('current_password')" />
-              <button type="button" class="password-toggle" :aria-label="showCurrentPassword ? 'Hide current password' : 'Show current password'"
-                @click="showCurrentPassword = !showCurrentPassword"><i :class="showCurrentPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" aria-hidden="true"></i></button>
+        <form @submit.prevent="handleChangePassword" novalidate>
+          <div class="edit-grid security-grid">
+            <!-- Current password -->
+            <div class="edit-field edit-field--full">
+              <label for="current-password">Current password <span>*</span></label>
+              <div class="line-input">
+                <i class="bi bi-key"></i>
+                <input id="current-password" v-model="passwordForm.current_password"
+                  :type="showCurrentPassword ? 'text' : 'password'" autocomplete="current-password"
+                  placeholder="Enter current password" :class="{ 'input-error': passErrors.current_password }"
+                  @input="clearPasswordError('current_password')" />
+                <button type="button" class="eye-button"
+                  :aria-label="showCurrentPassword ? 'Hide password' : 'Show password'"
+                  @click="showCurrentPassword = !showCurrentPassword">
+                  <i :class="showCurrentPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                </button>
+              </div>
+              <small v-if="passErrors.current_password" class="field-error">
+                {{ passErrors.current_password }}
+              </small>
             </div>
-            <small v-if="passErrors.current_password" class="field-error">{{ passErrors.current_password }}</small>
+
+            <!-- New password -->
+            <div class="edit-field">
+              <label for="new-password">New password <span>*</span></label>
+              <div class="line-input">
+                <i class="bi bi-lock"></i>
+                <input id="new-password" v-model="passwordForm.new_password"
+                  :type="showNewPassword ? 'text' : 'password'" autocomplete="new-password"
+                  placeholder="Min. 8 characters" :class="{ 'input-error': passErrors.new_password }"
+                  @input="clearPasswordError('new_password')" />
+                <button type="button" class="eye-button"
+                  :aria-label="showNewPassword ? 'Hide password' : 'Show password'"
+                  @click="showNewPassword = !showNewPassword">
+                  <i :class="showNewPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                </button>
+              </div>
+              <small v-if="passErrors.new_password" class="field-error">
+                {{ passErrors.new_password }}
+              </small>
+            </div>
+
+            <!-- Confirm password -->
+            <div class="edit-field">
+              <label for="confirm-password">Confirm password <span>*</span></label>
+              <div class="line-input">
+                <i class="bi bi-lock-fill"></i>
+                <input id="confirm-password" v-model="passwordForm.new_password_confirmation"
+                  :type="showConfirmPassword ? 'text' : 'password'" autocomplete="new-password"
+                  placeholder="Repeat password" :class="{ 'input-error': passErrors.new_password_confirmation }"
+                  @input="clearPasswordError('new_password_confirmation')" />
+                <button type="button" class="eye-button"
+                  :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
+                  @click="showConfirmPassword = !showConfirmPassword">
+                  <i :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                </button>
+              </div>
+              <small v-if="passErrors.new_password_confirmation" class="field-error">
+                {{ passErrors.new_password_confirmation }}
+              </small>
+            </div>
           </div>
 
-          <div class="form-field">
-            <label for="new-password">New password <span class="required-mark">*</span></label>
-            <div class="input-wrap">
-              <i class="bi bi-lock input-icon" aria-hidden="true"></i>
-              <input id="new-password" v-model="passwordForm.new_password" :type="showNewPassword ? 'text' : 'password'"
-                class="form-control profile-input" :class="{ 'is-invalid': passErrors.new_password }"
-                autocomplete="new-password" placeholder="At least 8 characters" required @input="clearPasswordError('new_password')" />
-              <button type="button" class="password-toggle" :aria-label="showNewPassword ? 'Hide new password' : 'Show new password'"
-                @click="showNewPassword = !showNewPassword"><i :class="showNewPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" aria-hidden="true"></i></button>
-            </div>
-            <small v-if="passErrors.new_password" class="field-error">{{ passErrors.new_password }}</small>
+          <div class="form-footer security-footer">
+            <span class="footer-note">
+              <i class="bi bi-shield-lock"></i>
+              Never share your password.
+            </span>
+            <button class="save-button save-button--dark" type="submit" :disabled="isPasswordLoading">
+              <span v-if="isPasswordLoading" class="spinner-border spinner-border-sm"></span>
+              <i v-else class="bi bi-shield-check"></i>
+              {{ isPasswordLoading ? 'Updating...' : 'Update password' }}
+            </button>
           </div>
-
-          <div class="form-field">
-            <label for="confirm-password">Confirm new password <span class="required-mark">*</span></label>
-            <div class="input-wrap">
-              <i class="bi bi-lock-fill input-icon" aria-hidden="true"></i>
-              <input id="confirm-password" v-model="passwordForm.new_password_confirmation" :type="showConfirmPassword ? 'text' : 'password'"
-                class="form-control profile-input" :class="{ 'is-invalid': passErrors.new_password_confirmation }"
-                autocomplete="new-password" placeholder="Re-enter new password" required @input="clearPasswordError('new_password_confirmation')" />
-              <button type="button" class="password-toggle" :aria-label="showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'"
-                @click="showConfirmPassword = !showConfirmPassword"><i :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" aria-hidden="true"></i></button>
-            </div>
-            <small v-if="passErrors.new_password_confirmation" class="field-error">{{ passErrors.new_password_confirmation }}</small>
-          </div>
-
-          <button type="submit" class="profile-button profile-button--dark profile-button--full" :disabled="isPasswordLoading">
-            <span v-if="isPasswordLoading" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-            <i v-else class="bi bi-shield-check" aria-hidden="true"></i>
-            {{ isPasswordLoading ? 'Updating password…' : 'Update password' }}
-          </button>
         </form>
-      </aside>
+      </section>
     </div>
   </main>
 </template>
-
 <script setup>
 import { reactive, ref, watch } from 'vue'
 import { useAuthStore } from '@/utils/auth'
@@ -307,112 +345,775 @@ const handleChangePassword = async () => {
 
 <style scoped>
 .profile-page {
-  --profile-ink: #17243b;
-  --profile-muted: #758198;
-  --profile-line: #e7ecf4;
-  --profile-blue: #3568e8;
-  max-width: 1440px;
+  --ink: #19243a;
+  --muted: #8490a4;
+  --line: #e8edf5;
+  --blue: #3568e8;
+  --purple: #7756db;
+  max-width: 1380px;
   margin: 0 auto;
-  padding: 22px 14px 36px;
-  color: var(--profile-ink);
+  padding: 28px 22px 48px;
+  color: var(--ink);
 }
-.profile-heading { display: flex; align-items: center; gap: 14px; margin: 0 auto 22px; max-width: 1200px; flex-wrap: wrap; }
-.profile-heading__icon { display: grid; place-items: center; flex: 0 0 52px; width: 52px; height: 52px; border-radius: 17px; color: #fff; font-size: 24px; background: linear-gradient(145deg, #477cf3, #6448d9); box-shadow: 0 9px 22px rgb(66 103 226 / 20%); }
-.profile-heading__copy { min-width: 0; flex: 1 1 190px; }
-.profile-eyebrow { margin: 0 0 4px; color: var(--profile-blue); font-size: 10px; font-weight: 800; letter-spacing: .16em; }
-.profile-heading h1 { margin: 0; color: var(--profile-ink); font-size: clamp(22px, 5vw, 30px); font-weight: 800; letter-spacing: -.04em; }
-.profile-subtitle { margin: 5px 0 0; color: var(--profile-muted); font-size: 13px; line-height: 1.55; }
-.wallet-chip { display: inline-flex; align-items: center; gap: 10px; padding: 9px 13px; border: 1px solid #dce9ff; border-radius: 15px; background: linear-gradient(135deg, #f4f8ff, #f5f2ff); margin-left: auto; }
-.wallet-chip__icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; color: #3469df; background: #fff; font-size: 17px; }
-.wallet-chip small, .wallet-chip strong { display: block; }
-.wallet-chip small { margin-bottom: 2px; color: var(--profile-muted); font-size: 10px; white-space: nowrap; }
-.wallet-chip strong { color: var(--profile-ink); font-size: 14px; font-weight: 800; white-space: nowrap; }
-.profile-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(290px, .9fr); align-items: start; gap: 20px; max-width: 1200px; margin: 0 auto; }
-.profile-card { min-width: 0; overflow: hidden; border: 1px solid var(--profile-line); border-radius: 22px; background: #fff; box-shadow: 0 10px 34px rgb(24 43 77 / 5%); }
-.profile-card__header { display: flex; align-items: flex-start; gap: 13px; padding: 23px 23px 20px; border-bottom: 1px solid #f0f3f8; }
-.section-icon { display: grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; border-radius: 14px; font-size: 19px; }
-.section-icon--blue { color: #3568e8; background: #edf3ff; }
-.section-icon--violet { color: #7450d8; background: #f3efff; }
-.profile-card__header h2 { margin: 1px 0 5px; color: var(--profile-ink); font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
-.profile-card__header p { margin: 0; color: var(--profile-muted); font-size: 12px; line-height: 1.55; }
-.profile-form { display: flex; flex-direction: column; gap: 18px; padding: 22px 23px 23px; }
-.profile-form__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.form-field { min-width: 0; }
-.form-field label { display: block; margin: 0 0 8px; color: #34425a; font-size: 12px; font-weight: 750; }
-.required-mark { color: #e14b5a; }
-.optional-label { margin-left: 5px; color: #8a95a8; font-size: 10px; font-weight: 500; }
-.input-wrap { position: relative; display: flex; align-items: center; min-width: 0; }
-.input-icon { position: absolute; z-index: 1; left: 14px; color: #8995aa; font-size: 16px; pointer-events: none; }
-.profile-input.form-control, .profile-input.form-select { width: 100%; min-width: 0; min-height: 48px; padding: 11px 13px 11px 42px; border: 1px solid #e1e7f0; border-radius: 12px; background-color: #fbfcfe; color: var(--profile-ink); font-size: 13px; box-shadow: none; transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease; }
-.profile-input::placeholder { color: #a1aabb; opacity: 1; }
-.profile-input.form-control:focus, .profile-input.form-select:focus { border-color: #7ea1fb; background-color: #fff; box-shadow: 0 0 0 3px rgb(53 104 232 / 10%); }
-.profile-input.form-control.is-invalid, .profile-input.form-select.is-invalid, .input-wrap--invalid .profile-input { border-color: #e45b69; }
-.profile-input.form-select { padding-right: 30px; }
-.input-wrap--readonly .profile-input { padding-right: 38px; color: #64718a; background: #f4f6fa; }
-.readonly-lock { position: absolute; right: 13px; color: #98a3b5; font-size: 13px; pointer-events: none; }
-.input-wrap--textarea { align-items: flex-start; }
-.input-wrap--textarea .input-icon { top: 14px; }
-.profile-textarea { min-height: 96px; resize: vertical; }
-.field-hint, .field-error { display: block; margin: 6px 1px 0; font-size: 11px; line-height: 1.45; }
-.field-hint { color: #8994a7; }
-.field-error { color: #d13d4d; }
-.profile-form__footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 2px; padding-top: 19px; border-top: 1px solid #edf1f6; }
-.save-note { display: flex; align-items: flex-start; gap: 7px; margin: 0; color: #7c879a; font-size: 11px; line-height: 1.5; }
-.save-note i { color: #2c9c77; font-size: 15px; }
-.profile-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 12px 18px; border: 0; border-radius: 12px; font-size: 12px; font-weight: 750; transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease; }
-.profile-button:disabled { cursor: not-allowed; opacity: .7; }
-.profile-button:not(:disabled):active { transform: translateY(1px); }
-.profile-button--primary { flex: 0 0 auto; color: #fff; background: linear-gradient(135deg, #3568e8, #5a57e8); box-shadow: 0 7px 17px rgb(53 104 232 / 19%); }
-.profile-button--primary:not(:disabled):hover { box-shadow: 0 10px 22px rgb(53 104 232 / 27%); }
-.profile-button--dark { color: #fff; background: linear-gradient(135deg, #202c43, #364564); }
-.profile-button--full { width: 100%; margin-top: 2px; }
-.security-tip { display: flex; align-items: flex-start; gap: 9px; margin: 20px 22px 0; padding: 12px; border: 1px solid #e9e3ff; border-radius: 13px; background: #faf8ff; color: #65538f; font-size: 11px; line-height: 1.55; }
-.security-tip i { flex: 0 0 auto; color: #7857d9; font-size: 15px; }
-.security-form { gap: 18px; padding-top: 20px; }
-.password-toggle { position: absolute; right: 8px; z-index: 2; display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 9px; background: transparent; color: #7f8ba1; }
-.password-toggle:hover, .password-toggle:focus-visible { color: var(--profile-blue); background: #edf3ff; outline: none; }
-.security-form .profile-input { padding-right: 45px; }
-.profile-alert { display: flex; align-items: flex-start; gap: 9px; margin: 16px 22px 0; padding: 11px 12px; border: 1px solid transparent; border-radius: 12px; font-size: 12px; line-height: 1.5; }
-.profile-alert > i { margin-top: 1px; }
-.profile-alert span { flex: 1; overflow-wrap: anywhere; }
-.profile-alert--success { border-color: #ccefe0; background: #f0fbf6; color: #18764f; }
-.profile-alert--danger { border-color: #f6d5d8; background: #fff5f5; color: #b72f40; }
-.alert-dismiss { display: grid; place-items: center; flex: 0 0 auto; width: 25px; height: 25px; margin: -4px -4px 0 0; border: 0; border-radius: 7px; background: transparent; color: currentColor; opacity: .7; }
-.alert-dismiss:hover { background: rgb(0 0 0 / 5%); opacity: 1; }
-@media (max-width: 991.98px) {
-  .profile-layout { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
-  .profile-heading { max-width: 760px; }
+
+.page-heading {
+  max-width: 1120px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
+
+.page-eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.page-heading h1 {
+  margin: 0;
+  font-size: clamp(25px, 3vw, 32px);
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.page-heading p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.heading-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #d9eee4;
+  border-radius: 30px;
+  background: #f3fbf7;
+  color: #26815d;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.profile-overview {
+  max-width: 1120px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 23px 26px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 100% 0%, #edf2ff 0%, transparent 48%),
+    #fff;
+  box-shadow: 0 5px 24px rgb(28 45 77 / 3%);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 70px;
+  height: 70px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3568e8, #8661e9);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 800;
+  box-shadow: 0 0 0 1px #e2e9fa, 0 7px 18px #3568e824;
+}
+
+.overview-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.overview-info h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.overview-info p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  color: #748198;
+  font-size: 12px;
+}
+
+.account-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #24845e;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2eb67d;
+}
+
+.overview-icon {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  background: #eef2ff;
+  color: #5774dc;
+  font-size: 23px;
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.profile-section {
+  min-width: 0;
+  padding: 25px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 7px 28px rgb(28 45 77 / 4%);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 30px;
+  padding-bottom: 21px;
+  border-bottom: 1px solid #000;
+}
+
+.section-heading__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #edf3ff;
+  color: var(--blue);
+  font-size: 20px;
+}
+
+.section-heading__icon--purple {
+  background: #f3efff;
+  color: var(--purple);
+}
+
+.section-heading h2 {
+  margin: 0 0 5px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -.3px;
+}
+
+.section-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 20px;
+}
+
+.edit-field {
+  min-width: 0;
+}
+
+.edit-field--full {
+  grid-column: 1 / -1;
+}
+
+.edit-field label {
+  display: block;
+  margin: 0 0 6px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: .35px;
+}
+
+.edit-field label>span:not(.label-optional) {
+  color: #e05263;
+}
+
+.label-optional {
+  margin-left: 5px;
+  color: #9aa5b6;
+  font-size: 12px;
+  letter-spacing: .7px;
+}
+
+.line-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 43px;
+  border-bottom: 1px solid #fff;
+  transition: border-color .2s ease;
+}
+
+.line-input::after {
+  position: absolute;
+  right: 50%;
+  bottom: -1px;
+  left: 50%;
+  height: 2px;
+  background: var(--blue);
+  content: "";
+  transition: left .22s ease, right .22s ease;
+}
+
+.line-input:focus-within::after {
+  right: 0;
+  left: 0;
+}
+
+.line-input>i:first-child {
+  flex-shrink: 0;
+  margin-right: 11px;
+  color: #fff;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+/* Only second card: Password & security */
+.security-section .edit-field label {
+  color: #000;
+}
+
+.security-section .line-input input,
+.security-section .line-input select {
+  color: #000 !important;
+}
+
+.security-section .line-input input::placeholder {
+  color: #666 !important;
+  opacity: 1;
+}
+
+.security-section .line-input>i:first-child {
+  color: #000;
+}
+
+.security-section .eye-button {
+  color: #000;
+}
+
+.security-section .line-input--readonly input {
+  color: #000 !important;
+}
+
+
+.line-input input,
+.line-input select,
+.line-input textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 0;
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  box-shadow: none !important;
+  appearance: none;
+}
+
+.line-input input::placeholder,
+.line-input textarea::placeholder {
+  color: #fff;
+  opacity: 1;
+}
+
+.line-input input:focus,
+.line-input select:focus,
+.line-input textarea:focus {
+  outline: none;
+}
+
+.line-input--readonly input {
+  color: #fff;
+  cursor: not-allowed;
+}
+
+.line-input--readonly>i:first-child {
+  color: #fff;
+}
+
+.line-input .field-lock {
+  flex-shrink: 0;
+  margin: 0 2px 0 8px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.line-input select {
+  padding-right: 18px;
+  cursor: pointer;
+}
+
+.line-input .select-arrow {
+  position: absolute;
+  right: 2px;
+  color: #fff;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.line-input--textarea {
+  align-items: flex-start;
+}
+
+.line-input--textarea>i:first-child {
+  margin-top: 12px;
+}
+
+.line-input textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.line-input .input-error {
+  color: #d13d4d;
+}
+
+.line-input:has(.input-error) {
+  border-bottom-color: #e05263;
+}
+
+.field-error,
+.field-note {
+  display: block;
+  margin-top: 7px;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.field-error {
+  color: #d13d4d;
+}
+
+.field-note {
+  color: #fff;
+}
+
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid #edf0f5;
+}
+
+.footer-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #8792a5;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.footer-note i {
+  color: #26956b;
+  font-size: 15px;
+}
+
+.save-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 12px 19px;
+  border: 0;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #3568e8, #554fe0);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 750;
+  box-shadow: 0 6px 16px #3568e826;
+  transition: transform .2s, box-shadow .2s, opacity .2s;
+}
+
+.save-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 9px 20px #3568e83b;
+}
+
+.save-button:disabled {
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+.save-button--dark {
+  background: linear-gradient(135deg, #27344c, #455572);
+  box-shadow: 0 6px 16px #27344c20;
+}
+
+.security-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: -5px 0 27px;
+  padding: 13px;
+  border: 1px solid #e9e4fc;
+  border-radius: 11px;
+  background: #faf8ff;
+  color: #716093;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.security-banner i {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #805cda;
+  font-size: 15px;
+}
+
+.security-grid {
+  gap: 26px 18px;
+}
+
+.eye-button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  margin-left: 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #8290a6;
+  font-size: 16px;
+}
+
+.eye-button:hover,
+.eye-button:focus-visible {
+  background: #f0f4ff;
+  color: var(--blue);
+  outline: none;
+}
+
+.status-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 20px;
+  padding: 12px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.status-message>i {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.status-message>span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.status-message--success {
+  border-color: #ccefe0;
+  background: #f0fbf6;
+  color: #18764f;
+}
+
+.status-message--danger {
+  border-color: #f6d5d8;
+  background: #fff5f5;
+  color: #b72f40;
+}
+
+.dismiss-button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 25px;
+  height: 25px;
+  margin: -4px -4px 0 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: currentColor;
+}
+
+@media (max-width: 1000px) {
+  .profile-layout {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 720px;
+  }
+
+  .page-heading,
+  .profile-overview {
+    max-width: 720px;
+  }
+}
+
 @media (max-width: 575.98px) {
-  .profile-page { padding: 17px 10px 26px; }
-  .profile-heading { gap: 11px; margin-bottom: 17px; }
-  .profile-heading__icon { flex-basis: 44px; width: 44px; height: 44px; border-radius: 14px; font-size: 21px; }
-  .profile-heading__copy { flex-basis: calc(100% - 60px); }
-  .profile-heading h1 { font-size: 22px; }
-  .profile-subtitle { font-size: 12px; }
-  .wallet-chip { width: 100%; margin: 2px 0 0; padding: 9px 12px; border-radius: 13px; }
-  .wallet-chip__icon { width: 32px; height: 32px; }
-  .wallet-chip small { font-size: 10px; }
-  .wallet-chip strong { font-size: 13px; }
-  .profile-layout { gap: 15px; }
-  .profile-card { border-radius: 18px; }
-  .profile-card__header { gap: 11px; padding: 18px 16px 16px; }
-  .section-icon { flex-basis: 38px; width: 38px; height: 38px; border-radius: 12px; font-size: 17px; }
-  .profile-card__header h2 { font-size: 15px; }
-  .profile-card__header p { font-size: 11px; }
-  .profile-form { gap: 16px; padding: 18px 16px 17px; }
-  .profile-form__row { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .form-field label { margin-bottom: 7px; font-size: 12px; }
-  .profile-input.form-control, .profile-input.form-select { min-height: 48px; font-size: 14px; }
-  .profile-textarea { min-height: 88px; }
-  .profile-form__footer { align-items: stretch; flex-direction: column; gap: 13px; padding-top: 16px; }
-  .save-note { font-size: 11px; }
-  .profile-button { width: 100%; min-height: 48px; }
-  .security-tip { margin: 16px 16px 0; }
-  .security-form { padding-top: 17px; }
-  .profile-alert { margin: 14px 16px 0; }
+  .profile-page {
+    padding: 19px 11px 30px;
+  }
+
+  .page-heading {
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+
+  .page-heading h1 {
+    font-size: 26px;
+  }
+
+  .page-heading p {
+    max-width: 245px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .page-eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.6px;
+  }
+
+  .heading-badge {
+    gap: 5px;
+    padding: 8px;
+    font-size: 9px;
+  }
+
+  .profile-overview {
+    gap: 13px;
+    margin-bottom: 17px;
+    padding: 17px 14px;
+    border-radius: 16px;
+  }
+
+  .avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 23px;
+  }
+
+  .overview-info h2 {
+    font-size: 17px;
+  }
+
+  .overview-info p {
+    gap: 6px;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+
+  .overview-icon {
+    width: 37px;
+    height: 37px;
+    border-radius: 11px;
+    font-size: 18px;
+  }
+
+  .profile-layout {
+    gap: 16px;
+  }
+
+  .profile-section {
+    padding: 19px 15px;
+    border-radius: 17px;
+  }
+
+  .section-heading {
+    gap: 11px;
+    margin-bottom: 26px;
+    padding-bottom: 17px;
+  }
+
+  .section-heading__icon {
+    width: 41px;
+    height: 41px;
+    border-radius: 12px;
+    font-size: 18px;
+  }
+
+  .section-heading h2 {
+    font-size: 15px;
+    color: #fff;
+  }
+
+  .section-heading p {
+    font-size: 11px;
+  }
+
+  .edit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 20px;
+  }
+
+  .edit-field label {
+    margin-bottom: 5px;
+    font-size: 14px;
+    letter-spacing: .15px;
+  }
+
+  .line-input {
+    min-height: 44px;
+  }
+
+  .line-input>i:first-child {
+    margin-right: 8px;
+    font-size: 14px;
+  }
+
+  .line-input input,
+  .line-input select,
+  .line-input textarea {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 12px;
+  }
+
+  .line-input input::placeholder,
+  .line-input textarea::placeholder {
+    font-size: 11px;
+  }
+
+  .line-input select {
+    padding-right: 14px;
+  }
+
+  .line-input .select-arrow {
+    font-size: 9px;
+  }
+
+  .line-input--readonly .field-lock {
+    margin-left: 4px;
+    font-size: 10px;
+  }
+
+  .line-input--textarea textarea {
+    min-height: 70px;
+  }
+
+  .field-note,
+  .field-error {
+    font-size: 9px;
+  }
+
+  .form-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 13px;
+    margin-top: 25px;
+    padding-top: 18px;
+  }
+
+  .footer-note {
+    font-size: 10px;
+  }
+
+  .save-button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .security-banner {
+    margin-bottom: 25px;
+    padding: 11px;
+    font-size: 10px;
+  }
+
+  .security-grid {
+    gap: 25px 12px;
+  }
+
+  .eye-button {
+    width: 28px;
+    height: 32px;
+    margin-left: 0;
+    font-size: 14px;
+  }
+
+  .status-message {
+    padding: 10px;
+    font-size: 10px;
+  }
 }
+
+@media (max-width: 360px) {
+  .profile-page {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .profile-section {
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+
+  .profile-overview {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .edit-grid {
+    column-gap: 9px;
+  }
+
+  .line-input>i:first-child {
+    margin-right: 6px;
+  }
+
+  .line-input input,
+  .line-input select,
+  .line-input textarea {
+    font-size: 11px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .profile-button, .profile-input.form-control, .profile-input.form-select { transition: none; }
+
+  .line-input,
+  .line-input::after,
+  .save-button {
+    transition: none;
+  }
 }
 </style>

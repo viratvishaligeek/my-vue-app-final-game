@@ -20,9 +20,9 @@
             <i class="bi bi-telephone text-muted"></i>
           </span>
           <span class="input-group-text bg-transparent border-end-0 fw-semibold">+91</span>
-          <input type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10"
-            class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }" id="phone"
-            :value="form.phone" placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
+          <input type="text" inputmode="numeric" class="form-control border-start-0"
+            :class="{ 'is-invalid': errors.phone }" id="phone" :value="form.phone"
+            placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
         </div>
         <div v-if="errors.phone" class="invalid-feedback d-block small mt-1">
           {{ errors.phone }}
@@ -82,7 +82,7 @@ import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '@/plugins/axios'
 import { useAuthStore } from '@/utils/auth'
-import { normalizePhoneDigits, hasExactlyTenDigits } from '@/utils/indianPhone'
+import { normalizeIndianPhone, isValidIndianPhone } from '@/utils/indianPhone'
 
 const router = useRouter()
 const route = useRoute()
@@ -108,20 +108,14 @@ const clearFieldError = (field) => {
   errors.api = ''
 }
 
-const handlePhoneInput = (event) => {
-  const normalized = normalizePhoneDigits(event.target.value)
-  if (event.target.value !== normalized) event.target.value = normalized
-  form.phone = normalized
-  clearFieldError('phone')
-}
-
 const validateForm = () => {
   let isValid = true
+  console.log(form);
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
     isValid = false
-  } else if (!hasExactlyTenDigits(form.phone)) {
-    errors.phone = 'Enter exactly 10 digits.'
+  } else if (!isValidIndianPhone(form.phone)) {
+    errors.phone = 'Enter a valid 10-digit Indian mobile number.'
     isValid = false
   } else {
     errors.phone = ''
@@ -138,6 +132,11 @@ const validateForm = () => {
   }
 
   return isValid
+}
+const handlePhoneInput = (event) => {
+  const value = event.target.value.replace(/\D/g, '').slice(0, 10)
+  form.phone = value
+  clearFieldError('phone')
 }
 
 const handleLogin = async () => {
