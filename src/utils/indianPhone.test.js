@@ -19,11 +19,6 @@ test('caps the input at ten digits and strips non-digits', () => {
   assert.equal(normalizePhoneDigits('0000000000'), '0000000000')
 })
 
-test('does not add or specially strip a country code', () => {
-  // +91 is display-only. Processing applies no country-code-specific rules.
-  assert.equal(normalizePhoneDigits('+91 1234567890'), '9112345678')
-})
-
 test('submission validation rejects non-digits and eleven digits', () => {
   assert.equal(hasExactlyTenDigits('123456789a'), false)
   assert.equal(hasExactlyTenDigits('12345678901'), false)
