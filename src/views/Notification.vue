@@ -17,18 +17,19 @@
             'granted' ? 'Disable Notifications' : 'Enable Notifications') }}
         </button>
       </div>
-      <div v-if="isAndroidApp"
-        class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
+      <div v-if="appUpdate.latest_url"
+        class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3"
+        style="background: linear-gradient(135deg, #9fbf3c8c, #ff450066);">
         <div>
-          <div class="fw-bold text-dark"><i class="bi bi-arrow-down-circle me-2"></i>Update App</div>
-          <div v-if="appUpdate.latest_url" class="small text-muted">
+          <div class="fw-bold text-danger btn btn-sm border"><i class="bi bi-arrow-down-circle me-2"></i>Update App
+          </div>
+          <div v-if="appUpdate.latest_url" class="text-dark">
             <span v-if="appUpdate.latest_version">Version {{ appUpdate.latest_version }} · </span>Published {{
               formatAppUpdateDate(appUpdate.update_date) }}. Downloading the APK opens the normal Android installation
             flow; it will not install silently.
           </div>
-          <div v-else class="small text-muted">No app update package is configured yet. Please check again later.</div>
         </div>
-        <button v-if="appUpdate.latest_url" type="button" class="btn btn-sm btn-outline-primary flex-shrink-0"
+        <button v-if="appUpdate.latest_url" type="button" class="btn btn-md btn-success flex-shrink-0"
           @click="openLatestApp">Download APK</button>
       </div>
       <div v-if="isInitialLoading" class="text-center py-5">
@@ -145,7 +146,7 @@ const togglePushNotifications = async () => {
       await saveNotificationPreference(false)
       const result = await disablePush()
       pushStatus.value = result.message
-      preferenceMessage.value = result.ok ? 'Push alerts are disabled. Your in-app notification history remains available. To revoke the device/browser permission completely, turn it off in system or site settings.' : result.message
+      preferenceMessage.value = result.ok ? 'Push alerts are disabled.' : result.message
       await refreshPushPermission()
     } catch (error) {
       preferenceMessage.value = error?.response?.data?.message || 'Unable to save your notification preference.'
@@ -166,7 +167,7 @@ const togglePushNotifications = async () => {
         await saveNotificationPreference(true)
         preferenceMessage.value = 'Push notifications are enabled.'
       } catch (error) {
-        preferenceMessage.value = error?.response?.data?.message || 'Device permission is enabled, but the account preference could not be saved.'
+        preferenceMessage.value = error?.response?.data?.message || 'Device permission is enabled.'
       } finally {
         preferenceLoading.value = false
       }
@@ -244,7 +245,7 @@ const refreshPushPermission = async () => {
       permissionMessage.value = 'Browser notification permission is enabled.'
     } else if (permission === 'denied') {
       pushPermissionState.value = 'denied'
-      permissionMessage.value = 'Notifications are blocked by the browser. Open this site’s browser permissions/settings and allow notifications; this page cannot re-prompt while permission is denied.'
+      permissionMessage.value = 'Notifications are blocked by the browser.'
     } else {
       pushPermissionState.value = 'prompt'
       permissionMessage.value = 'Permission will be requested only after you tap Enable.'
