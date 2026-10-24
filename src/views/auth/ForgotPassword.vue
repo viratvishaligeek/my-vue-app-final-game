@@ -33,8 +33,10 @@
           <span class="input-group-text bg-transparent border-end-0">
             <i class="bi bi-telephone text-muted"></i>
           </span>
-          <input type="tel" class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }" id="phone"
-            v-model.trim="form.phone" placeholder="Enter registered phone number" @input="clearFieldError('phone')" />
+          <span class="input-group-text bg-transparent border-end-0 fw-semibold">+91</span>
+          <input type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10"
+            class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }" id="phone"
+            :value="form.phone" placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
         </div>
         <div v-if="errors.phone" class="invalid-feedback d-block small mt-1">
           {{ errors.phone }}
@@ -130,6 +132,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/plugins/axios'
+import { normalizeIndianPhone, isValidIndianPhone } from '@/utils/indianPhone'
 
 const router = useRouter()
 
@@ -171,8 +174,8 @@ const handleSendOtp = async () => {
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
     return
-  } else if (!phoneRegex.test(normalizePhone(form.phone))) {
-    errors.phone = 'Please enter a valid phone number.'
+  } else if (!isValidIndianPhone(form.phone)) {
+    errors.phone = 'Enter a valid 10-digit Indian mobile number.'
     return
   }
 
@@ -180,7 +183,7 @@ const handleSendOtp = async () => {
 
   try {
     const response = await api.post('/forgot/send-otp', {
-      phone: normalizePhone(form.phone),
+      phone: form.phone,
     })
 
     if (response.data?.success) {
