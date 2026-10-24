@@ -143,6 +143,12 @@ const clearFieldError = (field) => {
 }
 
 // Client Validation
+const handlePhoneInput = (event) => {
+  form.phone = normalizeIndianPhone(event.target.value)
+  event.target.value = form.phone
+  clearFieldError('phone')
+}
+
 const validateForm = () => {
   let isValid = true
   if (!form.fullName) {
