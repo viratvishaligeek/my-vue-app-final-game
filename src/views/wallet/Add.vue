@@ -649,7 +649,10 @@ const getStatusClass = (status) => {
 
   if (
     value === 'rejected' ||
-    value === 'failed'
+    value === 'failed' ||
+    value === 'cancelled' ||
+    value === 'canceled' ||
+    value === 'expired'
   ) {
     return 'status-danger'
   }
