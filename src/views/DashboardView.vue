@@ -9,7 +9,7 @@
     <div class="alert alert-danger m-3" role="alert">{{ errorMessage }} <button class="btn btn-sm btn-danger ms-2"
         @click="fetchGames">Retry</button></div>
   </div>
-  <div v-else class="content-area">
+  <div v-else ref="dashboardRootElement" class="content-area">
     <div id="heroCarousel" ref="heroCarouselElement" class="carousel slide m-1 mb-2">
       <div class="carousel-indicators" v-if="banners.length > 1">
         <button v-for="(banner, index) in banners" :key="banner.id" type="button"
@@ -148,7 +148,7 @@
       </div>
     </div>
     <div v-else class="row g-3 ms-2 me-2">
-      <div v-for="(game, index) in games" :key="game.id" class="col-12">
+      <div v-for="(game, index) in games" :key="game.id" v-memo="[game, isGamePlayable(game)]" class="col-12">
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card"
           :class="{ 'game-closed': !isGamePlayable(game) }">
           <div class="bg-white p-3 d-flex align-items-center justify-content-between">
@@ -175,7 +175,7 @@
                 {{ game.latest_result?.date === todayDate ? (game.latest_result?.number ?? '--') : '--' }}
               </div>
               <div v-if="isGamePlayable(game)" class="text-danger small">
-                {{ getRemainingTime(game) }}
+                <GameCountdown :end-at="game.play_window_end_at" :server-offset="serverOffset" />
               </div>
             </div>
             <div class="d-flex align-items-center">
@@ -215,13 +215,16 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Carousel } from 'bootstrap'
 import api from '../plugins/axios'
 import LoadingState from '@/components/LoadingState.vue'
+import GameCountdown from '@/components/GameCountdown.vue'
 
 const games = ref([])
 const featuredGame = ref(null)
 const banners = ref([])
 const heroCarouselElement = ref(null)
+const dashboardRootElement = ref(null)
 const activeBannerIndex = ref(0)
 let heroCarouselInstance = null
+let dashboardAnimationObserver = null
 
 const isLoading = ref(false)
 const hasInitialLoadCompleted = ref(false)
@@ -559,6 +562,8 @@ const fetchGames = async () => {
   } finally {
     isLoading.value = false
     hasInitialLoadCompleted.value = true
+    await nextTick()
+    observeDashboardAnimations()
   }
 }
 
@@ -595,6 +600,25 @@ const initializeBannerCarousel = () => {
   heroCarouselInstance.cycle()
 }
 
+const observeDashboardAnimations = () => {
+  if (dashboardAnimationObserver) {
+    dashboardAnimationObserver.disconnect()
+    dashboardAnimationObserver = null
+  }
+
+  const root = dashboardRootElement.value
+  if (!root || typeof IntersectionObserver === 'undefined') return
+
+  dashboardAnimationObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      entry.target.classList.toggle('dashboard-animation-paused', !entry.isIntersecting)
+    }
+  }, { rootMargin: '100px 0px', threshold: 0.01 })
+
+  root.querySelectorAll('.marquee-wrapper, .notice-card, .live-result-box, .custom-card, .row.g-2.mb-4.ms-2.me-2 .btn')
+    .forEach((element) => dashboardAnimationObserver.observe(element))
+}
+
 const handleBannerSlid = (event) => {
   activeBannerIndex.value = event.to
 }
@@ -628,9 +652,11 @@ onMounted(async () => {
   await fetchGames()
   await nextTick()
   initializeBannerCarousel()
+  // The parent dashboard only needs frequent schedule-boundary checks;
+  // individual countdown text updates in their own lightweight component.
   clockTimer = setInterval(() => {
     currentTime.value = Date.now()
-  }, 1000)
+  }, 5000)
   startRefreshTimer()
 })
 
@@ -640,6 +666,10 @@ onUnmounted(() => {
     heroCarouselInstance.dispose()
   }
   heroCarouselInstance = null
+  if (dashboardAnimationObserver) {
+    dashboardAnimationObserver.disconnect()
+    dashboardAnimationObserver = null
+  }
   if (clockTimer) {
     clearInterval(clockTimer)
     clockTimer = null
@@ -2222,6 +2252,17 @@ onUnmounted(() => {
   .custom-card h6 {
     font-size: 14px !important;
   }
+}
+
+/* Pause decorative motion while sections are outside the viewport. The same
+   animations resume at their previous position when the user scrolls back. */
+.dashboard-animation-paused,
+.dashboard-animation-paused *,
+.dashboard-animation-paused::before,
+.dashboard-animation-paused::after,
+.dashboard-animation-paused *::before,
+.dashboard-animation-paused *::after {
+  animation-play-state: paused !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
