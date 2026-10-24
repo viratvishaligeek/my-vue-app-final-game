@@ -2500,14 +2500,16 @@ onBeforeUnmount(async () => {
 }
 
 .manual-instruction {
+
   padding: 9px;
   border-radius: 11px;
-  color: #5F6B73;
+  color: #735f5f;
   background: #f4f8f7;
   display: flex;
   gap: 7px;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.4;
+  font-weight: 600;
 }
 
 .manual-instruction i {

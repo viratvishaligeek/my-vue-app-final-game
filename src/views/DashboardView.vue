@@ -152,7 +152,7 @@
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card"
           :class="{ 'game-closed': !isGamePlayable(game) }">
           <div class="bg-white p-3 d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2" style="min-width:48%">
               <i class="bi bi-geo-alt-fill fs-5 icon-color"></i>
               <div>
                 <h6 class="fw-bold text-dark mb-0 text-uppercase fs-3">
@@ -166,7 +166,7 @@
                   {{ game.monthly_closure ? 'MONTH-END CLOSED' : getGameStatus(game) }}
                 </span>
                 <small v-if="game.monthly_closure" class="d-block text-danger mt-1">
-                  {{ game.play_status_message || 'Games are unavailable on the last calendar day of the month. Please try again next month.' }}
+                  {{ game.play_status_message || 'Games are unavailable on the last calendar day of the month' }}
                 </small>
               </div>
             </div>

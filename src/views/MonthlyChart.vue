@@ -86,19 +86,21 @@
                   Date
                 </th>
 
-                <th v-for="game in gameHeaders" :key="game.id" class="p-2 text-success">
+                <th v-for="game in gameHeaders" :key="game.id" class="p-1 text-white" :style="{
+                  backgroundColor: 'brown',
+                  minWidth: game.name.trim().split(/\s+/).length >= 2 ? '100px' : 'auto'
+                }">
                   <div class="d-flex align-items-center justify-content-center gap-1">
                     <span>{{ game.name }}</span>
                   </div>
                 </th>
               </tr>
             </thead>
-
             <tbody>
               <tr v-for="row in monthlyData" :key="row.date" :class="{
                 'table-warning fw-bold border-2 border-warning': row.is_today,
               }">
-                <td class="fw-black bg-light font-monospace p-0 text-danger">
+                <td class="fw-black bg-light font-monospace p-1 text-danger">
                   {{ row.formatted_day }}
 
                   <span v-if="row.is_today" class="badge bg-danger text-white rounded-pill ms-1 d-block"
@@ -107,7 +109,7 @@
                   </span>
                 </td>
 
-                <td v-for="game in gameHeaders" :key="game.id" class="py-2">
+                <td v-for="game in gameHeaders" :key="game.id" class="p-0">
                   <span
                     v-if="row.results[game.id] !== null && row.results[game.id] !== undefined && row.results[game.id] !== ''"
                     class="result-badge fw-black" :class="[

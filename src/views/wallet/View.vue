@@ -170,14 +170,19 @@
 
                     <div :class="[
                       'transaction-icon',
-                      item.type === 'credit'
-                        ? 'transaction-credit'
-                        : 'transaction-debit'
+                      item.description?.toLowerCase().includes('winning')
+                        ? 'transaction-winning'
+                        : item.type === 'credit'
+                          ? 'transaction-credit'
+                          : 'transaction-debit'
                     ]">
-                      <i :class="item.type === 'credit'
-                        ? 'bi bi-arrow-down-left'
-                        : 'bi bi-arrow-up-right'
-                        "></i>
+
+                      <img :src="item.description?.toLowerCase().includes('winning')
+                        ? '../src/assets/img/win.png'
+                        : item.type === 'credit'
+                          ? '../src/assets/img/credit.png'
+                          : '../src/assets/img/debit.png'" alt="Transaction Icon" style="width: 40px;">
+
                     </div>
 
                     <div class="transaction-info">
@@ -189,9 +194,7 @@
 
                         <div :class="[
                           'transaction-amount',
-                          item.type === 'credit'
-                            ? 'amount-credit'
-                            : 'amount-debit'
+                          item.type === 'credit' ? 'amount-credit' : 'amount-debit'
                         ]">
                           {{ item.type === 'credit' ? '+' : '-' }}₹{{
                             formatCurrency(item.amount)
@@ -200,29 +203,19 @@
                       </div>
 
                       <div class="transaction-meta">
-                        <span>
-                          {{ item.txn_id }}
-                        </span>
-
+                        <span>{{ item.txn_id }}</span>
                         <span class="meta-dot">•</span>
-
-                        <span>
-                          {{ formatDate(item.created_at) }}
-                        </span>
+                        <span>{{ formatDate(item.created_at) }}</span>
                       </div>
 
                       <div class="transaction-bottom">
                         <span :class="[
                           'transaction-type',
-                          item.type === 'credit'
-                            ? 'type-credit'
-                            : 'type-debit'
+                          item.type === 'credit' ? 'type-credit' : 'type-debit'
                         ]">
                           <i :class="item.type === 'credit'
                             ? 'bi bi-arrow-down'
-                            : 'bi bi-arrow-up'
-                            "></i>
-
+                            : 'bi bi-arrow-up'"></i>
                           {{ item.type }}
                         </span>
 
@@ -579,12 +572,13 @@ onMounted(() => {
   display: flex;
   align-items: flex-start;
   gap: 11px;
+  align-items: center;
 }
 
 .transaction-icon {
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
   border-radius: 13px;
   display: flex;
   align-items: center;
@@ -595,16 +589,15 @@ onMounted(() => {
 
 .transaction-credit {
   color: #198754;
-  background: linear-gradient(135deg,
-      rgba(25, 135, 84, 0.14),
-      rgba(25, 135, 84, 0.05));
 }
 
 .transaction-debit {
   color: #dc3545;
-  background: linear-gradient(135deg,
-      rgba(220, 53, 69, 0.14),
-      rgba(220, 53, 69, 0.05));
+}
+
+.transaction-winning {
+  color: #05c72f;
+
 }
 
 .transaction-info {
