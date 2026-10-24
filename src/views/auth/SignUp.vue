@@ -37,7 +37,7 @@
             <i class="bi bi-telephone text-muted"></i>
           </span>
           <span class="input-group-text bg-transparent border-end-0 fw-semibold">+91</span>
-          <input type="tel" inputmode="numeric" autocomplete="tel-national"
+          <input type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10"
             class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }"
             id="phone" :value="form.phone" placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
         </div>
@@ -113,7 +113,7 @@ import { reactive, ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '@/plugins/axios'
 import { useAuthStore } from '@/utils/auth'
-import { normalizeIndianPhone, isValidIndianPhone } from '@/utils/indianPhone'
+import { normalizePhoneDigits, hasExactlyTenDigits } from '@/utils/indianPhone'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -144,8 +144,9 @@ const clearFieldError = (field) => {
 
 // Client Validation
 const handlePhoneInput = (event) => {
-  form.phone = normalizeIndianPhone(event.target.value)
-  event.target.value = form.phone
+  const normalized = normalizePhoneDigits(event.target.value)
+  if (event.target.value !== normalized) event.target.value = normalized
+  form.phone = normalized
   clearFieldError('phone')
 }
 
@@ -162,8 +163,8 @@ const validateForm = () => {
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
     isValid = false
-  } else if (!isValidIndianPhone(form.phone)) {
-    errors.phone = 'Enter a valid 10-digit Indian mobile number.'
+  } else if (!hasExactlyTenDigits(form.phone)) {
+    errors.phone = 'Enter exactly 10 digits.'
     isValid = false
   }
 

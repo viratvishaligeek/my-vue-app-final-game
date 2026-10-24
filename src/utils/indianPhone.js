@@ -1,23 +1,18 @@
 /**
- * Normalize an Indian mobile number to the ten-digit format expected by
- * the existing authentication API. The UI displays +91 separately.
+ * Keep only the digits the user enters, capped at ten characters.
+ * The visible +91 prefix is presentation-only and is never processed here.
  */
-export const normalizeIndianPhone = (value) => {
-  const raw = String(value ?? '').trim()
-  let digits = raw.replace(/\D/g, '')
+export const normalizePhoneDigits = (value) =>
+  String(value ?? '').replace(/[^0-9]/g, '').slice(0, 10)
 
-  // Strip an explicitly entered +91 prefix, including partial pasted values.
-  if (/^\s*\+91/.test(raw)) {
-    digits = digits.slice(2)
-  } else if (digits.length === 12 && digits.startsWith('91')) {
-    // Also support a pasted number like 919876543210 without a plus sign.
-    digits = digits.slice(2)
-  } else if (digits.length === 11 && digits.startsWith('0')) {
-    // Support a common domestic trunk-prefix format.
-    digits = digits.slice(1)
+export const hasExactlyTenDigits = (value) => {
+  const digits = String(value ?? '')
+  if (digits.length !== 10) return false
+
+  for (let index = 0; index < digits.length; index += 1) {
+    const code = digits.charCodeAt(index)
+    if (code < 48 || code > 57) return false
   }
 
-  return digits.slice(0, 10)
+  return true
 }
-
-export const isValidIndianPhone = (value) => /^\d{10}$/.test(String(value ?? ''))
