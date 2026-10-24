@@ -2337,12 +2337,14 @@ onBeforeUnmount(async () => {
 }
 
 .gateway-payment-frame {
+  display: block;
   width: 100%;
-  height: min(52vh, 470px);
-  min-height: 300px;
+  height: clamp(220px, 42dvh, 420px);
+  min-height: 220px;
   border: 1px solid #e5eaea;
   border-radius: 12px;
   background: #fff;
+  overflow: hidden;
 }
 
 .gateway-payment-status {
