@@ -36,8 +36,10 @@
           <span class="input-group-text bg-transparent border-end-0">
             <i class="bi bi-telephone text-muted"></i>
           </span>
-          <input type="tel" class="form-control border-start-0" maxlength="10" :class="{ 'is-invalid': errors.phone }"
-            id="phone" v-model.trim="form.phone" placeholder="Enter phone number" @input="clearFieldError('phone')" />
+          <span class="input-group-text bg-transparent border-end-0 fw-semibold">+91</span>
+          <input type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10"
+            class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }"
+            id="phone" :value="form.phone" placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
         </div>
         <div v-if="errors.phone" class="invalid-feedback d-block small mt-1">
           {{ errors.phone }}
@@ -111,6 +113,7 @@ import { reactive, ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '@/plugins/axios'
 import { useAuthStore } from '@/utils/auth'
+import { normalizeIndianPhone, isValidIndianPhone } from '@/utils/indianPhone'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -157,8 +160,8 @@ const validateForm = () => {
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
     isValid = false
-  } else if (!phoneRegex.test(normalizePhone(form.phone))) {
-    errors.phone = 'Please enter a valid phone number.'
+  } else if (!isValidIndianPhone(form.phone)) {
+    errors.phone = 'Enter a valid 10-digit Indian mobile number.'
     isValid = false
   }
 
@@ -234,7 +237,7 @@ const handleSignUp = async () => {
   try {
     const response = await api.post('/register', {
       name: form.fullName,
-      phone: normalizePhone(form.phone),
+      phone: form.phone,
       password: form.password,
       ...(form.referralCode ? { referral_code: form.referralCode.trim().toUpperCase() } : {}),
     })
