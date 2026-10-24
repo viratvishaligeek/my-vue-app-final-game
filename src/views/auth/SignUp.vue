@@ -37,7 +37,7 @@
             <i class="bi bi-telephone text-muted"></i>
           </span>
           <span class="input-group-text bg-transparent border-end-0 fw-semibold">+91</span>
-          <input type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10"
+          <input type="tel" inputmode="numeric" autocomplete="tel-national"
             class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }"
             id="phone" :value="form.phone" placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
         </div>
