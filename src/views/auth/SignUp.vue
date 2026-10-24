@@ -143,12 +143,8 @@ const clearFieldError = (field) => {
 }
 
 // Client Validation
-const normalizePhone = (value) => value.replace(/[\s-]/g, '')
-
 const validateForm = () => {
   let isValid = true
-  const phoneRegex = /^\+?[0-9]{7,15}$/
-
   if (!form.fullName) {
     errors.fullName = 'Full name is required.'
     isValid = false
