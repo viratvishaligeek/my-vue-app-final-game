@@ -82,7 +82,7 @@ import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '@/plugins/axios'
 import { useAuthStore } from '@/utils/auth'
-import { normalizeIndianPhone, isValidIndianPhone } from '@/utils/indianPhone'
+import { isValidIndianPhone } from '@/utils/indianPhone'
 
 const router = useRouter()
 const route = useRoute()

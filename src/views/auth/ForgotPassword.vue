@@ -132,7 +132,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/plugins/axios'
-import { normalizePhoneDigits, hasExactlyTenDigits } from '@/utils/indianPhone'
+import { normalizeIndianPhone } from '@/utils/indianPhone'
 
 const router = useRouter()
 
@@ -165,7 +165,7 @@ const clearFieldError = (field) => {
 }
 
 const handlePhoneInput = (event) => {
-  const normalized = normalizePhoneDigits(event.target.value)
+  const normalized = normalizeIndianPhone(event.target.value)
   if (event.target.value !== normalized) event.target.value = normalized
   form.phone = normalized
   clearFieldError('phone')
@@ -176,9 +176,6 @@ const handleSendOtp = async () => {
   apiMessage.text = ''
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
-    return
-  } else if (!hasExactlyTenDigits(form.phone)) {
-    errors.phone = 'Enter exactly 10 digits.'
     return
   }
 

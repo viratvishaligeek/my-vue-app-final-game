@@ -113,7 +113,7 @@ import { reactive, ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '@/plugins/axios'
 import { useAuthStore } from '@/utils/auth'
-import { normalizePhoneDigits, hasExactlyTenDigits } from '@/utils/indianPhone'
+import { normalizeIndianPhone } from '@/utils/indianPhone'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -144,7 +144,7 @@ const clearFieldError = (field) => {
 
 // Client Validation
 const handlePhoneInput = (event) => {
-  const normalized = normalizePhoneDigits(event.target.value)
+  const normalized = normalizeIndianPhone(event.target.value)
   if (event.target.value !== normalized) event.target.value = normalized
   form.phone = normalized
   clearFieldError('phone')
@@ -162,9 +162,6 @@ const validateForm = () => {
 
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
-    isValid = false
-  } else if (!hasExactlyTenDigits(form.phone)) {
-    errors.phone = 'Enter exactly 10 digits.'
     isValid = false
   }
 
