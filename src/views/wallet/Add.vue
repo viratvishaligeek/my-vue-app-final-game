@@ -2348,6 +2348,7 @@ onBeforeUnmount(async () => {
   border-radius: 12px;
   background: #fff;
   overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .gateway-payment-status {
@@ -2360,6 +2361,8 @@ onBeforeUnmount(async () => {
 }
 
 .gateway-payment-status-message {
+  min-height: 2.8em;
+  overflow-wrap: anywhere;
   margin: 10px 0 0;
   color: #66727d;
   font-size: 10px;
