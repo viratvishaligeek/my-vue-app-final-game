@@ -334,7 +334,8 @@ const getTimestamp = (value) => {
 */
 
 const isGamePlayable = (game) => {
-  if (!game || game.status !== 'active') {
+  // The API's monthly-closure flag overrides client-side countdown math.
+  if (!game || game.status !== 'active' || game.monthly_closure) {
     return false
   }
   const start = getTimestamp(game.play_window_start_at)
