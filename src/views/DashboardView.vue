@@ -163,8 +163,11 @@
                   <span class="dot-running" :class="{
                     'bg-danger': !isGamePlayable(game),
                   }"></span>
-                  {{ getGameStatus(game) }}
+                  {{ game.monthly_closure ? 'MONTH-END CLOSED' : getGameStatus(game) }}
                 </span>
+                <small v-if="game.monthly_closure" class="d-block text-danger mt-1">
+                  {{ game.play_status_message || 'Games are unavailable on the last calendar day of the month. Please try again next month.' }}
+                </small>
               </div>
             </div>
             <div class="text-center">
