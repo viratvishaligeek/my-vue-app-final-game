@@ -164,13 +164,9 @@ const clearFieldError = (field) => {
   apiMessage.text = ''
 }
 
-const normalizePhone = (value) => value.replace(/[\s-]/g, '')
-
 // Send OTP Handler
 const handleSendOtp = async () => {
   apiMessage.text = ''
-  const phoneRegex = /^\+?[0-9]{7,15}$/
-
   if (!form.phone) {
     errors.phone = 'Phone number is required.'
     return
