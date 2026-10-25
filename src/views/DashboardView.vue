@@ -1526,9 +1526,9 @@ onUnmounted(() => {
 
 .custom-card h6 {
   color: #172033 !important;
-  font-size: 15px !important;
+  font-size: 13px !important;
   font-weight: 900 !important;
-  letter-spacing: .15px;
+  letter-spacing: .5px;
 }
 
 .custom-card .small {

@@ -79,7 +79,7 @@
         </div>
 
         <div v-else class="table-responsive result-table-wrapper">
-          <table class="table table-bordered table-hover align-middle mb-0 text-center font-monospace fs-8">
+          <table class="table  table-hover align-middle mb-0 text-center font-monospace fs-8">
             <thead class=" text-uppercase fs-8">
               <tr>
                 <th class="date-sticky date-header p-0 py-2 text-danger">
@@ -119,7 +119,7 @@
                     {{ row.results[game.id] }}
                   </span>
 
-                  <span v-else class="text-muted opacity-25 fw-bold">
+                  <span v-else class=" fw-bold">
                     --
                   </span>
                 </td>

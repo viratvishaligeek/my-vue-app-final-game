@@ -16,9 +16,6 @@
       <div class="mb-3">
         <label for="phone" class="form-label">Phone Number</label>
         <div class="input-group">
-          <span class="input-group-text bg-transparent border-end-0">
-            <i class="bi bi-telephone text-danger"></i>
-          </span>
           <span class="input-group-text bg-transparent border-end-0">+91</span>
           <input type="text" inputmode="numeric" class="form-control border-start-0"
             :class="{ 'is-invalid': errors.phone }" id="phone" :value="form.phone" placeholder="Enter mobile number"
@@ -42,7 +39,7 @@
           </span>
           <input :type="showPassword ? 'text' : 'password'" class="form-control border-start-0 border-end-0"
             :class="{ 'is-invalid': errors.password }" id="password" v-model="form.password"
-            placeholder="            Enter your password" @input="clearFieldError('password')" />
+            placeholder="Enter your password" @input="clearFieldError('password')" />
           <button type="button" class="input-group-text bg-transparent border-start-0" id="togglePassword"
             @click="showPassword = !showPassword" aria-label="Toggle password visibility">
             <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye', 'text-info']"></i>
