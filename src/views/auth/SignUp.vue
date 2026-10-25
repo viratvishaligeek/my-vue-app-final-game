@@ -20,10 +20,10 @@
         <label for="fullName" class="form-label">Full Name</label>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0">
-            <i class="bi bi-person text-muted"></i>
+            <i class="bi bi-person text-primary"></i>
           </span>
           <input type="text" class="form-control border-start-0" :class="{ 'is-invalid': errors.fullName }"
-            id="fullName" v-model.trim="form.fullName" placeholder="Enter full name"
+            id="fullName" v-model.trim="form.fullName" placeholder="            Enter full name"
             @input="clearFieldError('fullName')" />
         </div>
         <div v-if="errors.fullName" class="invalid-feedback d-block small mt-1">
@@ -34,12 +34,12 @@
         <label for="phone" class="form-label">Phone Number</label>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0">
-            <i class="bi bi-telephone text-muted"></i>
+            <i class="bi bi-telephone text-danger"></i>
           </span>
-          <span class="input-group-text bg-transparent border-end-0 fw-semibold">+91</span>
+          <span class="input-group-text bg-transparent border-end-0 ">+91</span>
           <input type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10"
             class="form-control border-start-0" :class="{ 'is-invalid': errors.phone }" id="phone" :value="form.phone"
-            placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
+            placeholder="Enter mobile number" @input="handlePhoneInput" />
         </div>
         <div v-if="errors.phone" class="invalid-feedback d-block small mt-1">
           {{ errors.phone }}
@@ -50,14 +50,14 @@
         <label for="password" class="form-label">Password</label>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0">
-            <i class="bi bi-lock text-muted"></i>
+            <i class="bi bi-lock text-success"></i>
           </span>
           <input :type="showPassword ? 'text' : 'password'" class="form-control border-start-0 border-end-0"
             :class="{ 'is-invalid': errors.password }" id="password" v-model="form.password"
-            placeholder="Create password" @input="clearFieldError('password')" />
+            placeholder="            Create password" @input="clearFieldError('password')" />
           <button type="button" class="input-group-text bg-transparent border-start-0"
             @click="showPassword = !showPassword" aria-label="Toggle password visibility">
-            <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye', 'text-muted']"></i>
+            <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye', 'text-info']"></i>
           </button>
         </div>
         <div v-if="errors.password" class="invalid-feedback d-block small mt-1">
@@ -79,10 +79,10 @@
         <label for="referralCode" class="form-label">Referral Code (Optional)</label>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0">
-            <i class="bi bi-gift text-muted"></i>
+            <i class="bi bi-gift text-warning"></i>
           </span>
           <input type="text" class="form-control border-start-0" :class="{ 'is-invalid': errors.referralCode }"
-            id="referralCode" v-model.trim="form.referralCode" placeholder="Enter referral code"
+            id="referralCode" v-model.trim="form.referralCode" placeholder="            Enter referral code"
             @input="form.referralCode = form.referralCode.toUpperCase(); clearFieldError('referralCode')" />
         </div>
         <div v-if="errors.referralCode" class="invalid-feedback d-block small mt-1">

@@ -3,7 +3,7 @@
     <div class="page-content">
       <div class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between gap-3 mb-3">
         <div>
-          <div class="fw-bold text-dark"><i class="bi bi-bell-fill me-2"></i>Stay up to date</div>
+          <div class="fw-bold text-dark"><i class="bi bi-bell-fill me-2"></i>Notification</div>
           <div v-if="pushStatus" class="small mt-1" role="status">{{ pushStatus }}</div>
           <div v-if="permissionMessage" class="small mt-1 text-muted" role="status">{{ permissionMessage }}</div>
           <div v-if="preferenceMessage" class="small mt-1" role="status">{{ preferenceMessage }}</div>
@@ -14,7 +14,7 @@
           @click="togglePushNotifications">
           <span v-if="pushLoading || preferenceLoading" class="spinner-border spinner-border-sm me-1"></span>
           {{ pushLoading || preferenceLoading ? 'Please wait…' : (notificationsEnabled && pushPermissionState ===
-            'granted' ? 'Disable Notifications' : 'Enable Notifications') }}
+            'granted' ? 'नोटिफिकेशन बंद करें' : 'नोटिफिकेशन चालू करें') }}
         </button>
       </div>
       <div v-if="appUpdate.latest_url"
@@ -165,9 +165,9 @@ const togglePushNotifications = async () => {
       preferenceLoading.value = true
       try {
         await saveNotificationPreference(true)
-        preferenceMessage.value = 'Push notifications are enabled.'
+        preferenceMessage.value = ''
       } catch (error) {
-        preferenceMessage.value = error?.response?.data?.message || 'Device permission is enabled.'
+        preferenceMessage.value = error?.response?.data?.message || ''
       } finally {
         preferenceLoading.value = false
       }

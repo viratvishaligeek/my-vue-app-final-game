@@ -1,7 +1,6 @@
 <template>
   <main class="profile-page">
     <div class="profile-layout">
-      <!-- Personal details -->
       <section class="profile-section" style="  background: linear-gradient(135deg, #272451, #000);">
         <div class="section-heading">
           <div class="section-heading__icon">
@@ -15,7 +14,6 @@
 
         <form @submit.prevent="handleUpdateProfile" novalidate>
           <div class="edit-grid">
-            <!-- Full name -->
             <div class="edit-field">
               <label for="profile-name">Full name <span>*</span></label>
               <div class="line-input">
@@ -27,7 +25,6 @@
               <small v-if="errors.name" class="field-error">{{ errors.name }}</small>
             </div>
 
-            <!-- Registered phone -->
             <div class="edit-field">
               <label for="profile-phone">Phone number</label>
               <div class="line-input line-input--readonly">
@@ -38,7 +35,6 @@
               </div>
             </div>
 
-            <!-- City -->
             <div class="edit-field">
               <label for="profile-city">City</label>
               <div class="line-input">
@@ -50,7 +46,6 @@
               <small v-if="errors.city" class="field-error">{{ errors.city }}</small>
             </div>
 
-            <!-- Gender -->
             <div class="edit-field">
               <label for="profile-gender">Gender</label>
               <div class="line-input">
@@ -67,7 +62,6 @@
               <small v-if="errors.gender" class="field-error">{{ errors.gender }}</small>
             </div>
 
-            <!-- Address -->
           </div>
 
           <div v-if="profileStatus.text" class="status-message" :class="'status-message--' + profileStatus.type"
@@ -93,7 +87,6 @@
         </form>
       </section>
 
-      <!-- Password and security -->
       <section class="profile-section security-section">
         <div class="section-heading">
           <div class="section-heading__icon section-heading__icon--purple">
@@ -123,7 +116,6 @@
 
         <form @submit.prevent="handleChangePassword" novalidate>
           <div class="edit-grid security-grid">
-            <!-- Current password -->
             <div class="edit-field edit-field--full">
               <label for="current-password">Current password <span>*</span></label>
               <div class="line-input">
@@ -143,7 +135,6 @@
               </small>
             </div>
 
-            <!-- New password -->
             <div class="edit-field">
               <label for="new-password">New password <span>*</span></label>
               <div class="line-input">
@@ -163,7 +154,6 @@
               </small>
             </div>
 
-            <!-- Confirm password -->
             <div class="edit-field">
               <label for="confirm-password">Confirm password <span>*</span></label>
               <div class="line-input">
@@ -734,9 +724,9 @@ const handleChangePassword = async () => {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 15px;
-  margin-top: 30px;
-  padding-top: 22px;
-  border-top: 1px solid #edf0f5;
+  /* margin-top: 30px;
+  padding-top: 22px; */
+  /* border-top: 1px solid #edf0f5; */
 }
 
 .footer-note {
@@ -1041,8 +1031,8 @@ const handleChangePassword = async () => {
     align-items: stretch;
     flex-direction: column;
     gap: 13px;
-    margin-top: 25px;
-    padding-top: 18px;
+    /* margin-top: 25px;
+    padding-top: 18px; */
   }
 
   .footer-note {

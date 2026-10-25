@@ -78,11 +78,11 @@
           </p>
         </div>
 
-        <div v-else class="table-responsive">
+        <div v-else class="table-responsive result-table-wrapper">
           <table class="table table-bordered table-hover align-middle mb-0 text-center font-monospace fs-8">
             <thead class=" text-uppercase fs-8">
               <tr>
-                <th class="p-0 py-2 text-danger">
+                <th class="date-sticky date-header p-0 py-2 text-danger">
                   Date
                 </th>
 
@@ -100,7 +100,7 @@
               <tr v-for="row in monthlyData" :key="row.date" :class="{
                 'table-warning fw-bold border-2 border-warning': row.is_today,
               }">
-                <td class="fw-black bg-light font-monospace p-1 text-danger">
+                <td class="date-sticky date-cell fw-black bg-light font-monospace p-1 text-danger">
                   {{ row.formatted_day }}
 
                   <span v-if="row.is_today" class="badge bg-danger text-white rounded-pill ms-1 d-block"
@@ -353,5 +353,49 @@ onBeforeUnmount(async () => {
   border-radius: 0.35rem;
   background-color: #d1e7dd;
   color: #0f5132 !important;
+}
+
+.result-table-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+  isolation: isolate;
+  -webkit-overflow-scrolling: touch;
+}
+
+.result-table-wrapper table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+}
+
+.result-table-wrapper th,
+.result-table-wrapper td {
+  white-space: nowrap;
+}
+
+.result-table-wrapper .date-sticky {
+  position: sticky;
+  left: 0;
+  min-width: 65px;
+  width: 65px;
+  max-width: 65px;
+  background-color: #fff !important;
+  z-index: 2;
+  border-right: 2px solid #dee2e6;
+}
+
+.result-table-wrapper .date-header {
+  z-index: 4;
+  background-color: #f8f9fa !important;
+}
+
+.result-table-wrapper .date-cell {
+  background-color: #f8f9fa !important;
+}
+
+.result-table-wrapper tbody tr.table-warning .date-cell {
+  background-color: #fff3cd !important;
 }
 </style>

@@ -178,10 +178,10 @@
                     ]">
 
                       <img :src="item.description?.toLowerCase().includes('winning')
-                        ? '../src/assets/img/win.png'
+                        ? '../../assets/img/win.png'
                         : item.type === 'credit'
-                          ? '../src/assets/img/credit.png'
-                          : '../src/assets/img/debit.png'" alt="Transaction Icon" style="width: 40px;">
+                          ? '../../assets/img/credit.png'
+                          : '../../assets/img/debit.png'" alt="Transaction Icon" style="width: 40px;">
 
                     </div>
 

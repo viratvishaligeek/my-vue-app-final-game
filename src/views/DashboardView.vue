@@ -148,7 +148,8 @@
       </div>
     </div>
     <div v-else class="row g-3 ms-2 me-2">
-      <div v-for="(game, index) in games" :key="game.id" v-memo="[game, isGamePlayable(game), serverOffset]" class="col-12">
+      <div v-for="(game, index) in games" :key="game.id" v-memo="[game, isGamePlayable(game), serverOffset]"
+        class="col-12">
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden custom-card"
           :class="{ 'game-closed': !isGamePlayable(game) }">
           <div class="bg-white p-3 d-flex align-items-center justify-content-between">
@@ -613,13 +614,11 @@ const startRefreshTimer = () => {
 
 onMounted(async () => {
   await fetchGames()
-  await nextTick()
-  initializeBannerCarousel()
-  // The parent dashboard only needs frequent schedule-boundary checks;
-  // individual countdown text updates in their own lightweight component.
+
   clockTimer = setInterval(() => {
     currentTime.value = Date.now()
   }, 5000)
+
   startRefreshTimer()
 })
 
@@ -1375,7 +1374,7 @@ onUnmounted(() => {
   justify-content: space-between;
   width: 100%;
   gap: 6px;
-  padding: 0px 30px;
+  padding: 0px 15px;
 }
 
 .city-name {
@@ -2240,6 +2239,108 @@ onUnmounted(() => {
 
   .notice-track {
     animation: none !important;
+  }
+}
+
+/* =========================================
+   CENTRAL ANIMATION SYSTEM
+   ========================================= */
+
+:root {
+  --motion-cycle: 8s;
+  --motion-gap: 5s;
+  --motion-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+/* Shared shine animation */
+@keyframes sharedShine {
+
+  0%,
+  55%,
+  100% {
+    transform: translateX(0) skewX(-22deg);
+  }
+
+  75% {
+    transform: translateX(350%) skewX(-22deg);
+  }
+}
+
+/* Shared soft pulse */
+@keyframes sharedPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  10% {
+    opacity: .8;
+    transform: scale(1.04);
+  }
+
+  20%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Shared entrance */
+@keyframes sharedEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reusable shine timing */
+.row.g-2.mb-4.ms-2.me-2 .btn::before,
+.custom-card .btn-light::before,
+.custom-card .btn-success::before,
+.custom-card>.bg-success::before {
+  animation-duration: 8s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* Keep visual effects, reduce expensive rendering */
+.custom-card,
+.live-result-box,
+.notice-card,
+.marquee-wrapper {
+  backface-visibility: hidden;
+}
+
+.custom-card::after,
+.live-result-box::before,
+.notice-card::before,
+.notice-card::after {
+  pointer-events: none;
+}
+
+/* Pause animations when the tab is hidden */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none !important;
+  }
+}
+
+/* Avoid hover movement on touch devices */
+@media (hover: none) {
+  .custom-card:hover {
+    transform: none;
+  }
+
+  .custom-card .btn-success:hover,
+  .custom-card .btn-light:hover {
+    transform: none;
   }
 }
 </style>

@@ -17,12 +17,12 @@
         <label for="phone" class="form-label">Phone Number</label>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0">
-            <i class="bi bi-telephone text-muted"></i>
+            <i class="bi bi-telephone text-danger"></i>
           </span>
-          <span class="input-group-text bg-transparent border-end-0 fw-semibold">+91</span>
+          <span class="input-group-text bg-transparent border-end-0">+91</span>
           <input type="text" inputmode="numeric" class="form-control border-start-0"
-            :class="{ 'is-invalid': errors.phone }" id="phone" :value="form.phone"
-            placeholder="Enter 10-digit mobile number" @input="handlePhoneInput" />
+            :class="{ 'is-invalid': errors.phone }" id="phone" :value="form.phone" placeholder="Enter mobile number"
+            @input="handlePhoneInput" />
         </div>
         <div v-if="errors.phone" class="invalid-feedback d-block small mt-1">
           {{ errors.phone }}
@@ -38,14 +38,14 @@
         </div>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0">
-            <i class="bi bi-lock text-muted"></i>
+            <i class="bi bi-lock text-success"></i>
           </span>
           <input :type="showPassword ? 'text' : 'password'" class="form-control border-start-0 border-end-0"
             :class="{ 'is-invalid': errors.password }" id="password" v-model="form.password"
-            placeholder="Enter your password" @input="clearFieldError('password')" />
+            placeholder="            Enter your password" @input="clearFieldError('password')" />
           <button type="button" class="input-group-text bg-transparent border-start-0" id="togglePassword"
             @click="showPassword = !showPassword" aria-label="Toggle password visibility">
-            <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye', 'text-muted']"></i>
+            <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye', 'text-info']"></i>
           </button>
         </div>
         <div v-if="errors.password" class="invalid-feedback d-block small mt-1">
