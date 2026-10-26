@@ -293,8 +293,6 @@ const noticeLines = computed(() => {
     .filter(Boolean)
 })
 
-
-
 const syncServerTime = (serverTime, timezone) => {
   if (typeof timezone === 'string' && timezone.trim()) serverTimezone.value = timezone
   if (!serverTime) {
@@ -887,6 +885,8 @@ onUnmounted(() => {
  */
 
 .notice-card::before {
+  --shine-start: -40%;
+  --shine-end: 140%;
   content: "";
   position: absolute;
   top: 0;
@@ -900,7 +900,7 @@ onUnmounted(() => {
       #74ffd8,
       transparent);
   animation:
-    noticeTopLine 4s linear infinite;
+    sharedShine 4s linear infinite;
 }
 
 /*
@@ -1110,17 +1110,6 @@ onUnmounted(() => {
 
 }
 
-@keyframes noticeTopLine {
-  from {
-    left: -40%;
-  }
-
-  to {
-    left: 140%;
-  }
-
-}
-
 @keyframes noticeOrb {
 
   0%,
@@ -1161,8 +1150,6 @@ onUnmounted(() => {
   }
 
 }
-
-
 
 .row.g-2.mb-4.ms-2.me-2 {
   position: relative;
@@ -1219,7 +1206,7 @@ onUnmounted(() => {
       rgba(255, 255, 255, .65),
       rgba(255, 255, 255, .12),
       transparent);
-  animation: actionShine 5s linear infinite;
+  animation: sharedShine 5s linear infinite;
 }
 
 /* glow layer */
@@ -1344,6 +1331,8 @@ onUnmounted(() => {
 }
 
 .live-result-box::before {
+  --shine-start: -60%;
+  --shine-end: 140%;
   content: "";
   position: absolute;
   z-index: 1;
@@ -1359,12 +1348,10 @@ onUnmounted(() => {
       rgba(255, 255, 255, .42),
       rgba(255, 255, 255, .08),
       transparent);
-  animation: resultSweep 4s ease-in-out infinite;
+  animation: sharedShine 4s ease-in-out infinite;
 }
 
 /* floating orb */
-
-
 
 .horizontal-result-content {
   position: relative;
@@ -1488,6 +1475,8 @@ onUnmounted(() => {
 /* subtle moving reflection */
 
 .custom-card::after {
+  --shine-start: -50%;
+  --shine-end: 140%;
   content: "";
   position: absolute;
   z-index: 4;
@@ -1503,7 +1492,7 @@ onUnmounted(() => {
       transparent);
   pointer-events: none;
   opacity: .35;
-  animation: cardReflection 7s ease-in-out infinite;
+  animation: sharedShine 7s ease-in-out infinite;
 }
 
 .custom-card:hover {
@@ -1588,7 +1577,7 @@ onUnmounted(() => {
       transparent,
       rgba(0, 168, 120, .10),
       transparent);
-  animation: chartShine 4s linear infinite;
+  animation: sharedShine 4s linear infinite;
 }
 
 .custom-card .btn-light:hover {
@@ -1632,7 +1621,7 @@ onUnmounted(() => {
       rgba(255, 255, 255, .65),
       rgba(255, 255, 255, .15),
       transparent);
-  animation: playButtonSweep 2.5s linear infinite;
+  animation: sharedShine 2.5s linear infinite;
 }
 
 .custom-card .btn-success i {
@@ -1672,6 +1661,8 @@ onUnmounted(() => {
 }
 
 .custom-card>.bg-success::before {
+  --shine-start: -40%;
+  --shine-end: 140%;
   content: "";
   position: absolute;
   top: 0;
@@ -1684,7 +1675,7 @@ onUnmounted(() => {
       rgba(255, 255, 255, .25),
       transparent);
   transform: skewX(-20deg);
-  animation: bottomBarShine 8s linear infinite;
+  animation: sharedShine 8s linear infinite;
 }
 
 .spinner-border {
@@ -1730,193 +1721,6 @@ onUnmounted(() => {
   color: #172033 !important;
 }
 
-@keyframes ambientLeft {
-  from {
-    transform: translate(0, 0) scale(1);
-  }
-
-  to {
-    transform: translate(45px, 35px) scale(1.2);
-  }
-}
-
-@keyframes ambientRight {
-  from {
-    transform: translate(0, 0) scale(1);
-  }
-
-  to {
-    transform: translate(-35px, -45px) scale(1.2);
-  }
-}
-
-@keyframes heroEnter {
-  from {
-    opacity: 0;
-    transform: translateY(-12px) scale(.985);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes heroBreathing {
-  from {
-    transform: scale(1.02);
-  }
-
-  to {
-    transform: scale(1.065);
-  }
-}
-
-@keyframes heroLight {
-  0% {
-    left: -80%;
-  }
-
-  45%,
-  100% {
-    left: 150%;
-  }
-}
-
-@keyframes noticeGlow {
-
-  0%,
-  100% {
-    box-shadow:
-      0 7px 20px rgba(21, 47, 61, .07);
-  }
-
-  50% {
-    box-shadow:
-      0 8px 23px rgba(0, 168, 120, .13);
-  }
-}
-
-@keyframes noticeTopLight {
-  from {
-    left: -30%;
-  }
-
-  to {
-    left: 130%;
-  }
-}
-
-@keyframes speakerPulse {
-
-  0%,
-  100% {
-    filter: brightness(1);
-  }
-
-  50% {
-    filter: brightness(1.12);
-  }
-}
-
-@keyframes actionShine {
-  0% {
-    left: -100%;
-  }
-
-  35%,
-  100% {
-    left: 140%;
-  }
-}
-
-@keyframes actionFloat {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-2px);
-  }
-}
-
-@keyframes greenGlow {
-
-  0%,
-  100% {
-    box-shadow:
-      0 9px 20px rgba(20, 35, 45, .13),
-      inset 0 1px 0 rgba(255, 255, 255, .4);
-  }
-
-  50% {
-    box-shadow:
-      0 11px 25px rgba(0, 168, 120, .22),
-      0 0 15px rgba(0, 200, 145, .10),
-      inset 0 1px 0 rgba(255, 255, 255, .4);
-  }
-}
-
-@keyframes redGlow {
-
-  0%,
-  100% {
-    box-shadow:
-      0 9px 20px rgba(20, 35, 45, .13),
-      inset 0 1px 0 rgba(255, 255, 255, .4);
-  }
-
-  50% {
-    box-shadow:
-      0 11px 25px rgba(255, 64, 86, .20),
-      0 0 15px rgba(255, 64, 86, .08),
-      inset 0 1px 0 rgba(255, 255, 255, .4);
-  }
-}
-
-@keyframes blueGlow {
-
-  0%,
-  100% {
-    box-shadow:
-      0 9px 20px rgba(20, 35, 45, .13),
-      inset 0 1px 0 rgba(255, 255, 255, .4);
-  }
-
-  50% {
-    box-shadow:
-      0 11px 25px rgba(57, 119, 255, .20),
-      0 0 15px rgba(57, 119, 255, .08),
-      inset 0 1px 0 rgba(255, 255, 255, .4);
-  }
-}
-
-@keyframes icon3DFloat {
-
-  0%,
-  100% {
-    transform:
-      translateY(0) rotate(0deg) scale(1);
-  }
-
-  25% {
-    transform:
-      translateY(-4px) rotate(-5deg) scale(1.06);
-  }
-
-  50% {
-    transform:
-      translateY(0) rotate(0deg) scale(1);
-  }
-
-  75% {
-    transform:
-      translateY(3px) rotate(4deg) scale(1.04);
-  }
-}
-
 @keyframes titleBar {
   from {
     height: 18px;
@@ -1937,30 +1741,6 @@ onUnmounted(() => {
   }
 }
 
-
-@keyframes badgeShine {
-  0% {
-    left: -70%;
-  }
-
-  45%,
-  100% {
-    left: 130%;
-  }
-}
-
-@keyframes resultSweep {
-  0% {
-    left: -60%;
-  }
-
-  50%,
-  100% {
-    left: 140%;
-  }
-}
-
-
 @keyframes livePulse {
   0% {
     transform: scale(.8);
@@ -1975,32 +1755,6 @@ onUnmounted(() => {
   100% {
     transform: scale(.8);
     opacity: 1;
-  }
-}
-
-
-@keyframes marketCardEnter {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(.985);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes cardReflection {
-
-  0%,
-  65% {
-    left: -50%;
-  }
-
-  80%,
-  100% {
-    left: 140%;
   }
 }
 
@@ -2033,28 +1787,6 @@ onUnmounted(() => {
   }
 }
 
-@keyframes chartShine {
-  0% {
-    left: -100%;
-  }
-
-  40%,
-  100% {
-    left: 140%;
-  }
-}
-
-@keyframes playButtonSweep {
-  0% {
-    left: -120%;
-  }
-
-  40%,
-  100% {
-    left: 140%;
-  }
-}
-
 @keyframes playButtonIcon {
 
   0%,
@@ -2064,17 +1796,6 @@ onUnmounted(() => {
 
   50% {
     transform: scale(1.18);
-  }
-}
-
-@keyframes bottomBarShine {
-  0% {
-    left: -40%;
-  }
-
-  35%,
-  100% {
-    left: 140%;
   }
 }
 
@@ -2102,11 +1823,6 @@ onUnmounted(() => {
   }
 }
 
-@media (min-width: 577px) {
-  .content-area>* {
-    /* no desktop redesign */
-  }
-}
 
 @media (max-width: 576px) {
   .content-area {
@@ -2125,20 +1841,6 @@ onUnmounted(() => {
     max-height: 185px;
   }
 
-  /* NOTICE */
-  .notice-wrapper {
-    height: 38px;
-    margin-top: 2px;
-  }
-
-  .notice-text {
-    font-size: 12px;
-    padding-right: 65px;
-  }
-
-  .notice-track {
-    animation-duration: 12s;
-  }
 
   /* TOP ACTIONS */
   .row.g-2.mb-4.ms-2.me-2 {
@@ -2246,57 +1948,14 @@ onUnmounted(() => {
    CENTRAL ANIMATION SYSTEM
    ========================================= */
 
-:root {
-  --motion-cycle: 8s;
-  --motion-gap: 5s;
-  --motion-ease: cubic-bezier(.2, .8, .2, 1);
-}
-
 /* Shared shine animation */
 @keyframes sharedShine {
-
-  0%,
-  55%,
-  100% {
-    transform: translateX(0) skewX(-22deg);
+  0% {
+    left: var(--shine-start, -120%);
   }
 
-  75% {
-    transform: translateX(350%) skewX(-22deg);
-  }
-}
-
-/* Shared soft pulse */
-@keyframes sharedPulse {
-
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  10% {
-    opacity: .8;
-    transform: scale(1.04);
-  }
-
-  20%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Shared entrance */
-@keyframes sharedEntrance {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  40%, 100% {
+    left: var(--shine-end, 140%);
   }
 }
 
