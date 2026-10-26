@@ -122,7 +122,7 @@
             </div>
             <span v-if="featuredGame.today_result?.date === todayDate" class="live-tag text-white">
               <span class="live-dot"></span>
-              Latest Result Today
+              Live
             </span>
             <h3 class="result-number mb-0" aria-label="Today's result">
               {{ featuredGame.today_result?.date === todayDate ? (featuredGame.today_result?.number ?? '--') : '--' }}
@@ -1954,7 +1954,8 @@ onUnmounted(() => {
     left: var(--shine-start, -120%);
   }
 
-  40%, 100% {
+  40%,
+  100% {
     left: var(--shine-end, 140%);
   }
 }
