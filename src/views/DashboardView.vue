@@ -2001,12 +2001,6 @@ onUnmounted(() => {
    CENTRAL ANIMATION SYSTEM
    ========================================= */
 
-:root {
-  --motion-cycle: 8s;
-  --motion-gap: 5s;
-  --motion-ease: cubic-bezier(.2, .8, .2, 1);
-}
-
 /* Shared shine animation */
 @keyframes sharedShine {
   0% {
@@ -2017,12 +2011,6 @@ onUnmounted(() => {
     left: var(--shine-end, 140%);
   }
 }
-
-/* Shared soft pulse */
-
-
-/* Shared entrance */
-
 
 /* Reusable shine timing */
 .row.g-2.mb-4.ms-2.me-2 .btn::before,
