@@ -178,11 +178,11 @@
                     ]">
 
                       <img :src="item.description?.toLowerCase().includes('winning')
-                        ? '../../assets/img/win.png'
+                        ? winIcon
                         : item.type === 'credit'
-                          ? '../../assets/img/credit.png'
-                          : '../../assets/img/debit.png'" alt="Transaction Icon" style="width: 40px;">
-
+                          ? creditIcon
+                          : debitIcon
+                        " alt="Transaction Icon" width="40" height="40" />
                     </div>
 
                     <div class="transaction-info">
@@ -301,6 +301,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/utils/auth'
 import api from '@/plugins/axios'
+import winIcon from '@/assets/img/win.png'
+import creditIcon from '@/assets/img/credit.png'
+import debitIcon from '@/assets/img/debit.png'
+
 
 const authStore = useAuthStore()
 const isBalanceVisible = ref(true)

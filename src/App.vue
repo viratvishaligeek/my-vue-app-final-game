@@ -91,7 +91,9 @@ onMounted(async () => {
         <div class="launch-splash__glow launch-splash__glow--one"></div>
         <div class="launch-splash__glow launch-splash__glow--two"></div>
         <div class="launch-splash__content">
-          <div class="launch-splash__logo"><span>POK</span></div>
+          <div class="launch-splash__logo">
+            <img src="../assets/icon.png" style="height: 200px;" alt="">
+          </div>
           <p class="launch-splash__eyebrow">WELCOME TO</p>
           <h1>PLAY ONLINE KHAIWAL</h1>
           <p class="launch-splash__tagline">Fast results. Smooth play.</p>
@@ -144,7 +146,7 @@ body {
   place-items: center;
   overflow: hidden;
   color: #fff;
-  background: radial-gradient(ellipse at 50% 35%, #263b48 0%, #17232f 45%, #101820 100%);
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
 }
 
 .launch-splash__content {
@@ -156,16 +158,16 @@ body {
 }
 
 .launch-splash__logo {
-  width: 94px;
-  height: 94px;
+  width: 200px;
+  height: 200px;
   display: grid;
   place-items: center;
-  margin: 0 auto 24px;
+  margin: 0 auto 14px;
   border: 1px solid rgba(255, 255, 255, .35);
   border-radius: 28px;
-  background: linear-gradient(145deg, #22c997, #128b76);
+  background: white;
   box-shadow: 0 14px 40px rgba(20, 201, 151, .25), inset 0 1px rgba(255, 255, 255, .45);
-  transform: rotate(-5deg);
+  /* transform: rotate(-5deg); */
 }
 
 .launch-splash__logo span {
