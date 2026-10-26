@@ -293,8 +293,6 @@ const noticeLines = computed(() => {
     .filter(Boolean)
 })
 
-
-
 const syncServerTime = (serverTime, timezone) => {
   if (typeof timezone === 'string' && timezone.trim()) serverTimezone.value = timezone
   if (!serverTime) {
@@ -1112,8 +1110,6 @@ onUnmounted(() => {
 
 }
 
-
-
 @keyframes noticeOrb {
 
   0%,
@@ -1154,8 +1150,6 @@ onUnmounted(() => {
   }
 
 }
-
-
 
 .row.g-2.mb-4.ms-2.me-2 {
   position: relative;
@@ -1358,8 +1352,6 @@ onUnmounted(() => {
 }
 
 /* floating orb */
-
-
 
 .horizontal-result-content {
   position: relative;
@@ -1729,34 +1721,6 @@ onUnmounted(() => {
   color: #172033 !important;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @keyframes titleBar {
   from {
     height: 18px;
@@ -1777,12 +1741,6 @@ onUnmounted(() => {
   }
 }
 
-
-
-
-
-
-
 @keyframes livePulse {
   0% {
     transform: scale(.8);
@@ -1799,11 +1757,6 @@ onUnmounted(() => {
     opacity: 1;
   }
 }
-
-
-
-
-
 
 @keyframes statusPulse {
   0% {
@@ -1834,10 +1787,6 @@ onUnmounted(() => {
   }
 }
 
-
-
-
-
 @keyframes playButtonIcon {
 
   0%,
@@ -1849,8 +1798,6 @@ onUnmounted(() => {
     transform: scale(1.18);
   }
 }
-
-
 
 @keyframes errorEntrance {
   from {
