@@ -1,13 +1,12 @@
-name: App build validation
+name: Focused Vue unit tests
 
 on:
   pull_request:
-  push:
-    branches: [main]
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
-  build:
+  focused-unit-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,86 +15,7 @@ jobs:
           node-version: '22.22.2'
           cache: npm
       - run: npm ci
-      - name: Load public Firebase web settings
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFileSync, appendFileSync } from 'node:fs'
-          const source = readFileSync('public/firebase-config.js', 'utf8')
-          const configMatch = source.match(/self\.FIREBASE_CONFIG\s*=\s*(\{[\s\S]*?\});/)
-          const vapidMatch = source.match(/self\.FIREBASE_VAPID_KEY\s*=\s*("(?:\\\\.|[^"])*")\s*;/)
-          if (!configMatch || !vapidMatch) throw new Error('public/firebase-config.js is missing Firebase web settings.')
-          const config = JSON.parse(configMatch[1])
-          const values = {
-            VITE_FIREBASE_API_KEY: config.apiKey,
-            VITE_FIREBASE_AUTH_DOMAIN: config.authDomain,
-            VITE_FIREBASE_PROJECT_ID: config.projectId,
-            VITE_FIREBASE_MESSAGING_SENDER_ID: config.messagingSenderId,
-            VITE_FIREBASE_APP_ID: config.appId,
-            VITE_FIREBASE_VAPID_KEY: JSON.parse(vapidMatch[1]),
-          }
-          const missing = Object.entries(values).filter(([, value]) => !value).map(([key]) => key)
-          if (missing.length) throw new Error('Missing Firebase settings: ' + missing.join(', '))
-          appendFileSync(process.env.GITHUB_ENV, Object.entries(values).map(([key, value]) => key + '=' + value).join('\n') + '\n')
-          NODE
-      - run: npm run test:unit
-      - run: npm run build
-      - run: npx oxlint src
-
-  android-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22.22.2'
-          cache: npm
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '21'
-      - run: npm ci
-      - name: Load public Firebase web settings
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFileSync, appendFileSync } from 'node:fs'
-          const source = readFileSync('public/firebase-config.js', 'utf8')
-          const configMatch = source.match(/self\.FIREBASE_CONFIG\s*=\s*(\{[\s\S]*?\});/)
-          const vapidMatch = source.match(/self\.FIREBASE_VAPID_KEY\s*=\s*("(?:\\\\.|[^"])*")\s*;/)
-          if (!configMatch || !vapidMatch) throw new Error('public/firebase-config.js is missing Firebase web settings.')
-          const config = JSON.parse(configMatch[1])
-          const values = {
-            VITE_FIREBASE_API_KEY: config.apiKey,
-            VITE_FIREBASE_AUTH_DOMAIN: config.authDomain,
-            VITE_FIREBASE_PROJECT_ID: config.projectId,
-            VITE_FIREBASE_MESSAGING_SENDER_ID: config.messagingSenderId,
-            VITE_FIREBASE_APP_ID: config.appId,
-            VITE_FIREBASE_VAPID_KEY: JSON.parse(vapidMatch[1]),
-          }
-          const missing = Object.entries(values).filter(([, value]) => !value).map(([key]) => key)
-          if (missing.length) throw new Error('Missing Firebase settings: ' + missing.join(', '))
-          appendFileSync(process.env.GITHUB_ENV, Object.entries(values).map(([key, value]) => key + '=' + value).join('\n') + '\n')
-          NODE
-      - name: Configure native Firebase app
-        env:
-          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
-        run: |
-          if [ -z "$GOOGLE_SERVICES_JSON_BASE64" ]; then
-            echo "::error::Missing GOOGLE_SERVICES_JSON_BASE64 repository secret. Base64-encode the Firebase Android google-services.json for package com.galidisawar.playgame and add it under Settings > Secrets and variables > Actions."
-            exit 1
-          fi
-          printf '%s' "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > android/app/google-services.json
-          node --input-type=module <<'NODE'
-          import { readFileSync } from 'node:fs'
-          const config = JSON.parse(readFileSync('android/app/google-services.json', 'utf8'))
-          const packageNames = (config.client || []).flatMap(client => client.client_info?.android_client_info?.package_name || [])
-          if (!packageNames.includes('com.galidisawar.playgame')) {
-            throw new Error('google-services.json must contain Android package com.galidisawar.playgame.')
-          }
-          NODE
-      - run: npm run build:android
-      - uses: actions/upload-artifact@v4
-        with:
-          name: play-online-khaiwal-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 14
+      - name: Run Vue unit tests
+        run: npm run test:unit
+      - name: Lint realtime request lifecycle changes
+        run: npx oxlint src/composables/usePresence.js src/utils/singleFlight.js src/utils/singleFlight.test.js

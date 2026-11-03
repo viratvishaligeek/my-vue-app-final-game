@@ -1,6 +1,8 @@
+import { acquirePusherChannel } from './pusherManager.js'
+
 /**
- * Creates the authenticated private Pusher subscription used by player live support.
- * The caller owns this subscription and must disconnect it when the view is disposed.
+ * Acquire the authenticated player support channel from the shared Pusher
+ * manager. Multiple consumers share one client and channel subscription.
  */
 export function createSupportRealtime({
   PusherConstructor,
@@ -21,41 +23,31 @@ export function createSupportRealtime({
     userId === null ||
     userId === undefined ||
     userId === ''
-  ) {
-    return null
-  }
+  ) return null
 
   const channelName = 'private-users.' + userId
-  const client = new PusherConstructor(key, {
+  const subscription = acquirePusherChannel({
+    PusherConstructor,
+    key,
     cluster,
-    forceTLS: true,
     authEndpoint,
-    auth: {
-      headers: {
-        Authorization: 'Bearer ' + token,
-        Accept: 'application/json',
-      },
-    },
+    token,
+    channelName,
+    events: { 'support.message.created': onMessage },
+    onConnected,
+    onDisconnected,
   })
 
-  const channel = client.subscribe(channelName)
-  client.connection.bind('connected', onConnected)
-  client.connection.bind('disconnected', onDisconnected)
-  client.connection.bind('unavailable', onDisconnected)
-  client.connection.bind('failed', onDisconnected)
-  channel.bind('support.message.created', onMessage)
+  if (!subscription) return null
 
   let disconnected = false
-
   return {
-    client,
-    channel,
+    client: subscription.client,
+    channel: subscription.channel,
     disconnect() {
       if (disconnected) return
       disconnected = true
-      channel.unbind_all()
-      client.unsubscribe(channelName)
-      client.disconnect()
+      subscription.release()
     },
   }
 }

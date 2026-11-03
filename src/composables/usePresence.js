@@ -3,6 +3,9 @@ import { App } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
 import api from '@/plugins/axios'
 import { useAuthStore } from '@/utils/auth'
+import { createSingleFlight } from '@/utils/singleFlight'
+
+const PRESENCE_HEARTBEAT_INTERVAL_MS = 15_000
 
 export function usePresence() {
   const authStore = useAuthStore()
@@ -25,18 +28,20 @@ export function usePresence() {
     return value
   }
 
-  const heartbeat = async () => {
-    if (!sessionId || !currentUserId || disposed) return
-    try {
-      await api.post('/presence/heartbeat', {
-        session_id: sessionId,
-        platform: Capacitor.getPlatform(),
-        app_state: appState,
-      }, { showGlobalLoader: false })
-    } catch {
-      // Presence is best-effort; a transient API outage must not interrupt play.
-    }
-  }
+  // Visibility and Capacitor lifecycle events can fire close together. Share
+  // one request while it is in flight instead of sending duplicate heartbeats.
+  const heartbeat = createSingleFlight(() => {
+    if (!sessionId || !currentUserId || disposed) return Promise.resolve()
+
+    return api.post('/presence/heartbeat', {
+      session_id: sessionId,
+      platform: Capacitor.getPlatform(),
+      app_state: appState,
+    }, { showGlobalLoader: false })
+      .catch(() => {
+        // Presence is best-effort; a transient API outage must not interrupt play.
+      })
+  })
 
   const disconnect = async () => {
     if (!sessionId) return
@@ -66,8 +71,9 @@ export function usePresence() {
       sessionId = currentUserId ? getSessionId(currentUserId) : ''
       if (sessionId) void heartbeat()
     })
-    // The server expires stale sessions after 30 seconds if mobile OS suspension stops timers.
-    heartbeatTimer = window.setInterval(() => void heartbeat(), 5000)
+    // Persisted presence is refreshed every 15s, matching the server write
+    // cadence; the server's 30s lease still expires sessions after suspension.
+    heartbeatTimer = window.setInterval(() => void heartbeat(), PRESENCE_HEARTBEAT_INTERVAL_MS)
     document.addEventListener('visibilitychange', onVisibilityChange)
     window.addEventListener('pagehide', disconnect)
 
