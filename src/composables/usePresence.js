@@ -54,6 +54,7 @@ export function usePresence() {
   onMounted(() => {
     sessionId = getSessionId()
     void heartbeat()
+    // The server expires stale sessions after 30 seconds if mobile OS suspension stops timers.
     heartbeatTimer = window.setInterval(() => void heartbeat(), 5000)
     document.addEventListener('visibilitychange', onVisibilityChange)
     window.addEventListener('pagehide', disconnect)
