@@ -407,6 +407,7 @@ import { useAuthStore } from '@/utils/auth'
 import api from '@/plugins/axios'
 import { playNotificationSound } from '@/services/notificationAudio'
 import { isTrustedGatewayPaymentUrl } from '@/utils/paymentUrl'
+import { getPaymentErrorMessage } from '@/utils/paymentErrors'
 
 const router = useRouter()
 const route = useRoute()
@@ -818,9 +819,9 @@ const createGatewayOrder = async () => {
     startGatewayStatusPolling()
     await refreshGatewayPaymentStatus()
   } catch (error) {
-    console.error('Gateway payment error:', error)
+    console.warn('Gateway payment request failed.', { status: error.response?.status || null })
     apiMessage.type = 'error'
-    apiMessage.text = error.response?.data?.message || error.message || 'Unable to start payment.'
+    apiMessage.text = getPaymentErrorMessage(error)
   } finally {
     isLoading.value = false
   }

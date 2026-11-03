@@ -1,17 +1,21 @@
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 import { App } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
 import api from '@/plugins/axios'
+import { useAuthStore } from '@/utils/auth'
 
 export function usePresence() {
+  const authStore = useAuthStore()
   let sessionId = ''
+  let currentUserId = null
+  let stopUserWatch = null
   let appState = 'foreground'
   let heartbeatTimer = null
   let appStateListener = null
   let disposed = false
 
-  const getSessionId = () => {
-    const key = 'user_presence_session_id'
+  const getSessionId = (userId) => {
+    const key = 'user_presence_session_id:' + String(userId)
     let value = sessionStorage.getItem(key)
     if (!value) {
       value = globalThis.crypto?.randomUUID?.()
@@ -22,7 +26,7 @@ export function usePresence() {
   }
 
   const heartbeat = async () => {
-    if (!sessionId || disposed) return
+    if (!sessionId || !currentUserId || disposed) return
     try {
       await api.post('/presence/heartbeat', {
         session_id: sessionId,
@@ -52,8 +56,16 @@ export function usePresence() {
   }
 
   onMounted(() => {
-    sessionId = getSessionId()
+    currentUserId = authStore.userId
+    sessionId = currentUserId ? getSessionId(currentUserId) : ''
     void heartbeat()
+    stopUserWatch = watch(() => authStore.userId, async nextUserId => {
+      if (String(nextUserId || '') === String(currentUserId || '')) return
+      await disconnect()
+      currentUserId = nextUserId || null
+      sessionId = currentUserId ? getSessionId(currentUserId) : ''
+      if (sessionId) void heartbeat()
+    })
     // The server expires stale sessions after 30 seconds if mobile OS suspension stops timers.
     heartbeatTimer = window.setInterval(() => void heartbeat(), 5000)
     document.addEventListener('visibilitychange', onVisibilityChange)
@@ -74,6 +86,7 @@ export function usePresence() {
     document.removeEventListener('visibilitychange', onVisibilityChange)
     window.removeEventListener('pagehide', disconnect)
     if (appStateListener) void appStateListener.remove()
+    if (stopUserWatch) stopUserWatch()
     void disconnect()
   })
 }
