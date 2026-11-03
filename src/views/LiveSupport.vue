@@ -130,7 +130,13 @@ const initRealtime = () => {
   const key = import.meta.env.VITE_PUSHER_APP_KEY
   const cluster = import.meta.env.VITE_PUSHER_APP_CLUSTER
   const token = getAuthToken()
-  if (!PusherClient || !key || !cluster || !token || !authStore.userId) return
+  if (!PusherClient) {
+    if (document.readyState !== 'complete') {
+      window.addEventListener('load', initRealtime, { once: true })
+    }
+    return
+  }
+  if (!key || !cluster || !token || !authStore.userId) return
 
   try {
     pusherClient = new PusherClient(key, {
