@@ -12,6 +12,7 @@ export function usePresence() {
   const authStore = useAuthStore()
   let sessionId = ''
   let currentUserId = null
+  let currentToken = ''
   let stopUserWatch = null
   let appState = 'foreground'
   let heartbeatTimer = null
@@ -95,15 +96,17 @@ export function usePresence() {
 
   onMounted(() => {
     currentUserId = authStore.userId
+    currentToken = getAuthToken() || ''
     sessionId = currentUserId ? getSessionId(currentUserId) : ''
     void heartbeat()
     connectPresenceChannel()
     stopUserWatch = watch(() => String(authStore.userId || '') + ':' + String(authStore.token || ''), async nextIdentity => {
       const [nextUserId, nextToken] = nextIdentity.split(':', 2)
-      if (String(nextUserId || '') === String(currentUserId || '') && nextToken === String(authStore.token || '')) return
+      if (String(nextUserId || '') === String(currentUserId || '') && nextToken === currentToken) return
       await disconnect()
       releasePresenceChannel()
       currentUserId = nextUserId || null
+      currentToken = nextToken || ''
       sessionId = currentUserId ? getSessionId(currentUserId) : ''
       if (sessionId) void heartbeat()
       connectPresenceChannel()
