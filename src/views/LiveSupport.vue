@@ -95,6 +95,7 @@ const recording = ref(false)
 const canRecord = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== 'undefined'
 let pollTimer = null
 let syncInFlight = false
+let syncRequested = false
 let consecutiveFailures = 0
 let hasLoadedHistory = false
 let recorder = null
@@ -164,6 +165,7 @@ const openHumanSupport = async () => {
 }
 const closeHumanSupport = () => {
   humanSupportRequested.value = false
+  syncRequested = false
   if (pollTimer) clearTimeout(pollTimer)
   pollTimer = null
 }
@@ -178,7 +180,10 @@ const scrollToBottom = async () => {
   if (chatFeed.value) chatFeed.value.scrollTop = chatFeed.value.scrollHeight
 }
 const syncMessages = async () => {
-  if (syncInFlight) return
+  if (syncInFlight) {
+    syncRequested = true
+    return
+  }
   syncInFlight = true
   const wasNearBottom = !chatFeed.value || (chatFeed.value.scrollHeight - chatFeed.value.scrollTop - chatFeed.value.clientHeight < 100)
   try {
@@ -225,7 +230,13 @@ const syncMessages = async () => {
   } finally {
     loading.value = false
     syncInFlight = false
-    scheduleNextSync()
+    if (syncRequested && humanSupportRequested.value) {
+      syncRequested = false
+      void syncMessages()
+    } else {
+      syncRequested = false
+      scheduleNextSync()
+    }
   }
 }
 const onFileSelected = event => {
