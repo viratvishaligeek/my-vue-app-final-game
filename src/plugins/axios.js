@@ -115,6 +115,10 @@ api.interceptors.request.use((config) => {
   actualHttpRequests += 1
   const requestPath = String(config.url || '').split('?')[0] || '/'
   const requestNow = Date.now()
+  const cutoff = requestNow - 60_000
+  while (actualHttpRequestTimestamps.length && actualHttpRequestTimestamps[0] < cutoff) {
+    actualHttpRequestTimestamps.shift()
+  }
   actualHttpRequestTimestamps.push(requestNow)
   actualHttpRequestsByPath.set(requestPath, (actualHttpRequestsByPath.get(requestPath) || 0) + 1)
   const token = getAuthToken()
