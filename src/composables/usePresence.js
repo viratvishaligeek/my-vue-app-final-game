@@ -2,7 +2,8 @@ import { onMounted, onUnmounted, watch } from 'vue'
 import { App } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
 import api from '@/plugins/axios'
-import { useAuthStore } from '@/utils/auth'
+import { getAuthToken, useAuthStore } from '@/utils/auth'
+import { acquirePusherChannel } from '@/services/pusherManager'
 import { createSingleFlight } from '@/utils/singleFlight'
 
 const PRESENCE_HEARTBEAT_INTERVAL_MS = 15_000
@@ -11,11 +12,13 @@ export function usePresence() {
   const authStore = useAuthStore()
   let sessionId = ''
   let currentUserId = null
+  let currentToken = ''
   let stopUserWatch = null
   let appState = 'foreground'
   let heartbeatTimer = null
   let appStateListener = null
   let disposed = false
+  let presenceSubscription = null
 
   const getSessionId = (userId) => {
     const key = 'user_presence_session_id:' + String(userId)
@@ -60,16 +63,52 @@ export function usePresence() {
     void heartbeat()
   }
 
+  // Presence membership is per account, not site-wide: players can only
+  // join their own channel, while same-site Admins can inspect that account.
+  // The shared manager reuses the same Pusher connection as Live Support.
+  const releasePresenceChannel = () => {
+    presenceSubscription?.release()
+    presenceSubscription = null
+  }
+
+  const connectPresenceChannel = () => {
+    releasePresenceChannel()
+    const token = getAuthToken()
+    if (!currentUserId || !token || typeof window.Pusher !== 'function') return
+
+    presenceSubscription = acquirePusherChannel({
+      PusherConstructor: window.Pusher,
+      key: import.meta.env.VITE_PUSHER_APP_KEY,
+      cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+      authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT || '/api/broadcasting/auth',
+      token,
+      channelName: 'presence-user-presence.' + currentUserId,
+      events: {
+        'pusher:subscription_succeeded': () => {
+          // Refresh the persisted session lease after a successful reconnect.
+          void heartbeat()
+        },
+      },
+      onConnected: () => void heartbeat(),
+      onDisconnected: () => {},
+    })
+  }
+
   onMounted(() => {
     currentUserId = authStore.userId
+    currentToken = getAuthToken() || ''
     sessionId = currentUserId ? getSessionId(currentUserId) : ''
     void heartbeat()
-    stopUserWatch = watch(() => authStore.userId, async nextUserId => {
-      if (String(nextUserId || '') === String(currentUserId || '')) return
+    connectPresenceChannel()
+    stopUserWatch = watch(() => [authStore.userId, authStore.token], async ([nextUserId, nextToken]) => {
+      if (String(nextUserId || '') === String(currentUserId || '') && String(nextToken || '') === currentToken) return
       await disconnect()
+      releasePresenceChannel()
       currentUserId = nextUserId || null
+      currentToken = String(nextToken || '')
       sessionId = currentUserId ? getSessionId(currentUserId) : ''
       if (sessionId) void heartbeat()
+      connectPresenceChannel()
     })
     // Persisted presence is refreshed every 15s, matching the server write
     // cadence; the server's 30s lease still expires sessions after suspension.
@@ -93,6 +132,7 @@ export function usePresence() {
     window.removeEventListener('pagehide', disconnect)
     if (appStateListener) void appStateListener.remove()
     if (stopUserWatch) stopUserWatch()
+    releasePresenceChannel()
     void disconnect()
   })
 }

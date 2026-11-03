@@ -532,9 +532,11 @@ onMounted(() => {
   void loadNotificationPreference()
   void fetchAppUpdate()
   fetchNotifications()
+  // Push delivery handles immediate alerts; this is a low-frequency
+  // recovery sync for missed notifications while the page stays visible.
   notificationRefreshTimer = setInterval(() => {
     if (document.visibilityState === 'visible') fetchNotifications(1)
-  }, 20000)
+  }, 60000)
 })
 
 onUnmounted(() => {

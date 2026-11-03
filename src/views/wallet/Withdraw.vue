@@ -977,8 +977,8 @@ const startPendingRefresh =
     }
     pendingTimer =
       setInterval(() => {
-        loadPendingWithdrawals()
-      }, 30000)
+        if (document.visibilityState === 'visible') void loadPendingWithdrawals()
+      }, 60000)
   }
 
 
