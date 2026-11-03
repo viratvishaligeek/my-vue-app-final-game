@@ -91,10 +91,20 @@ api.get = (url, config = {}) => {
 }
 
 let actualHttpRequests = 0
-export const getApiCacheDiagnostics = () => ({
-  ...apiResponseCache.diagnostics(),
-  actualHttpRequests,
-})
+const actualHttpRequestTimestamps = []
+const actualHttpRequestsByPath = new Map()
+export const getApiCacheDiagnostics = () => {
+  const cutoff = Date.now() - 60_000
+  while (actualHttpRequestTimestamps.length && actualHttpRequestTimestamps[0] < cutoff) {
+    actualHttpRequestTimestamps.shift()
+  }
+  return {
+    ...apiResponseCache.diagnostics(),
+    actualHttpRequests,
+    actualHttpRequestsLastMinute: actualHttpRequestTimestamps.length,
+    actualHttpRequestsByPath: Object.fromEntries(actualHttpRequestsByPath),
+  }
+}
 
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   window.__APP_API_CACHE_DIAGNOSTICS__ = getApiCacheDiagnostics
@@ -103,6 +113,10 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
 // Request Interceptor: Attach Token
 api.interceptors.request.use((config) => {
   actualHttpRequests += 1
+  const requestPath = String(config.url || '').split('?')[0] || '/'
+  const requestNow = Date.now()
+  actualHttpRequestTimestamps.push(requestNow)
+  actualHttpRequestsByPath.set(requestPath, (actualHttpRequestsByPath.get(requestPath) || 0) + 1)
   const token = getAuthToken()
   if (token) config.headers.Authorization = `Bearer ${token}`
   if (config.showGlobalLoader !== false) {
