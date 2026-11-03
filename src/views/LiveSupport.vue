@@ -187,7 +187,8 @@ const syncMessages = async () => {
   syncInFlight = true
   const wasNearBottom = !chatFeed.value || (chatFeed.value.scrollHeight - chatFeed.value.scrollTop - chatFeed.value.clientHeight < 100)
   try {
-    const params = hasLoadedHistory ? { after_id: lastMessageId } : {}
+    const isIncremental = hasLoadedHistory
+    const params = isIncremental ? { after_id: lastMessageId } : {}
     const { data } = await api.get('/support-chat', { params, showGlobalLoader: false })
     conversationId = data?.conversation_id || conversationId
     const incoming = Array.isArray(data?.data) ? data.data : []
@@ -220,6 +221,7 @@ const syncMessages = async () => {
         if (wasNearBottom) await scrollToBottom()
       }
     }
+    if (isIncremental && incoming.length >= 200) syncRequested = true
     connected.value = true
     consecutiveFailures = 0
     errorMessage.value = ''
