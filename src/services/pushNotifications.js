@@ -4,15 +4,16 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import api from '@/plugins/axios'
 import { getAuthToken } from '@/utils/auth'
 import router from '@/router'
+import { createPushRegistrationCoordinator } from '@/utils/pushRegistration'
 
 let currentToken = ''
 let currentPlatform = 'web'
 let nativeListenersRegistered = false
 let webMessageListenerRegistered = false
-let lastRegisteredSignature = ''
-let registrationInFlight = null
-let registrationInFlightSignature = ''
-const PUSH_SCOPE_KEY = 'push_registration_scope'
+const pushRegistration = createPushRegistrationCoordinator({
+  register: (endpoint, payload) => api.post(endpoint, payload),
+  storage: typeof localStorage !== 'undefined' ? localStorage : null,
+})
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -29,44 +30,7 @@ async function registerToken(token, platform) {
   currentPlatform = platform
 
   const endpoint = getAuthToken() ? '/push/register-user' : '/push/subscribe'
-  const scope = endpoint + '|' + platform
-  const signature = scope + '|' + token
-
-  // App.vue calls syncPushSubscription after every route transition. Avoid
-  // reposting an unchanged device token on every navigation, including after
-  // the initial registration has already succeeded.
-  if (
-    signature === lastRegisteredSignature ||
-    (localStorage.getItem('push_registration_token') === token &&
-      localStorage.getItem(PUSH_SCOPE_KEY) === scope)
-  ) {
-    lastRegisteredSignature = signature
-    return true
-  }
-
-  // Coalesce concurrent startup / route-guard registrations. If the identity
-  // changes while a request is running, wait and then register the new scope.
-  if (registrationInFlight) {
-    if (registrationInFlightSignature === signature) return registrationInFlight
-    await registrationInFlight.catch(() => {})
-    if (signature === lastRegisteredSignature) return true
-  }
-
-  registrationInFlightSignature = signature
-  registrationInFlight = (async () => {
-    await api.post(endpoint, { token, platform })
-    localStorage.setItem('push_registration_token', token)
-    localStorage.setItem(PUSH_SCOPE_KEY, scope)
-    lastRegisteredSignature = signature
-    return true
-  })()
-
-  try {
-    return await registrationInFlight
-  } finally {
-    registrationInFlight = null
-    registrationInFlightSignature = ''
-  }
+  return pushRegistration.ensureRegistered({ token, platform, endpoint })
 }
 
 export async function syncPushSubscription() {
@@ -290,9 +254,7 @@ export async function disablePush() {
     if (Capacitor.isNativePlatform()) {
       await PushNotifications.unregister()
       currentToken = ''
-      lastRegisteredSignature = ''
-      localStorage.removeItem('push_registration_token')
-      localStorage.removeItem(PUSH_SCOPE_KEY)
+      pushRegistration.clear()
       return { ok: true, message: 'Push alerts disabled for this device.' }
     }
 
@@ -317,9 +279,7 @@ export async function disablePush() {
     }
 
     currentToken = ''
-    lastRegisteredSignature = ''
-    localStorage.removeItem('push_registration_token')
-    localStorage.removeItem(PUSH_SCOPE_KEY)
+    pushRegistration.clear()
     return {
       ok: true,
       message:
