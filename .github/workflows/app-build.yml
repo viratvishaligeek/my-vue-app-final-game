@@ -15,7 +15,7 @@ jobs:
           node-version: '22.22.2'
           cache: npm
       - run: npm ci
-      - name: Test request coalescing
-        run: node --test src/utils/singleFlight.test.js
+      - name: Run Vue unit tests
+        run: npm run test:unit
       - name: Lint realtime request lifecycle changes
         run: npx oxlint src/composables/usePresence.js src/utils/singleFlight.js src/utils/singleFlight.test.js
