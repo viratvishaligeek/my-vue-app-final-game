@@ -66,8 +66,7 @@ api.get = (url, config = {}) => {
 
   const [basePath, inlineQuery = ''] = String(url || '').split('?')
   const inlineParams = Object.fromEntries(new URLSearchParams(inlineQuery).entries())
-  const query = stableQueryString({ ...inlineParams, ...(config.params || {}) })
-  const scope = policy.public ? 'public' : `user:${userScope}`
+  const query = stableQueryString({ ...inlineParams, ...config.params })
   const cacheKey = policy.public
     ? `app-api-cache:public:${basePath}?${query}`
     : `private:${userScope}:${basePath}?${query}`

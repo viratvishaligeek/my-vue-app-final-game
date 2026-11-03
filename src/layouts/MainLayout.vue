@@ -191,6 +191,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/utils/auth'
 import { useSettings } from '@/composables/useSettings'
+import { usePresence } from '@/composables/usePresence'
 
 const router = useRouter()
 const route = useRoute()
@@ -209,9 +210,11 @@ const hideBottomNav = computed(() => {
   return path === '/wallet/add'
     || path === '/wallet/withdraw'
     || path === '/monthly-chart'
+    || path === '/live-support'
     || path.startsWith('/play-game/')
 })
 const authStore = useAuthStore()
+usePresence()
 
 const isSidebarOpen = ref(false)
 const shareMenuOpen = ref(false)
