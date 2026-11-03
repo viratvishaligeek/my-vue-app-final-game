@@ -24,8 +24,9 @@ export function usePresence() {
     const key = 'user_presence_session_id:' + String(userId)
     let value = sessionStorage.getItem(key)
     if (!value) {
-      value = globalThis.crypto?.randomUUID?.()
-        || 'presence-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2)
+      value =
+        globalThis.crypto?.randomUUID?.() ||
+        'presence-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2)
       sessionStorage.setItem(key, value)
     }
     return value
@@ -36,11 +37,16 @@ export function usePresence() {
   const heartbeat = createSingleFlight(() => {
     if (!sessionId || !currentUserId || disposed) return Promise.resolve()
 
-    return api.post('/presence/heartbeat', {
-      session_id: sessionId,
-      platform: Capacitor.getPlatform(),
-      app_state: appState,
-    }, { showGlobalLoader: false })
+    return api
+      .post(
+        '/presence/heartbeat',
+        {
+          session_id: sessionId,
+          platform: Capacitor.getPlatform(),
+          app_state: appState,
+        },
+        { showGlobalLoader: false },
+      )
       .catch(() => {
         // Presence is best-effort; a transient API outage must not interrupt play.
       })
@@ -80,7 +86,7 @@ export function usePresence() {
       PusherConstructor: window.Pusher,
       key: import.meta.env.VITE_PUSHER_APP_KEY,
       cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-      authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT || '/api/broadcasting/auth',
+      authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT || '/api/v1/broadcasting/auth',
       token,
       channelName: 'presence-user-presence.' + currentUserId,
       events: {
@@ -100,29 +106,38 @@ export function usePresence() {
     sessionId = currentUserId ? getSessionId(currentUserId) : ''
     void heartbeat()
     connectPresenceChannel()
-    stopUserWatch = watch(() => [authStore.userId, authStore.token], async ([nextUserId, nextToken]) => {
-      if (String(nextUserId || '') === String(currentUserId || '') && String(nextToken || '') === currentToken) return
-      await disconnect()
-      releasePresenceChannel()
-      currentUserId = nextUserId || null
-      currentToken = String(nextToken || '')
-      sessionId = currentUserId ? getSessionId(currentUserId) : ''
-      if (sessionId) void heartbeat()
-      connectPresenceChannel()
-    })
+    stopUserWatch = watch(
+      () => [authStore.userId, authStore.token],
+      async ([nextUserId, nextToken]) => {
+        if (
+          String(nextUserId || '') === String(currentUserId || '') &&
+          String(nextToken || '') === currentToken
+        )
+          return
+        await disconnect()
+        releasePresenceChannel()
+        currentUserId = nextUserId || null
+        currentToken = String(nextToken || '')
+        sessionId = currentUserId ? getSessionId(currentUserId) : ''
+        if (sessionId) void heartbeat()
+        connectPresenceChannel()
+      },
+    )
     // Persisted presence is refreshed every 15s, matching the server write
     // cadence; the server's 30s lease still expires sessions after suspension.
     heartbeatTimer = window.setInterval(() => void heartbeat(), PRESENCE_HEARTBEAT_INTERVAL_MS)
     document.addEventListener('visibilitychange', onVisibilityChange)
     window.addEventListener('pagehide', disconnect)
 
-    App.addListener('appStateChange', state => {
+    App.addListener('appStateChange', (state) => {
       appState = state.isActive ? 'foreground' : 'background'
       void heartbeat()
-    }).then(listener => {
-      if (disposed) void listener.remove()
-      else appStateListener = listener
-    }).catch(() => {})
+    })
+      .then((listener) => {
+        if (disposed) void listener.remove()
+        else appStateListener = listener
+      })
+      .catch(() => {})
   })
 
   onUnmounted(() => {

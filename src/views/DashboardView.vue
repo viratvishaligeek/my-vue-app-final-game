@@ -167,7 +167,9 @@
                   {{ game.monthly_closure ? 'MONTH-END CLOSED' : getGameStatus(game) }}
                 </span>
                 <small v-if="game.monthly_closure" class="d-block text-danger mt-1">
-                  {{ game.play_status_message || 'Games are unavailable on the last calendar day of the month' }}
+                  {{
+                    game.play_status_message ||
+                    'आज महीने का आखिरी दिन है, इसलिए आज सभी खेल बंद रहेंगे। 1 तारीख से सभी खेल फिर से शुरू करेंगे। धन्यवाद।' }}
                 </small>
               </div>
             </div>

@@ -17,7 +17,7 @@
         <label for="phone" class="form-label">Phone Number</label>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0">+91</span>
-          <input type="text" inputmode="numeric" class="form-control border-start-0"
+          <input type="text" inputmode="numeric" class="form-control border-start-0" maxlength="10"
             :class="{ 'is-invalid': errors.phone }" id="phone" :value="form.phone" placeholder="Enter mobile number"
             @input="handlePhoneInput" />
         </div>

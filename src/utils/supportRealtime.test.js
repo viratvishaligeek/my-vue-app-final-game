@@ -56,14 +56,14 @@ function removeHandler(map, event, callback) {
 }
 
 function emit(map, event, payload) {
-  map.get(event)?.forEach(callback => callback(payload))
+  map.get(event)?.forEach((callback) => callback(payload))
 }
 
-const options = overrides => ({
+const options = (overrides) => ({
   PusherConstructor: FakePusher,
   key: 'public-key',
   cluster: 'ap2',
-  authEndpoint: '/api/broadcasting/auth',
+  authEndpoint: '/api/v1/broadcasting/auth',
   token: 'test-token',
   userId: 42,
   ...overrides,
@@ -75,29 +75,36 @@ test.beforeEach(() => {
 })
 
 test('support realtime requires complete public and authenticated configuration', () => {
-  assert.equal(createSupportRealtime({ PusherConstructor: FakePusher, key: 'key', cluster: 'ap2' }), null)
+  assert.equal(
+    createSupportRealtime({ PusherConstructor: FakePusher, key: 'key', cluster: 'ap2' }),
+    null,
+  )
 })
 
 test('support realtime subscribes to the authenticated user channel and forwards events', () => {
   const received = []
   const states = []
-  const subscription = createSupportRealtime(options({
-    onConnected: () => states.push('connected'),
-    onDisconnected: () => states.push('disconnected'),
-    onMessage: payload => received.push(payload),
-  }))
+  const subscription = createSupportRealtime(
+    options({
+      onConnected: () => states.push('connected'),
+      onDisconnected: () => states.push('disconnected'),
+      onMessage: (payload) => received.push(payload),
+    }),
+  )
 
   const client = FakePusher.instances[0]
   assert.equal(client.key, 'public-key')
   assert.equal(client.options.cluster, 'ap2')
   assert.equal(client.options.forceTLS, true)
-  assert.equal(client.options.authEndpoint, '/api/broadcasting/auth')
+  assert.equal(client.options.authEndpoint, '/api/v1/broadcasting/auth')
   assert.equal(client.options.auth.headers.Authorization, 'Bearer test-token')
   assert.deepEqual(client.subscribeCalls, ['private-users.42'])
 
   emit(client.handlers, 'connected')
   emit(client.handlers, 'failed')
-  emit(client.channels.get('private-users.42').handlers, 'support.message.created', { message_id: 9 })
+  emit(client.channels.get('private-users.42').handlers, 'support.message.created', {
+    message_id: 9,
+  })
   assert.deepEqual(states, ['connected', 'disconnected'])
   assert.deepEqual(received, [{ message_id: 9 }])
 
@@ -110,14 +117,20 @@ test('support realtime subscribes to the authenticated user channel and forwards
 test('multiple consumers share one client and channel until the final release', () => {
   const firstMessages = []
   const secondMessages = []
-  const first = createSupportRealtime(options({ onMessage: payload => firstMessages.push(payload) }))
-  const second = createSupportRealtime(options({ onMessage: payload => secondMessages.push(payload) }))
+  const first = createSupportRealtime(
+    options({ onMessage: (payload) => firstMessages.push(payload) }),
+  )
+  const second = createSupportRealtime(
+    options({ onMessage: (payload) => secondMessages.push(payload) }),
+  )
   const client = FakePusher.instances[0]
 
   assert.equal(FakePusher.instances.length, 1)
   assert.deepEqual(client.subscribeCalls, ['private-users.42'])
 
-  emit(client.channels.get('private-users.42').handlers, 'support.message.created', { message_id: 10 })
+  emit(client.channels.get('private-users.42').handlers, 'support.message.created', {
+    message_id: 10,
+  })
   assert.deepEqual(firstMessages, [{ message_id: 10 }])
   assert.deepEqual(secondMessages, [{ message_id: 10 }])
 
@@ -125,7 +138,9 @@ test('multiple consumers share one client and channel until the final release', 
   assert.equal(client.disconnected, false)
   assert.deepEqual(client.unsubscribed, [])
 
-  emit(client.channels.get('private-users.42').handlers, 'support.message.created', { message_id: 11 })
+  emit(client.channels.get('private-users.42').handlers, 'support.message.created', {
+    message_id: 11,
+  })
   assert.deepEqual(firstMessages, [{ message_id: 10 }])
   assert.deepEqual(secondMessages, [{ message_id: 10 }, { message_id: 11 }])
 
