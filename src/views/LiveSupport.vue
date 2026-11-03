@@ -5,9 +5,9 @@
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
           <div class="d-flex align-items-center gap-3">
             <div class="icon-circle bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center"><i class="bi bi-headset fs-5"></i></div>
-            <div><h6 class="fw-bold text-white mb-1">VIP Live Support Desk</h6><span class="small text-white-50">{{ connected ? 'Connected · messages sync automatically' : humanSupportRequested ? 'Reconnecting to support…' : 'Browse FAQs before starting a chat' }}</span></div>
+            <div><h6 class="fw-bold text-white mb-1">VIP Live Support Desk</h6><span class="small text-white-50">{{ realtimeConnected ? 'Connected · live messages' : connected ? 'Connected · recovery sync' : humanSupportRequested ? 'Reconnecting to support…' : 'Browse FAQs before starting a chat' }}</span></div>
           </div>
-          <span class="badge" :class="connected ? 'bg-success' : 'bg-secondary'">{{ connected ? 'Online' : 'Reconnecting' }}</span>
+          <span class="badge" :class="connected ? 'bg-success' : 'bg-secondary'">{{ realtimeConnected ? 'Live' : connected ? 'Online' : 'Reconnecting' }}</span>
         </div>
       </div>
       <section v-if="!humanSupportRequested" class="card border-0 shadow-sm rounded-4 bg-white mb-3">
@@ -73,7 +73,9 @@
 import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import api from '@/plugins/axios'
+import { useAuthStore, getAuthToken } from '@/utils/auth'
 
+const authStore = useAuthStore()
 const chatFeed = ref(null)
 const fileInput = ref(null)
 const newMessage = ref('')
@@ -81,6 +83,7 @@ const messages = ref([])
 const loading = ref(true)
 const sending = ref(false)
 const connected = ref(false)
+const realtimeConnected = ref(false)
 const errorMessage = ref('')
 const selectedFile = ref(null)
 const faqs = ref([])
@@ -97,6 +100,9 @@ let recorder = null
 let recordingStream = null
 let recordedChunks = []
 let lastMessageId = 0
+let conversationId = null
+let pusherClient = null
+let userChannel = null
 
 const loadFaqs = async () => {
   faqLoading.value = true
@@ -111,12 +117,63 @@ const loadFaqs = async () => {
   }
 }
 const scheduleNextSync = () => {
-  if (!humanSupportRequested.value || pollTimer) return
-  const delay = connected.value ? 5000 : Math.min(30000, 5000 * (2 ** Math.min(consecutiveFailures, 3)))
+  if (!humanSupportRequested.value || realtimeConnected.value || pollTimer) return
+  const delay = connected.value ? 30000 : Math.min(60000, 5000 * (2 ** Math.min(consecutiveFailures, 3)))
   pollTimer = setTimeout(() => {
     pollTimer = null
     void syncMessages()
   }, delay)
+}
+
+const initRealtime = () => {
+  const PusherClient = window.Pusher
+  const key = import.meta.env.VITE_PUSHER_APP_KEY
+  const cluster = import.meta.env.VITE_PUSHER_APP_CLUSTER
+  const token = getAuthToken()
+  if (!PusherClient || !key || !cluster || !token || !authStore.userId) return
+
+  try {
+    pusherClient = new PusherClient(key, {
+      cluster,
+      forceTLS: true,
+      authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT || '/api/broadcasting/auth',
+      auth: {
+        headers: {
+          Authorization: 'Bearer ' + token,
+          Accept: 'application/json',
+        },
+      },
+    })
+
+    pusherClient.connection.bind('connected', () => {
+      realtimeConnected.value = true
+      connected.value = true
+      consecutiveFailures = 0
+      if (pollTimer) clearTimeout(pollTimer)
+      pollTimer = null
+      if (humanSupportRequested.value) void syncMessages()
+    })
+    const onDisconnected = () => {
+      realtimeConnected.value = false
+      connected.value = false
+      scheduleNextSync()
+    }
+    pusherClient.connection.bind('disconnected', onDisconnected)
+    pusherClient.connection.bind('unavailable', onDisconnected)
+    pusherClient.connection.bind('failed', onDisconnected)
+
+    userChannel = pusherClient.subscribe('private-users.' + authStore.userId)
+    userChannel.bind('support.message.created', payload => {
+      if (payload?.sender === 'admin' &&
+          (!conversationId || Number(payload.conversation_id) === Number(conversationId)) &&
+          humanSupportRequested.value) {
+        void syncMessages()
+      }
+    })
+  } catch (error) {
+    console.warn('Support chat realtime initialization failed:', error?.message || error)
+    realtimeConnected.value = false
+  }
 }
 const openHumanSupport = async () => {
   humanSupportRequested.value = true
@@ -144,6 +201,7 @@ const syncMessages = async () => {
   try {
     const params = hasLoadedHistory ? { after_id: lastMessageId } : {}
     const { data } = await api.get('/support-chat', { params, showGlobalLoader: false })
+    conversationId = data?.conversation_id || conversationId
     const incoming = Array.isArray(data?.data) ? data.data : []
     await Promise.all(incoming.filter(message => message.media_url).map(async message => {
       if (mediaUrlCache.has(message.id)) {
@@ -242,9 +300,15 @@ const sendMessage = async () => {
 }
 onMounted(() => {
   void loadFaqs()
+  initRealtime()
 })
 onUnmounted(() => {
   if (pollTimer) clearTimeout(pollTimer)
+  if (userChannel) userChannel.unbind_all()
+  if (pusherClient) {
+    if (authStore.userId) pusherClient.unsubscribe('private-users.' + authStore.userId)
+    pusherClient.disconnect()
+  }
   if (recorder && recorder.state !== 'inactive') recorder.stop()
   recordingStream?.getTracks().forEach(track => track.stop())
   mediaUrlCache.forEach(url => URL.revokeObjectURL(url))
