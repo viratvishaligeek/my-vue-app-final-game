@@ -100,13 +100,12 @@ export function usePresence() {
     sessionId = currentUserId ? getSessionId(currentUserId) : ''
     void heartbeat()
     connectPresenceChannel()
-    stopUserWatch = watch(() => String(authStore.userId || '') + ':' + String(authStore.token || ''), async nextIdentity => {
-      const [nextUserId, nextToken] = nextIdentity.split(':', 2)
-      if (String(nextUserId || '') === String(currentUserId || '') && nextToken === currentToken) return
+    stopUserWatch = watch(() => [authStore.userId, authStore.token], async ([nextUserId, nextToken]) => {
+      if (String(nextUserId || '') === String(currentUserId || '') && String(nextToken || '') === currentToken) return
       await disconnect()
       releasePresenceChannel()
       currentUserId = nextUserId || null
-      currentToken = nextToken || ''
+      currentToken = String(nextToken || '')
       sessionId = currentUserId ? getSessionId(currentUserId) : ''
       if (sessionId) void heartbeat()
       connectPresenceChannel()
