@@ -819,7 +819,7 @@ const createGatewayOrder = async () => {
     startGatewayStatusPolling()
     await refreshGatewayPaymentStatus()
   } catch (error) {
-    console.error('Gateway payment error:', error)
+    console.warn('Gateway payment request failed.', { status: error.response?.status || null })
     apiMessage.type = 'error'
     apiMessage.text = getPaymentErrorMessage(error)
   } finally {
