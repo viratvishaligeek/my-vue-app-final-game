@@ -4,6 +4,7 @@ import { apiResponseCache } from '@/utils/apiCache'
 
 const AUTH_TOKEN_KEY = 'auth_token'
 const USER_KEY = 'auth_user'
+let authVerificationPromise = null
 
 /**
  * Get the currently stored authentication token.
@@ -161,40 +162,55 @@ export const useAuthStore = defineStore('auth', {
         this.logoutLocal()
         return false
       }
-      if (this.isVerifying) {
-        return this.isAuthenticated
+      // Router guards run on every protected navigation. Once this exact
+      // token has been verified, reuse that result instead of calling /user
+      // for every route transition. Axios still clears auth on a later 401.
+      if (this.isAuthVerified && this.token === token) {
+        return true
       }
+
+      // Concurrent guards share one verification request and wait for its
+      // result instead of racing or allowing navigation before verification.
+      if (authVerificationPromise) {
+        return authVerificationPromise
+      }
+
       this.isVerifying = true
-      try {
-        const response = await api.get('/user')
-        if (response.status === 200) {
-          const userData =
-            response.data?.data?.user || response.data?.data || response.data?.user || response.data
-          if (userData && typeof userData === 'object') {
-            this.setUser(userData)
+      authVerificationPromise = (async () => {
+        try {
+          const response = await api.get('/user')
+          if (response.status === 200) {
+            if (getAuthToken() !== token) return false
+            const userData =
+              response.data?.data?.user || response.data?.data || response.data?.user || response.data
+            if (userData && typeof userData === 'object') {
+              this.setUser(userData)
+            }
+            this.token = token
+            this.isAuthVerified = true
+            return true
           }
-          this.token = token
-          this.isAuthVerified = true
-          return true
-        }
-        return false
-      } catch (error) {
-        const status = error.response?.status
-        /*
-         * Only invalidate authentication when the backend
-         * explicitly says the token is unauthorized/forbidden.
-         *
-         * Do NOT logout on network errors or 5xx errors.
-         */
-        if (status === 401 || status === 403) {
-          this.logoutLocal()
           return false
+        } catch (error) {
+          const status = error.response?.status
+          /*
+           * Only invalidate authentication when the backend explicitly
+           * says the token is unauthorized/forbidden. Network and 5xx
+           * errors must not sign the user out.
+           */
+          if (status === 401 || status === 403) {
+            this.logoutLocal()
+            return false
+          }
+          console.error('Unable to verify authentication:', error)
+          return this.isAuthenticated
+        } finally {
+          this.isVerifying = false
+          authVerificationPromise = null
         }
-        console.error('Unable to verify authentication:', error)
-        return this.isAuthenticated
-      } finally {
-        this.isVerifying = false
-      }
+      })()
+
+      return authVerificationPromise
     },
     /**
      * Logout from backend and clear local authentication.
