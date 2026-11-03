@@ -81,10 +81,12 @@ export function acquirePusherChannel(options) {
       channel: client.subscribe(channelName),
       refs: 0,
       eventHandlers: new Map(),
-      connectionHandlers: [],
+      connectionHandlers: new Set(),
     }
     channels.set(channelName, entry)
   }
+  const ownerClient = client
+  const localConnectionHandlers = []
   entry.refs += 1
 
   for (const [eventName, callback] of Object.entries(events)) {
@@ -97,8 +99,10 @@ export function acquirePusherChannel(options) {
 
   const bindConnection = (eventName, callback) => {
     if (typeof callback !== 'function') return
-    client.connection.bind(eventName, callback)
-    entry.connectionHandlers.push({ eventName, callback })
+    ownerClient.connection.bind(eventName, callback)
+    const handler = { eventName, callback }
+    entry.connectionHandlers.add(handler)
+    localConnectionHandlers.push(handler)
   }
 
   bindConnection('connected', onConnected)
@@ -114,6 +118,8 @@ export function acquirePusherChannel(options) {
       if (released) return
       released = true
 
+      if (client !== ownerClient || channels.get(channelName) !== entry) return
+
       for (const [eventName, callback] of Object.entries(events)) {
         if (typeof callback !== 'function') continue
         entry.channel.unbind?.(eventName, callback)
@@ -122,17 +128,17 @@ export function acquirePusherChannel(options) {
         if (callbacks?.size === 0) entry.eventHandlers.delete(eventName)
       }
 
-      entry.connectionHandlers.forEach(({ eventName, callback }) => {
-        client?.connection.unbind?.(eventName, callback)
+      localConnectionHandlers.forEach(({ eventName, callback }) => {
+        ownerClient.connection.unbind?.(eventName, callback)
+        entry.connectionHandlers.delete(localConnectionHandlers.find(item => item.eventName === eventName && item.callback === callback))
       })
-      entry.connectionHandlers = []
       entry.refs = Math.max(0, entry.refs - 1)
 
       if (entry.refs === 0) {
         channels.delete(channelName)
-        client?.unsubscribe(channelName)
+        ownerClient.unsubscribe(channelName)
       }
-      if (channels.size === 0) destroyClient()
+      if (channels.size === 0 && client === ownerClient) destroyClient()
     },
   }
 }
