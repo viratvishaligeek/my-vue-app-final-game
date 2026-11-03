@@ -74,6 +74,7 @@ import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import api from '@/plugins/axios'
 import { useAuthStore, getAuthToken } from '@/utils/auth'
+import { createSupportRealtime, isRelevantSupportMessage } from '@/services/supportRealtime'
 
 const authStore = useAuthStore()
 const chatFeed = ref(null)
@@ -101,8 +102,7 @@ let recordingStream = null
 let recordedChunks = []
 let lastMessageId = 0
 let conversationId = null
-let pusherClient = null
-let userChannel = null
+let realtimeSubscription = null
 
 const loadFaqs = async () => {
   faqLoading.value = true
@@ -126,49 +126,32 @@ const scheduleNextSync = () => {
 }
 
 const initRealtime = () => {
-  const PusherClient = window.Pusher
-  const key = import.meta.env.VITE_PUSHER_APP_KEY
-  const cluster = import.meta.env.VITE_PUSHER_APP_CLUSTER
-  const token = getAuthToken()
-  if (!PusherClient || !key || !cluster || !token || !authStore.userId) return
-
   try {
-    pusherClient = new PusherClient(key, {
-      cluster,
-      forceTLS: true,
+    realtimeSubscription = createSupportRealtime({
+      PusherConstructor: window.Pusher,
+      key: import.meta.env.VITE_PUSHER_APP_KEY,
+      cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
       authEndpoint: import.meta.env.VITE_PUSHER_AUTH_ENDPOINT || '/api/broadcasting/auth',
-      auth: {
-        headers: {
-          Authorization: 'Bearer ' + token,
-          Accept: 'application/json',
-        },
+      token: getAuthToken(),
+      userId: authStore.userId,
+      onConnected: () => {
+        realtimeConnected.value = true
+        connected.value = true
+        consecutiveFailures = 0
+        if (pollTimer) clearTimeout(pollTimer)
+        pollTimer = null
+        if (humanSupportRequested.value) void syncMessages()
       },
-    })
-
-    pusherClient.connection.bind('connected', () => {
-      realtimeConnected.value = true
-      connected.value = true
-      consecutiveFailures = 0
-      if (pollTimer) clearTimeout(pollTimer)
-      pollTimer = null
-      if (humanSupportRequested.value) void syncMessages()
-    })
-    const onDisconnected = () => {
-      realtimeConnected.value = false
-      connected.value = false
-      scheduleNextSync()
-    }
-    pusherClient.connection.bind('disconnected', onDisconnected)
-    pusherClient.connection.bind('unavailable', onDisconnected)
-    pusherClient.connection.bind('failed', onDisconnected)
-
-    userChannel = pusherClient.subscribe('private-users.' + authStore.userId)
-    userChannel.bind('support.message.created', payload => {
-      if (payload?.sender === 'admin' &&
-          (!conversationId || Number(payload.conversation_id) === Number(conversationId)) &&
-          humanSupportRequested.value) {
-        void syncMessages()
-      }
+      onDisconnected: () => {
+        realtimeConnected.value = false
+        connected.value = false
+        scheduleNextSync()
+      },
+      onMessage: payload => {
+        if (isRelevantSupportMessage(payload, conversationId, humanSupportRequested.value)) {
+          void syncMessages()
+        }
+      },
     })
   } catch (error) {
     console.warn('Support chat realtime initialization failed:', error?.message || error)
@@ -304,11 +287,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
   if (pollTimer) clearTimeout(pollTimer)
-  if (userChannel) userChannel.unbind_all()
-  if (pusherClient) {
-    if (authStore.userId) pusherClient.unsubscribe('private-users.' + authStore.userId)
-    pusherClient.disconnect()
-  }
+  realtimeSubscription?.disconnect()
   if (recorder && recorder.state !== 'inactive') recorder.stop()
   recordingStream?.getTracks().forEach(track => track.stop())
   mediaUrlCache.forEach(url => URL.revokeObjectURL(url))
