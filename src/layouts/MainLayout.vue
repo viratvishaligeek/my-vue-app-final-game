@@ -209,6 +209,7 @@ const hideBottomNav = computed(() => {
   return path === '/wallet/add'
     || path === '/wallet/withdraw'
     || path === '/monthly-chart'
+    || path === '/live-support'
     || path.startsWith('/play-game/')
 })
 const authStore = useAuthStore()
