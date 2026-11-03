@@ -1170,7 +1170,7 @@ const startGatewayStatusPolling = () => {
     if (showGatewayModal.value && !gatewaySuccessStatuses.has(gatewayPaymentStatus.value) && !gatewayFailureStatuses.has(gatewayPaymentStatus.value)) {
       void refreshGatewayPaymentStatus()
     }
-  }, 5000)
+  }, 10000)
 }
 
 const stopGatewayStatusPolling = () => {
@@ -1323,9 +1323,8 @@ const startPendingRefresh = () => {
 
   pendingTimer =
     setInterval(() => {
-      loadPendingPayments()
-
-    }, 30000)
+      if (document.visibilityState === 'visible') void loadPendingPayments()
+    }, 60000)
 }
 
 
