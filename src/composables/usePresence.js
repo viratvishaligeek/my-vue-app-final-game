@@ -3,6 +3,7 @@ import { App } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
 import api from '@/plugins/axios'
 import { useAuthStore } from '@/utils/auth'
+import { createSingleFlight } from '@/utils/singleFlight'
 
 const PRESENCE_HEARTBEAT_INTERVAL_MS = 15_000
 
@@ -14,7 +15,6 @@ export function usePresence() {
   let appState = 'foreground'
   let heartbeatTimer = null
   let appStateListener = null
-  let heartbeatInFlight = null
   let disposed = false
 
   const getSessionId = (userId) => {
@@ -30,11 +30,10 @@ export function usePresence() {
 
   // Visibility and Capacitor lifecycle events can fire close together. Share
   // one request while it is in flight instead of sending duplicate heartbeats.
-  const heartbeat = () => {
+  const heartbeat = createSingleFlight(() => {
     if (!sessionId || !currentUserId || disposed) return Promise.resolve()
-    if (heartbeatInFlight) return heartbeatInFlight
 
-    heartbeatInFlight = api.post('/presence/heartbeat', {
+    return api.post('/presence/heartbeat', {
       session_id: sessionId,
       platform: Capacitor.getPlatform(),
       app_state: appState,
@@ -42,12 +41,7 @@ export function usePresence() {
       .catch(() => {
         // Presence is best-effort; a transient API outage must not interrupt play.
       })
-      .finally(() => {
-        heartbeatInFlight = null
-      })
-
-    return heartbeatInFlight
-  }
+  })
 
   const disconnect = async () => {
     if (!sessionId) return
