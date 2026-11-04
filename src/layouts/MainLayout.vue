@@ -214,7 +214,7 @@ const hideBottomNav = computed(() => {
     || path.startsWith('/play-game/')
 })
 const authStore = useAuthStore()
-usePresence()
+const { disconnect: disconnectPresence } = usePresence()
 
 const isSidebarOpen = ref(false)
 const shareMenuOpen = ref(false)
@@ -260,6 +260,8 @@ onUnmounted(() => {
 const handleLogout = async () => {
   isLoggingOut.value = true
   try {
+    // End this device's server-side presence lease before auth storage is cleared.
+    await disconnectPresence()
     await authStore.performLogout()
     closeSidebar()
     await router.replace({ name: 'login' })
