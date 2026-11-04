@@ -27,6 +27,9 @@ export function usePresence() {
   let presenceSubscription = null
   let heartbeatInFlight = null
   let lastHeartbeatState = ''
+  let activitySinceHeartbeat = true
+  let lastActivityAt = Date.now()
+  let activityVersion = 0
 
   const getSessionId = (userId) => {
     const key = 'user_presence_session_id:' + String(userId)
@@ -62,6 +65,9 @@ export function usePresence() {
 
     const requestedSessionId = sessionId
     const requestedState = appState
+    const requestedActivity = activitySinceHeartbeat
+    const requestedActivityVersion = activityVersion
+    const requestedActivityAt = lastActivityAt
     heartbeatInFlight = api
       .post(
         '/presence/heartbeat',
@@ -69,12 +75,17 @@ export function usePresence() {
           session_id: requestedSessionId,
           platform: Capacitor.getPlatform(),
           app_state: requestedState,
+          activity: requestedActivity,
+          activity_at: requestedActivity ? new Date(requestedActivityAt).toISOString() : null,
         },
         { showGlobalLoader: false, timeout: 5000 },
       )
       .then((response) => {
         if (requestedSessionId === sessionId) {
           lastHeartbeatState = requestedState
+          if (requestedActivity && requestedActivityVersion === activityVersion) {
+            activitySinceHeartbeat = false
+          }
           const idleTimeout = Number(response.data?.idle_timeout_seconds)
           if (Number.isFinite(idleTimeout) && idleTimeout > 0) {
             activityTracker.setTimeoutMs(idleTimeout * 1000)
@@ -125,8 +136,15 @@ export function usePresence() {
     }, PRESENCE_HEARTBEAT_INTERVAL_MS)
   }
 
+  const recordUserActivity = () => {
+    lastActivityAt = Date.now()
+    activityVersion += 1
+    activitySinceHeartbeat = true
+  }
+
   const startForegroundPresence = (sendHeartbeat = true) => {
     if (!sessionId || disposed) return
+    recordUserActivity()
     appState = 'foreground'
     activityTracker.start()
     startHeartbeatTimer()
@@ -145,6 +163,7 @@ export function usePresence() {
 
   const onUserActivity = () => {
     if (!sessionId || disposed) return
+    recordUserActivity()
 
     if (appState === 'background') {
       if (document.visibilityState !== 'hidden') startForegroundPresence(true)
