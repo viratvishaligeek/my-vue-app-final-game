@@ -73,6 +73,23 @@ test('user activity resumes an idle session and starts a fresh idle window', () 
   assert.equal(resumeCount, 1)
 })
 
+test('repeated server heartbeats with the same timeout do not postpone the idle deadline', () => {
+  const timers = createFakeTimers()
+  let idleCount = 0
+  const tracker = createPresenceActivityTracker({
+    timeoutMs: 300_000,
+    onIdle: () => idleCount++,
+    schedule: timers.schedule,
+    cancel: timers.cancel,
+  })
+
+  tracker.start()
+  tracker.setTimeoutMs(300_000)
+  assert.equal(timers.size, 1)
+  timers.runNext()
+  assert.equal(idleCount, 1)
+})
+
 test('background suspension cancels the idle timer without emitting an idle event', () => {
   const timers = createFakeTimers()
   let idleCount = 0
