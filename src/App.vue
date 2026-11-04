@@ -5,6 +5,7 @@ import { App } from '@capacitor/app'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import router from '@/router'
 import { initNativePushNotifications, restorePushSubscription, syncPushSubscription } from '@/services/pushNotifications'
+import { disconnectActivePresence } from '@/composables/usePresence'
 
 const showSplash = ref(true)
 const pushPermissionNotice = ref('')
@@ -56,12 +57,13 @@ onMounted(async () => {
 
   let backButtonPressedOnce = false
 
-  App.addListener('backButton', ({ canGoBack }) => {
+  App.addListener('backButton', async ({ canGoBack }) => {
     if (canGoBack) {
       window.history.back()
     } else {
       if (backButtonPressedOnce) {
-        App.exitApp()
+        await disconnectActivePresence()
+        await App.exitApp()
       } else {
         backButtonPressedOnce = true
         alert('Press back again to exit')
