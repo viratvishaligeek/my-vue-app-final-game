@@ -24,6 +24,9 @@ function createFakeTimers() {
     get size() {
       return tasks.size
     },
+    get nextDelay() {
+      return [...tasks.values()][0]?.delay ?? null
+    },
   }
 }
 
@@ -98,5 +101,5 @@ test('server-provided idle timeout can update the active timer', () => {
   tracker.start()
   tracker.setTimeoutMs(120_000)
   assert.equal(timers.size, 1)
-  assert.equal([...timers.tasks?.values?.() || []][0]?.delay, undefined)
+  assert.equal(timers.nextDelay, 120_000)
 })
