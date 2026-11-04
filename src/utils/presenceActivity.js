@@ -51,7 +51,7 @@ export function createPresenceActivityTracker({
       const next = Number(value)
       if (!Number.isFinite(next) || next <= 0) return
       delay = next
-      scheduleIdle()
+      if (!idle) scheduleIdle()
     },
     dispose() {
       running = false
