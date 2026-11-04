@@ -18,4 +18,4 @@ jobs:
       - name: Run Vue unit tests
         run: npm run test:unit
       - name: Lint realtime request lifecycle changes
-        run: npx oxlint src/composables/usePresence.js src/utils/singleFlight.js src/utils/singleFlight.test.js src/services/pusherManager.js src/services/supportRealtime.js src/utils/supportRealtime.test.js src/utils/pushRegistration.js src/utils/pushRegistration.test.js src/utils/auth.js src/plugins/axios.js src/services/pushNotifications.js src/views/Notification.vue src/views/wallet/Add.vue src/views/wallet/Withdraw.vue
+        run: npx oxlint src/composables/usePresence.js src/utils/presenceActivity.js src/utils/presenceActivity.test.js src/layouts/MainLayout.vue src/utils/singleFlight.js src/utils/singleFlight.test.js src/services/pusherManager.js src/services/supportRealtime.js src/utils/supportRealtime.test.js src/utils/pushRegistration.js src/utils/pushRegistration.test.js src/utils/auth.js src/plugins/axios.js src/services/pushNotifications.js src/views/Notification.vue src/views/wallet/Add.vue src/views/wallet/Withdraw.vue
