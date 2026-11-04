@@ -8,6 +8,11 @@ import { createPresenceActivityTracker } from '@/utils/presenceActivity'
 
 const PRESENCE_HEARTBEAT_INTERVAL_MS = 15_000
 const DEFAULT_IDLE_TIMEOUT_MS = 5 * 60 * 1000
+let activePresenceDisconnect = null
+
+export async function disconnectActivePresence() {
+  if (activePresenceDisconnect) await activePresenceDisconnect()
+}
 
 export function usePresence() {
   const authStore = useAuthStore()
@@ -214,6 +219,7 @@ export function usePresence() {
   }
 
   onMounted(() => {
+    activePresenceDisconnect = disconnect
     currentUserId = authStore.userId
     currentToken = getAuthToken() || ''
     sessionId = currentUserId ? getSessionId(currentUserId) : ''
@@ -281,6 +287,7 @@ export function usePresence() {
     if (appStateListener) void appStateListener.remove()
     if (stopUserWatch) stopUserWatch()
     releasePresenceChannel()
+    if (activePresenceDisconnect === disconnect) activePresenceDisconnect = null
     void disconnect()
   })
 
