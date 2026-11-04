@@ -21,3 +21,13 @@ jobs:
         run: npm run build
       - name: Lint realtime request lifecycle changes
         run: npx oxlint src/composables/usePresence.js src/utils/presenceActivity.js src/utils/presenceActivity.test.js src/layouts/MainLayout.vue src/App.vue src/utils/singleFlight.js src/utils/singleFlight.test.js src/services/pusherManager.js src/services/supportRealtime.js src/utils/supportRealtime.test.js src/utils/pushRegistration.js src/utils/pushRegistration.test.js src/utils/auth.js src/plugins/axios.js src/services/pushNotifications.js src/views/Notification.vue src/views/wallet/Add.vue src/views/wallet/Withdraw.vue
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+      - name: Assemble Android debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
