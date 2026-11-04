@@ -49,7 +49,7 @@ export function createPresenceActivityTracker({
     },
     setTimeoutMs(value) {
       const next = Number(value)
-      if (!Number.isFinite(next) || next <= 0) return
+      if (!Number.isFinite(next) || next <= 0 || next === delay) return
       delay = next
       if (!idle) scheduleIdle()
     },
