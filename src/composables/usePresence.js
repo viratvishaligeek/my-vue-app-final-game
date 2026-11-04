@@ -70,7 +70,7 @@ export function usePresence() {
           platform: Capacitor.getPlatform(),
           app_state: requestedState,
         },
-        { showGlobalLoader: false },
+        { showGlobalLoader: false, timeout: 5000 },
       )
       .then((response) => {
         if (requestedSessionId === sessionId) {
@@ -109,6 +109,7 @@ export function usePresence() {
       await api.delete('/presence/session', {
         data: { session_id: disconnectSessionId },
         showGlobalLoader: false,
+        timeout: 3000,
       })
       lastHeartbeatState = ''
     } catch {
