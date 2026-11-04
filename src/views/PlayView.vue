@@ -61,7 +61,7 @@
         <div v-if="activeTab === 'single'" class="px-1">
           <div class="card p-2 mb-3 shadow-xs border-0 bg-white rounded-3">
             <small class="fw-bold text-muted mb-2 d-block fs-7">
-              Select Quick Coin / Point Value:
+              नीचे दिए गए रकम में से चुने, या अपनी रकम खुद डाले:
             </small>
             <div class="d-flex gap-2 flex-wrap">
               <button v-for="chip in chipOptions" :key="chip" type="button" class="btn btn-sm rounded-pill fw-bold "
@@ -104,7 +104,7 @@
         <div v-if="activeTab === 'harup'" class="px-1">
           <div class="card p-2 mb-3 shadow-xs border-0 bg-white rounded-3">
             <small class="fw-bold text-muted mb-2 d-block fs-7">
-              Select Quick Coin / Point Value:
+              नीचे दिए गए रकम में से चुने, या अपनी रकम खुद डाले:
             </small>
             <div class="d-flex gap-2 flex-wrap mb-2">
               <button v-for="chip in chipOptions" :key="chip" type="button" class="btn btn-sm rounded-pill fw-bold"
@@ -174,7 +174,7 @@
         <div v-if="activeTab === 'crossing'" class="px-1">
           <div class="card p-2 mb-3 shadow-xs border-0 bg-white rounded-3">
             <small class="fw-bold text-muted mb-2 d-block fs-7">
-              Select Quick Coin / Point Value:
+              नीचे दिए गए रकम में से चुने, या अपनी रकम खुद डाले:
             </small>
             <div class="d-flex gap-2 flex-wrap mb-2">
               <button v-for="chip in chipOptions" :key="chip" type="button" class="btn btn-sm rounded-pill fw-bold"
